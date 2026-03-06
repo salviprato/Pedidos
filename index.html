@@ -58,7 +58,7 @@
         button.outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); }
         button.outline:hover { border-color: var(--accent); color: var(--text-main); }
         button.danger { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); }
-        button.danger:hover { color: var(--accent-light); border-color: var(--accent-light); }
+        button.danger:hover { color: #ef4444; border-color: #ef4444; }
         
         /* Botón WhatsApp Flotante */
         .btn-flotante-wsp {
@@ -718,21 +718,22 @@
                 let it = ''; p.items.forEach(i => it += `<li>${i.nombre} - ${i.detalle} x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
                 if(p.costoEnvio) it += `<li style="color:var(--text-dark);">Envío - $${window.formatearNum(p.costoEnvio)}</li>`;
                 
+                const bC = isP ? `<button class="danger" style="border: 1px solid #ef4444; color: #ef4444;" onclick="window.cancelarPedido('${p.id}', '${p.telefono}')">Cancelar</button>` : '';
                 const bP = p.estadoPago ? `<span style="color:var(--text-dark); font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">Registrar Pago</button>`;
-                const bE = isP ? `<button onclick="window.marcarEntregado('${p.id}')">Entregado</button>` : `<span style="color:var(--text-dark); font-size:0.8rem;">FINALIZADO</span>`;
+                const bE = isP ? `<button onclick="window.marcarEntregado('${p.id}', '${p.telefono}')">Entregado</button>` : `<span style="color:var(--text-dark); font-size:0.8rem;">FINALIZADO</span>`;
                 
                 return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha.toDate().toLocaleString()}</span></div><span style="font-size:1.1rem; color:var(--text-main);">$${window.formatearNum(p.total)}</span></div>
                 <p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:var(--text-main);">${p.nombreCliente} ${p.apellidoCliente}</span></p>
                 <p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${p.telefono.replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--text-main); text-decoration:none;">${p.telefono}</a></p>
                 <p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main);">${p.metodoEntrega}</span> ${p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p>
-                <ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bP} ${bE}</div></div>`;
+                <ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bC} ${bP} ${bE}</div></div>`;
             };
             pend.forEach(p => lP.innerHTML += card(p, true)); entr.forEach(p => lH.innerHTML += card(p, false));
         };
         
         window.marcarPagado = async (id, t, m, c) => { await updateDoc(doc(db, "pedidos", id), { estadoPago: true }); await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m==='Transferencia'?t:0 }); };
         
-        window.marcarEntregado = async (id) => {
+        window.marcarEntregado = async (id, telefono) => {
             try {
                 const docRef = doc(db, "pedidos", id); const snap = await getDoc(docRef); const p = snap.data();
                 if(!p.estadoPago) {
@@ -740,7 +741,42 @@
                     await updateDoc(docRef, { estadoPago: true });
                 }
                 await updateDoc(docRef, { estadoEntrega: true });
+
+                if (telefono) {
+                    let numLimpio = telefono.replace(/[^0-9]/g, '');
+                    let msg = "su pedido a sido entregado, muchas gracias por comprar con nosotros lo esperamos para su siguiente compra";
+                    window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
+                }
             } catch(e) {}
+        };
+
+        window.cancelarPedido = async (id, telefono) => {
+            if(!confirm("¿Cancelar este pedido y reponer el stock?")) return;
+            const p = pedidosGlobales.find(x => x.id === id);
+            if(!p) return;
+
+            try {
+                // Reponer stock a los productos originarios
+                for (const item of p.items) {
+                    if(item.idProd && item.idVar) {
+                        const u = {}; 
+                        u[`variantes.${item.idVar}.stock`] = increment(item.cantidad);
+                        await updateDoc(doc(db, "productos", item.idProd), u);
+                    }
+                }
+                
+                // Eliminar el pedido de la base de datos
+                await deleteDoc(doc(db, "pedidos", id));
+                
+                // Enviar mensaje por WhatsApp notificando la cancelación
+                if (telefono) {
+                    let numLimpio = telefono.replace(/[^0-9]/g, '');
+                    let msg = "lo sentimos, no pudimos procesar su pedido";
+                    window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
+                }
+            } catch(e) {
+                alert("Hubo un error al cancelar el pedido.");
+            }
         };
 
         // --- LISTENERS ---
@@ -789,7 +825,17 @@
             try {
                 let tot = 0; const cP = {}; const iM = []; const cV = {};
                 carrito.forEach(i => { if(!cP[i.idProd]) cP[i.idProd]={}; cP[i.idProd][i.idVar]=(cP[i.idProd][i.idVar]||0)+1; tot+=i.precio; const u=i.idProd+'_'+i.idVar; if(!cV[u]) cV[u]={...i,c:0}; cV[u].c++; });
-                Object.values(cV).forEach(i => iM.push({nombre:i.nombre, detalle:i.detalle, precio:i.precio, cantidad:i.c}));
+                
+                // GUARDAR EL ID DE PRODUCTO Y VARIANTE EN EL PEDIDO (NECESARIO PARA CANCELAR Y REPONER)
+                Object.values(cV).forEach(i => iM.push({
+                    idProd: i.idProd, 
+                    idVar: i.idVar, 
+                    nombre:i.nombre, 
+                    detalle:i.detalle, 
+                    precio:i.precio, 
+                    cantidad:i.c
+                }));
+                
                 let cEnv = (mE==='Envio'&&configTienda.envioDisponible) ? configTienda.envioPrecio : 0;
                 
                 // RESERVA: Descontar stock inmediatamente
