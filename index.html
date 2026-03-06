@@ -51,7 +51,7 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
         th { background-color: #f9fafb; font-weight: 600; }
 
-        /* ===== NUEVO MÓDULO FINANZAS (ESTILO OSCURO) ===== */
+        /* ===== MÓDULO FINANZAS (ESTILO OSCURO) ===== */
         .finanzas-container { background-color: var(--dark-bg); padding: 20px; border-radius: 12px; color: #f9fafb; }
         .modulo-oscuro { background-color: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
         .modulo-header { background-color: #1f2937; padding: 12px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
@@ -60,17 +60,20 @@
         
         .dark-input-group { display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap; }
         .dark-input-group > div { flex: 1; min-width: 150px; }
-        .dark-input-group label { display: block; font-size: 0.8rem; color: #9ca3af; margin-bottom: 5px; }
+        .dark-input-group label { display: block; font-size: 0.8rem; color: #9ca3af; margin-bottom: 5px; font-weight: bold; }
         .dark-input { width: 100%; background: #374151; border: 1px solid #4b5563; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box; }
         .dark-input:focus { outline: none; border-color: #60a5fa; }
         
         .dark-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
         .dark-table th { background-color: transparent; border-bottom: 2px solid var(--dark-border); color: #9ca3af; padding: 8px; }
         .dark-table td { border-bottom: 1px solid var(--dark-border); padding: 10px 8px; }
-        .btn-dark-action { background: #4b5563; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%; }
+        .btn-dark-action { background: #4b5563; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold;}
         .btn-dark-action:hover { background: #6b7280; }
         .btn-trash { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
         .btn-trash:hover { background: #ef4444; color: white; }
+        
+        /* Cajas de Balance (Widgets) */
+        .widget-balance { flex: 1; background: #1f2937; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid; min-width: 150px;}
 
         /* Modal Base */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
@@ -153,79 +156,100 @@
         <div id="panel-finanzas" class="finanzas-container hidden">
             
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')">
-                    <span>💸 Gastos Externos</span> <span>▼</span>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-balances')">
+                    <span>📊 Balance de Ganancias (Automático)</span> <span>▼</span>
                 </div>
-                <div id="body-gastos" class="modulo-body">
-                    <div class="dark-input-group">
-                        <div><label>Título (Ej: Luz, Alquiler)</label><input type="text" id="gasto-titulo" class="dark-input"></div>
-                        <div><label>Importe Gastado $</label><input type="number" id="gasto-importe" class="dark-input"></div>
-                        <div><label>Descripción corta (Opcional)</label><input type="text" id="gasto-desc" class="dark-input"></div>
+                <div id="body-balances" class="modulo-body">
+                    <div class="dark-input-group" style="max-width: 300px;">
+                        <div>
+                            <label>Periodo a analizar:</label>
+                            <select id="filtro-periodo" class="dark-input" onchange="window.calcularBalanceEnVivo()" style="font-weight: bold;">
+                                <option value="hoy">Hoy (Últimas 24hs)</option>
+                                <option value="semana">Última Semana</option>
+                                <option value="mes">Último Mes</option>
+                                <option value="siempre">Histórico Completo</option>
+                            </select>
+                        </div>
                     </div>
-                    <button class="btn-dark-action" onclick="window.registrarGasto()">Registrar Gasto</button>
                     
+                    <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
+                        <div class="widget-balance" style="border-color: var(--success);">
+                            <h4 style="margin: 0 0 5px 0; color: #9ca3af; text-transform: uppercase; font-size: 0.8rem;">Ingresos Totales</h4>
+                            <p id="bal-ingresos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--success);">$0.00</p>
+                        </div>
+                        <div class="widget-balance" style="border-color: var(--danger);">
+                            <h4 style="margin: 0 0 5px 0; color: #9ca3af; text-transform: uppercase; font-size: 0.8rem;">Gastos Totales</h4>
+                            <p id="bal-gastos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--danger);">$0.00</p>
+                        </div>
+                        <div class="widget-balance" style="border-color: #3b82f6; background-color: #1e3a8a;">
+                            <h4 style="margin: 0 0 5px 0; color: #93c5fd; text-transform: uppercase; font-size: 0.8rem;">Ganancia Neta</h4>
+                            <p id="bal-neta" style="margin: 0; font-size: 2.2rem; font-weight: bold; color: white;">$0.00</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="modulo-oscuro">
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-transacciones')">
+                    <span>🔄 Historial de Transacciones (Libro Diario)</span> <span>▼</span>
+                </div>
+                <div id="body-transacciones" class="modulo-body">
                     <table class="dark-table">
-                        <thead><tr><th>Detalle del Gasto</th><th>Importe</th><th>Borrar</th></tr></thead>
-                        <tbody id="tabla-gastos"></tbody>
+                        <thead><tr><th>Fecha y Hora</th><th>Tipo</th><th>Detalle / Origen</th><th>Monto</th></tr></thead>
+                        <tbody id="tabla-transacciones"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')">
-                    <span>📈 Ingresos y Ventas</span> <span>▼</span>
+                    <span>📈 Registrar Ingresos y Ventas</span> <span>▼</span>
                 </div>
-                <div id="body-ingresos" class="modulo-body">
-                    <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 0;">Pagos de turnos y ventas de mostrador.</p>
+                <div id="body-ingresos" class="modulo-body hidden">
+                    <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 0;">Carga ventas rápidas o ingresos de dinero libre.</p>
                     
-                    <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                        <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px;">Venta Rápida (Descuenta Stock):</label>
+                    <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #1f2937;">
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px; color:#60a5fa;">▶ Venta Rápida (Descuenta Stock):</label>
                         <div class="dark-input-group">
                             <div style="flex: 2;"><select id="venta-rapida-prod" class="dark-input"><option value="">Selecciona producto para vender...</option></select></div>
                             <div><input type="number" id="venta-rapida-efectivo" class="dark-input" placeholder="Efectivo $"></div>
                             <div><input type="number" id="venta-rapida-transf" class="dark-input" placeholder="Transf. $"></div>
                         </div>
-                        <button class="btn-dark-action" onclick="window.registrarVentaRapida()">Vender Producto</button>
+                        <button class="btn-dark-action" onclick="window.registrarVentaRapida()">Confirmar Venta Rápida</button>
                     </div>
 
-                    <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px;">
-                        <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px;">Ingreso Manual Libre:</label>
+                    <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #1f2937;">
+                        <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px; color:#60a5fa;">▶ Ingreso Manual Libre:</label>
                         <div class="dark-input-group">
-                            <div style="flex: 2;"><input type="text" id="ingreso-manual-detalle" class="dark-input" placeholder="Detalle..."></div>
+                            <div style="flex: 2;"><input type="text" id="ingreso-manual-detalle" class="dark-input" placeholder="Motivo del ingreso..."></div>
                             <div><input type="number" id="ingreso-manual-efectivo" class="dark-input" placeholder="Efectivo $"></div>
                             <div><input type="number" id="ingreso-manual-transf" class="dark-input" placeholder="Transf. $"></div>
                         </div>
-                        <button class="btn-dark-action" onclick="window.registrarIngresoManual()">Registrar Ingreso</button>
+                        <button class="btn-dark-action" onclick="window.registrarIngresoManual()">Registrar Ingreso Manual</button>
                     </div>
 
                     <table class="dark-table">
-                        <thead><tr><th>Detalle</th><th>Efectivo</th><th>Transf.</th><th>Borrar</th></tr></thead>
+                        <thead><tr><th>Detalle del Ingreso</th><th>Efectivo</th><th>Transf.</th><th>Borrar</th></tr></thead>
                         <tbody id="tabla-ingresos"></tbody>
                     </table>
                 </div>
             </div>
 
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-balances')">
-                    <span>📊 Balance de Ganancias</span> <span>▼</span>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')">
+                    <span>💸 Registrar Gastos Externos</span> <span>▼</span>
                 </div>
-                <div id="body-balances" class="modulo-body">
-                    <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 0;">(Ingresos Ventas) - (Gastos).</p>
+                <div id="body-gastos" class="modulo-body hidden">
                     <div class="dark-input-group">
-                        <div style="flex: 2;"><input type="text" id="cierre-nombre" class="dark-input" placeholder="Nombre (Ej: Cierre Mes)"></div>
-                        <div>
-                            <select id="cierre-periodo" class="dark-input">
-                                <option value="Hoy">Hoy (Últimas 24hs)</option>
-                                <option value="Semana">Última Semana</option>
-                                <option value="Mes">Último Mes</option>
-                            </select>
-                        </div>
+                        <div><label>Título (Ej: Luz, Alquiler)</label><input type="text" id="gasto-titulo" class="dark-input"></div>
+                        <div><label>Importe Gastado $</label><input type="number" id="gasto-importe" class="dark-input"></div>
+                        <div><label>Descripción corta (Opcional)</label><input type="text" id="gasto-desc" class="dark-input"></div>
                     </div>
-                    <button class="btn-dark-action" onclick="window.calcularGuardarCierre()">Calcular y Guardar Cierre</button>
+                    <button class="btn-dark-action" onclick="window.registrarGasto()" style="background: var(--danger);">Registrar Salida de Dinero</button>
                     
                     <table class="dark-table">
-                        <thead><tr><th>Cierre / Periodo</th><th>Ingresos</th><th>Gastos</th><th>Neta</th><th>Borrar</th></tr></thead>
-                        <tbody id="tabla-cierres"></tbody>
+                        <thead><tr><th>Detalle del Gasto</th><th>Importe</th><th>Borrar</th></tr></thead>
+                        <tbody id="tabla-gastos"></tbody>
                     </table>
                 </div>
             </div>
@@ -285,7 +309,7 @@
 
         // --- ESTADOS ---
         let productos = []; let carrito = []; let terminoBusqueda = "";
-        let ingresosGlobales = []; let gastosGlobales = []; let cierresGlobales = [];
+        let ingresosGlobales = []; let gastosGlobales = [];
 
         // --- UI BÁSICA ---
         window.cambiarVista = (rol) => {
@@ -315,13 +339,13 @@
                 document.getElementById('prod-nombre').value = prod.nombre;
                 document.getElementById('prod-imagen').value = prod.imagen || "";
                 document.getElementById('prod-precio').value = prod.precio;
-                cajaStockCosto.classList.add('hidden'); // OCULTA POR COMPLETO EN EDICIÓN
+                cajaStockCosto.classList.add('hidden');
             } else {
                 titulo.textContent = "Agregar Nuevo Producto";
                 document.getElementById('prod-id').value = ""; document.getElementById('prod-nombre').value = "";
                 document.getElementById('prod-imagen').value = ""; document.getElementById('prod-precio').value = "";
                 document.getElementById('prod-costo').value = ""; document.getElementById('prod-stock').value = "";
-                cajaStockCosto.classList.remove('hidden'); // MUESTRA AL CREAR
+                cajaStockCosto.classList.remove('hidden');
             }
             modal.classList.remove('hidden');
         };
@@ -369,10 +393,9 @@
         };
 
         // ==========================================
-        // SISTEMA FINANCIERO (GASTOS, INGRESOS, CIERRES)
+        // SISTEMA FINANCIERO AUTOMÁTICO
         // ==========================================
 
-        // 1. GASTOS EXTERNOS
         window.registrarGasto = async () => {
             const titulo = document.getElementById('gasto-titulo').value;
             const importe = parseFloat(document.getElementById('gasto-importe').value) || 0;
@@ -385,10 +408,9 @@
         };
 
         window.borrarGasto = async (id) => {
-            if(confirm("¿Eliminar este gasto?")) await deleteDoc(doc(db, "gastos", id));
+            if(confirm("¿Eliminar este gasto permanentemente?")) await deleteDoc(doc(db, "gastos", id));
         };
 
-        // 2. INGRESOS Y VENTAS
         window.registrarVentaRapida = async () => {
             const idProd = document.getElementById('venta-rapida-prod').value;
             const efvo = parseFloat(document.getElementById('venta-rapida-efectivo').value) || 0;
@@ -422,15 +444,12 @@
             if(confirm("¿Eliminar este ingreso? (No devuelve el stock)")) await deleteDoc(doc(db, "ingresos", id));
         };
 
-        // 3. BALANCE DE GANANCIAS (CIERRES)
-        window.calcularGuardarCierre = async () => {
-            const nombre = document.getElementById('cierre-nombre').value;
-            const periodo = document.getElementById('cierre-periodo').value;
-            if (!nombre) return alert("Ponle un nombre al cierre.");
-
+        // --- CÁLCULO DE BALANCE EN VIVO ---
+        window.calcularBalanceEnVivo = () => {
+            const periodo = document.getElementById('filtro-periodo').value;
             const ahora = new Date();
-            let diasLimite = periodo === 'Hoy' ? 1 : periodo === 'Semana' ? 7 : 30;
-            
+            let diasLimite = periodo === 'hoy' ? 1 : periodo === 'semana' ? 7 : periodo === 'mes' ? 30 : 99999;
+
             let totalIngresos = 0;
             ingresosGlobales.forEach(ing => {
                 const diff = (ahora - ing.fecha.toDate()) / (1000 * 60 * 60 * 24);
@@ -445,14 +464,61 @@
 
             const neta = totalIngresos - totalGastos;
 
-            try {
-                await addDoc(collection(db, "cierres"), { fecha: new Date(), nombre, periodo, ingresos: totalIngresos, gastos: totalGastos, neta });
-                document.getElementById('cierre-nombre').value = "";
-            } catch(e) { alert("Error al guardar cierre."); }
+            document.getElementById('bal-ingresos').textContent = `$${totalIngresos.toFixed(2)}`;
+            document.getElementById('bal-gastos').textContent = `$${totalGastos.toFixed(2)}`;
+            
+            const balNetaEl = document.getElementById('bal-neta');
+            balNetaEl.textContent = `${neta >= 0 ? '+' : ''}$${neta.toFixed(2)}`;
+            balNetaEl.style.color = neta >= 0 ? 'var(--success)' : '#fca5a5'; // Verde o Rojo claro
         };
 
-        window.borrarCierre = async (id) => {
-            if(confirm("¿Borrar historial de cierre?")) await deleteDoc(doc(db, "cierres", id));
+        // --- HISTORIAL DE TRANSACCIONES ---
+        window.renderizarTransacciones = () => {
+            let transacciones = [];
+            
+            // Unir Ingresos
+            ingresosGlobales.forEach(i => {
+                transacciones.push({
+                    id: i.id, fecha: i.fecha.toDate(), tipo: 'ingreso',
+                    detalle: i.detalle, monto: i.efectivo + i.transferencia
+                });
+            });
+
+            // Unir Gastos
+            gastosGlobales.forEach(g => {
+                transacciones.push({
+                    id: g.id, fecha: g.fecha.toDate(), tipo: 'gasto',
+                    detalle: g.titulo + (g.descripcion ? ` - ${g.descripcion}` : ''), monto: g.importe
+                });
+            });
+
+            // Ordenar por fecha (más reciente primero)
+            transacciones.sort((a, b) => b.fecha - a.fecha);
+
+            const tabla = document.getElementById('tabla-transacciones');
+            tabla.innerHTML = '';
+            
+            if (transacciones.length === 0) {
+                tabla.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#9ca3af; padding: 20px;">No hay transacciones registradas.</td></tr>';
+                return;
+            }
+
+            transacciones.forEach(t => {
+                const fechaStr = t.fecha.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute:'2-digit' });
+                const isIngreso = t.tipo === 'ingreso';
+                const badge = isIngreso ? '<span style="background: #064e3b; color: #34d399; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">Ingreso</span>' 
+                                        : '<span style="background: #7f1d1d; color: #fca5a5; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">Egreso</span>';
+                const montoStr = isIngreso ? `+$${t.monto.toFixed(2)}` : `-$${t.monto.toFixed(2)}`;
+                const colorMonto = isIngreso ? 'var(--success)' : '#fca5a5';
+
+                tabla.innerHTML += `
+                    <tr>
+                        <td style="color:#9ca3af;">${fechaStr}</td>
+                        <td>${badge}</td>
+                        <td>${t.detalle}</td>
+                        <td style="color: ${colorMonto}; font-weight: bold;">${montoStr}</td>
+                    </tr>`;
+            });
         };
 
         // --- ESCUCHAS FIREBASE ---
@@ -464,7 +530,7 @@
             // Actualizar select de venta rápida
             const selectVenta = document.getElementById('venta-rapida-prod');
             selectVenta.innerHTML = '<option value="">Selecciona producto para vender...</option>';
-            productos.forEach(p => selectVenta.innerHTML += `<option value="${p.id}">${p.nombre} (Stock: ${p.stock})</option>`);
+            productos.forEach(p => { if(p.stock > 0) selectVenta.innerHTML += `<option value="${p.id}">${p.nombre} (Stock: ${p.stock})</option>`; });
         });
 
         onSnapshot(collection(db, "gastos"), (snapshot) => {
@@ -473,10 +539,12 @@
             gastosGlobales.forEach(g => {
                 tabla.innerHTML += `<tr>
                     <td><strong>${g.titulo}</strong><br><span style="color:#9ca3af; font-size:0.75rem;">${g.descripcion||''}</span></td>
-                    <td style="color:var(--danger)">$${g.importe.toFixed(2)}</td>
+                    <td style="color:#fca5a5">-$${g.importe.toFixed(2)}</td>
                     <td><button class="btn-trash" onclick="window.borrarGasto('${g.id}')">🗑️</button></td>
                 </tr>`;
             });
+            window.calcularBalanceEnVivo();
+            window.renderizarTransacciones();
         });
 
         onSnapshot(collection(db, "ingresos"), (snapshot) => {
@@ -488,21 +556,9 @@
                     <td><button class="btn-trash" onclick="window.borrarIngreso('${i.id}')">🗑️</button></td>
                 </tr>`;
             });
+            window.calcularBalanceEnVivo();
+            window.renderizarTransacciones();
         });
-
-        onSnapshot(collection(db, "cierres"), (snapshot) => {
-            cierresGlobales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => b.fecha - a.fecha);
-            const tabla = document.getElementById('tabla-cierres'); tabla.innerHTML = '';
-            cierresGlobales.forEach(c => {
-                tabla.innerHTML += `<tr>
-                    <td><strong>${c.nombre}</strong><br><span style="color:#9ca3af; font-size:0.75rem;">(${c.periodo})</span></td>
-                    <td>$${c.ingresos.toFixed(2)}</td><td>$${c.gastos.toFixed(2)}</td>
-                    <td style="font-weight:bold; color:${c.neta>=0?'var(--success)':'var(--danger)'}">$${c.neta.toFixed(2)}</td>
-                    <td><button class="btn-trash" onclick="window.borrarCierre('${c.id}')">🗑️</button></td>
-                </tr>`;
-            });
-        });
-
 
         // --- LÓGICA CARRITO COMPRADOR ---
         window.abrirCarrito = () => document.getElementById('modal-carrito').classList.remove('hidden');
@@ -545,7 +601,6 @@
                     await updateDoc(doc(db, "productos", id), { stock: increment(-cantidad) });
                 }
 
-                // Guardamos la compra web como un Ingreso
                 await addDoc(collection(db, "ingresos"), {
                     fecha: new Date(), tipo: 'venta_web', detalle: `Compra Web (${carrito.length} arts.)`, 
                     efectivo: metodoPago === 'Efectivo' ? totalVenta : 0,
@@ -586,7 +641,7 @@
                         </div>
                     </div>`;
 
-                // Vista Dueño (Ahora también muestra si el link está roto)
+                // Vista Dueño
                 tabla.innerHTML += `
                     <tr>
                         <td>
