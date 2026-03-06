@@ -27,7 +27,8 @@
         /* Contenedores y Grillas */
         .container { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 15px; }
-        .card { border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; }
+        .card { border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; }
+        .card-img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; background-color: #f3f4f6; }
         
         /* Carrito de Compras */
         .carrito-container { background: #f8fafc; border: 2px dashed #cbd5e1; padding: 15px; border-radius: 8px; margin-top: 25px; }
@@ -48,8 +49,8 @@
         th { background-color: #f9fafb; font-weight: 600; }
 
         /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; }
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; max-height: 90vh; overflow-y: auto; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
@@ -116,7 +117,7 @@
                     <th>Costo</th>
                     <th>Precio Venta</th>
                     <th>Stock</th>
-                </tr>
+                    <th>Acciones</th> </tr>
             </thead>
             <tbody id="tabla-stock">
                 </tbody>
@@ -125,11 +126,30 @@
 
     <div id="modal-producto" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3 style="margin-top: 0;">Agregar Nuevo Producto</h3>
-            <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre"></div>
-            <div class="form-group"><label>Costo</label><input type="number" id="prod-costo"></div>
-            <div class="form-group"><label>Precio Venta</label><input type="number" id="prod-precio"></div>
-            <div class="form-group"><label>Stock Inicial</label><input type="number" id="prod-stock"></div>
+            <h3 id="modal-titulo" style="margin-top: 0;">Agregar Nuevo Producto</h3>
+            
+            <input type="hidden" id="prod-id">
+            
+            <div class="form-group">
+                <label>Nombre</label>
+                <input type="text" id="prod-nombre">
+            </div>
+            <div class="form-group">
+                <label>URL de la Imagen (Opcional)</label>
+                <input type="text" id="prod-imagen" placeholder="https://ejemplo.com/foto.jpg">
+            </div>
+            <div class="form-group">
+                <label>Costo</label>
+                <input type="number" id="prod-costo">
+            </div>
+            <div class="form-group">
+                <label>Precio Venta</label>
+                <input type="number" id="prod-precio">
+            </div>
+            <div class="form-group">
+                <label>Stock Inicial</label>
+                <input type="number" id="prod-stock">
+            </div>
             <div class="modal-actions">
                 <button class="secondary" onclick="window.cerrarModal()">Cancelar</button>
                 <button onclick="window.guardarProducto()">Guardar</button>
@@ -138,11 +158,10 @@
     </div>
 
     <script type="module">
-        // 1. Importar librerías de Firebase usando CDN
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        // Añadimos 'updateDoc' para poder editar
         import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // 2. Tu configuración de Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
             authDomain: "pedidos-dba18.firebaseapp.com",
@@ -152,41 +171,86 @@
             appId: "1:361618837437:web:ec464cb07617c5bdb5ccd4"
         };
 
-        // 3. Inicializar Firebase y Firestore
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // Variables de estado
         let productos = [];
         let carrito = [];
 
-        // --- NAVEGACIÓN Y UI (Expuestos a window para que funcionen con los onclick del HTML) ---
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
         };
 
-        window.abrirModal = () => document.getElementById('modal-producto').classList.remove('hidden');
-        window.cerrarModal = () => {
-            document.getElementById('modal-producto').classList.add('hidden');
-            document.getElementById('prod-nombre').value = '';
-            document.getElementById('prod-costo').value = '';
-            document.getElementById('prod-precio').value = '';
-            document.getElementById('prod-stock').value = '';
+        // --- LÓGICA DEL MODAL (AHORA SIRVE PARA CREAR Y EDITAR) ---
+        window.abrirModal = (idProducto = null) => {
+            const modal = document.getElementById('modal-producto');
+            const titulo = document.getElementById('modal-titulo');
+            
+            if (idProducto) {
+                // Modo Edición: Buscamos el producto y llenamos los campos
+                const prod = productos.find(p => p.id === idProducto);
+                titulo.textContent = "Editar Producto";
+                document.getElementById('prod-id').value = prod.id;
+                document.getElementById('prod-nombre').value = prod.nombre;
+                document.getElementById('prod-imagen').value = prod.imagen || "";
+                document.getElementById('prod-costo').value = prod.costo;
+                document.getElementById('prod-precio').value = prod.precio;
+                document.getElementById('prod-stock').value = prod.stock;
+            } else {
+                // Modo Creación: Limpiamos los campos
+                titulo.textContent = "Agregar Nuevo Producto";
+                document.getElementById('prod-id').value = "";
+                document.getElementById('prod-nombre').value = "";
+                document.getElementById('prod-imagen').value = "";
+                document.getElementById('prod-costo').value = "";
+                document.getElementById('prod-precio').value = "";
+                document.getElementById('prod-stock').value = "";
+            }
+            
+            modal.classList.remove('hidden');
         };
 
-        // --- FIREBASE: ESCUCHAR PRODUCTOS EN TIEMPO REAL ---
+        window.cerrarModal = () => {
+            document.getElementById('modal-producto').classList.add('hidden');
+        };
+
+        // --- FIREBASE: GUARDAR O EDITAR PRODUCTO ---
+        window.guardarProducto = async () => {
+            const id = document.getElementById('prod-id').value; // Si tiene ID, estamos editando
+            const nombre = document.getElementById('prod-nombre').value;
+            const imagen = document.getElementById('prod-imagen').value;
+            const costo = parseFloat(document.getElementById('prod-costo').value) || 0;
+            const precio = parseFloat(document.getElementById('prod-precio').value) || 0;
+            const stock = parseInt(document.getElementById('prod-stock').value) || 0;
+
+            if (!nombre) return alert("El nombre es obligatorio");
+
+            const datosProducto = { nombre, imagen, costo, precio, stock };
+
+            try {
+                if (id) {
+                    // Editar existente
+                    const productoRef = doc(db, "productos", id);
+                    await updateDoc(productoRef, datosProducto);
+                } else {
+                    // Crear nuevo
+                    await addDoc(collection(db, "productos"), datosProducto);
+                }
+                window.cerrarModal();
+            } catch (e) {
+                console.error("Error al guardar:", e);
+                alert("Hubo un error al guardar el producto.");
+            }
+        };
+
+        // --- FIREBASE: ESCUCHAS EN TIEMPO REAL ---
         onSnapshot(collection(db, "productos"), (snapshot) => {
             productos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderizarCatalogoYStock();
             document.getElementById('estado-conexion').textContent = "🟢 Conectado";
-        }, (error) => {
-            console.error("Error al conectar con Firestore:", error);
-            document.getElementById('estado-conexion').textContent = "🔴 Error de conexión";
-            document.getElementById('estado-conexion').style.color = "#ef4444";
         });
 
-        // --- FIREBASE: ESCUCHAR VENTAS PARA EL DASHBOARD ---
         onSnapshot(collection(db, "ventas"), (snapshot) => {
             let bruta = 0; let neta = 0; let cant = 0;
             snapshot.forEach(doc => {
@@ -200,37 +264,13 @@
             document.getElementById('metric-ventas-stock').textContent = `${cant} un.`;
         });
 
-        // --- FIREBASE: GUARDAR NUEVO PRODUCTO ---
-        window.guardarProducto = async () => {
-            const nombre = document.getElementById('prod-nombre').value;
-            const costo = parseFloat(document.getElementById('prod-costo').value) || 0;
-            const precio = parseFloat(document.getElementById('prod-precio').value) || 0;
-            const stock = parseInt(document.getElementById('prod-stock').value) || 0;
-
-            if (!nombre) return alert("El nombre es obligatorio");
-
-            try {
-                // Guardamos en la colección "productos" de Firestore
-                await addDoc(collection(db, "productos"), {
-                    nombre, costo, precio, stock
-                });
-                window.cerrarModal();
-            } catch (e) {
-                console.error("Error al guardar:", e);
-                alert("Hubo un error al guardar el producto.");
-            }
-        };
-
-        // --- LÓGICA DEL CARRITO DE COMPRAS ---
+        // --- LÓGICA DEL CARRITO ---
         window.agregarAlCarrito = (idProducto) => {
             const producto = productos.find(p => p.id === idProducto);
-            
-            // Verificamos si ya hay suficientes en el carrito respecto al stock real
             const enCarrito = carrito.filter(item => item.id === idProducto).length;
             if (enCarrito >= producto.stock) {
                 return alert("No hay más stock disponible de este producto.");
             }
-
             carrito.push(producto);
             renderizarCarrito();
         };
@@ -254,10 +294,8 @@
             try {
                 let totalVenta = 0;
                 let costoTotal = 0;
-
-                // 1. Descontar el stock en Firebase por cada producto
-                // Agrupamos los ids para no descontar 1 por 1 si compran 3 del mismo
                 const conteoProductos = {};
+                
                 carrito.forEach(p => {
                     conteoProductos[p.id] = (conteoProductos[p.id] || 0) + 1;
                     totalVenta += p.precio;
@@ -266,13 +304,9 @@
 
                 for (const [id, cantidad] of Object.entries(conteoProductos)) {
                     const productoRef = doc(db, "productos", id);
-                    await updateDoc(productoRef, {
-                        // "increment" resta la cantidad de forma segura en la base de datos
-                        stock: increment(-cantidad) 
-                    });
+                    await updateDoc(productoRef, { stock: increment(-cantidad) });
                 }
 
-                // 2. Registrar la venta en Firebase para las métricas financieras
                 await addDoc(collection(db, "ventas"), {
                     fecha: new Date(),
                     totalVenta: totalVenta,
@@ -306,28 +340,40 @@
             }
 
             productos.forEach(prod => {
+                // Usamos un placeholder genérico si el dueño no cargó imagen
+                const imagenSrc = prod.imagen ? prod.imagen : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+
                 // Catálogo del cliente
                 catalogo.innerHTML += `
                     <div class="card">
+                        <img src="${imagenSrc}" alt="${prod.nombre}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=Error+de+Imagen'">
                         <h3 style="margin-top:0;">${prod.nombre}</h3>
-                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">$${prod.precio}</p>
-                        <p style="font-size: 0.8rem; color: #6b7280;">Stock: ${prod.stock}</p>
-                        <button onclick="window.agregarAlCarrito('${prod.id}')" ${prod.stock === 0 ? 'disabled' : ''}>
+                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary); margin: 5px 0;">$${prod.precio}</p>
+                        <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock disponible: ${prod.stock}</p>
+                        <button style="margin-top: auto;" onclick="window.agregarAlCarrito('${prod.id}')" ${prod.stock === 0 ? 'disabled' : ''}>
                             ${prod.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
                         </button>
                     </div>
                 `;
 
-                // Tabla del dueño
+                // Tabla del dueño (Ahora con botón Editar)
                 tabla.innerHTML += `
                     <tr>
-                        <td><strong>${prod.nombre}</strong></td>
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <img src="${imagenSrc}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.style.display='none'">
+                                <strong>${prod.nombre}</strong>
+                            </div>
+                        </td>
                         <td>$${prod.costo}</td>
                         <td>$${prod.precio}</td>
                         <td>
                             <span style="color: ${prod.stock < 5 ? '#ef4444' : 'inherit'}; font-weight: ${prod.stock < 5 ? 'bold' : 'normal'}">
                                 ${prod.stock} un.
                             </span>
+                        </td>
+                        <td>
+                            <button class="secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="window.abrirModal('${prod.id}')">✏️ Editar</button>
                         </td>
                     </tr>
                 `;
