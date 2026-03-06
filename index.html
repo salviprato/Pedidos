@@ -49,7 +49,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s; 
+            transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.3s; 
         }
         button:hover { background-color: var(--primary-hover); }
         button:disabled { background-color: var(--border); color: var(--text-dark); cursor: not-allowed; }
@@ -59,6 +59,28 @@
         button.outline:hover { border-color: var(--accent); color: var(--text-main); }
         button.danger { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); }
         button.danger:hover { color: var(--accent-light); border-color: var(--accent-light); }
+        
+        /* Botón WhatsApp Flotante */
+        .btn-flotante-wsp {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background-color: var(--primary);
+            color: #fff;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+            z-index: 999;
+            padding: 0;
+        }
+        .btn-flotante-wsp:hover {
+            transform: scale(1.1);
+            background-color: var(--primary-hover);
+        }
         
         /* Navegación */
         nav.dev-tools { background: var(--card-bg); padding: 15px 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
@@ -150,7 +172,7 @@
         
         hr { border: 0; border-top: 1px solid var(--border); margin: 30px 0; }
 
-        /* NUEVO: Alertas de Stock */
+        /* Alertas de Stock */
         .alerta-container { display: flex; gap: 20px; flex-wrap: wrap; }
         .alerta-col { flex: 1; min-width: 200px; background: var(--bg-color); padding: 15px; border: 1px solid var(--border); border-left: 3px solid var(--accent); }
         .alerta-col h4 { margin: 0 0 10px 0; color: var(--text-main); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;}
@@ -180,6 +202,12 @@
         </div>
         <div id="catalogo-productos" class="grid-cards"><p style="color: var(--text-muted);">Cargando catálogo...</p></div>
     </div>
+
+    <button id="btn-flotante-wsp" class="btn-flotante-wsp" onclick="window.contactarWspLocal()" title="Contactar por WhatsApp">
+        <svg viewBox="0 0 24 24" width="30" height="30" fill="currentColor">
+            <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.885-.653-1.48-1.459-1.653-1.756-.173-.298-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
+        </svg>
+    </button>
 
     <div id="modal-carrito" class="modal-overlay hidden">
         <div class="modal-content">
@@ -266,7 +294,7 @@
                         <ul id="lista-alertas-agotados" class="alerta-lista"></ul>
                     </div>
                     <div class="alerta-col">
-                        <h4>Poco Stock (< 6)</h4>
+                        <h4>Poco Stock Menor a 6</h4>
                         <ul id="lista-alertas-bajo" class="alerta-lista"></ul>
                     </div>
                 </div>
@@ -489,9 +517,20 @@
             return horaActual >= configTienda.horaApertura && horaActual < configTienda.horaCierre;
         };
 
+        // --- BOTON WSP CONTACTO DIRECTO ---
+        window.contactarWspLocal = () => {
+            if(!configTienda.telefono) {
+                alert("El local aún no configuró su número de contacto.");
+                return;
+            }
+            const numeroLimpio = configTienda.telefono.replace(/[^0-9]/g, '');
+            window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent("Hola, me comunico desde la tienda en línea. Quiero realizar una consulta.")}`, '_blank');
+        };
+
         // --- UI BÁSICA ---
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
+            document.getElementById('btn-flotante-wsp').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
             if(rol === 'dueno') window.togglePanel('panel-inventario');
         };
@@ -531,7 +570,7 @@
                     html += `${txtDias} | ${configTienda.horaApertura} a ${configTienda.horaCierre} hs. | ${txtEstado}`;
                 }
                 
-                if(configTienda.envioDisponible) html += `<br><span style="font-size:0.75rem; color:var(--text-dark);">TARIFA ENVÍO: $${window.formatearNum(configTienda.envioPrecio)}</span>`;
+                if(configTienda.envioDisponible) html += `<br><span style="font-size:0.75rem; color:var(--text-dark);">TARIFA ENVÍO $${window.formatearNum(configTienda.envioPrecio)}</span>`;
                 
                 if(html) { info.innerHTML = html; info.style.display = 'block'; } else { info.style.display = 'none'; }
                 window.renderizarCarrito();
@@ -554,7 +593,7 @@
             const m = document.getElementById('metodo-entrega').value; const c = document.getElementById('caja-direccion');
             if (m === 'Envio') {
                 if(!configTienda.envioDisponible) { document.getElementById('metodo-entrega').value = 'Retiro'; c.style.display = 'none'; return; }
-                c.style.display = 'block'; document.getElementById('aviso-envio').textContent = `Coste adicional: $${window.formatearNum(configTienda.envioPrecio)}`;
+                c.style.display = 'block'; document.getElementById('aviso-envio').textContent = `Coste adicional $${window.formatearNum(configTienda.envioPrecio)}`;
             } else { c.style.display = 'none'; }
             window.renderizarCarrito();
         };
@@ -608,7 +647,7 @@
             const p = productos.find(x => x.id === id); document.getElementById('stock-id-prod').value = p.id; document.getElementById('stock-nombre-prod').textContent = p.nombre;
             document.getElementById('stock-cantidad').value = 1; document.getElementById('stock-nuevo-costo').value = ""; 
             const sel = document.getElementById('stock-select-var'); sel.innerHTML = '';
-            Object.entries(p.variantes || {}).forEach(([vId, v]) => sel.innerHTML += `<option value="${vId}">${v.detalle} (Actual: ${window.formatearNum(v.stock)})</option>`);
+            Object.entries(p.variantes || {}).forEach(([vId, v]) => sel.innerHTML += `<option value="${vId}">${v.detalle} - Stock actual ${window.formatearNum(v.stock)}</option>`);
             document.getElementById('modal-stock').classList.remove('hidden');
         };
         window.cerrarModalStock = () => document.getElementById('modal-stock').classList.add('hidden');
@@ -620,7 +659,7 @@
             const p = productos.find(x => x.id === id); const cTot = cant * costoU;
             try {
                 const u = {}; u[`variantes.${vId}.stock`] = increment(cant); await updateDoc(doc(db, "productos", id), u);
-                if(cTot > 0) await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} (${p.variantes[vId].detalle}) x${window.formatearNum(cant)}`, importe: cTot });
+                if(cTot > 0) await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: cTot });
                 window.cerrarModalStock();
             } catch (e) {}
         };
@@ -637,7 +676,7 @@
             const efvo = parseFloat(document.getElementById('venta-rapida-efectivo').value) || 0; const transf = parseFloat(document.getElementById('venta-rapida-transf').value) || 0;
             if (efvo === 0 && transf === 0) return;
             const u = {}; u[`variantes.${opt.value}.stock`] = increment(-1); await updateDoc(doc(db, "productos", opt.getAttribute('data-idprod')), u);
-            await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'venta', detalle: `Mostrador: ${opt.text.split('(')[0].trim()}`, efectivo: efvo, transferencia: transf });
+            await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'venta', detalle: `Mostrador - ${opt.text.split(' - ')[0].trim()}`, efectivo: efvo, transferencia: transf });
             document.getElementById('venta-rapida-efectivo').value = ""; document.getElementById('venta-rapida-transf').value = "";
         };
         window.registrarIngresoManual = async () => {
@@ -676,7 +715,7 @@
             const entr = pedidosGlobales.filter(p => p.estadoEntrega).sort((a,b) => b.fecha.toDate() - a.fecha.toDate());
             
             const card = (p, isP) => {
-                let it = ''; p.items.forEach(i => it += `<li>${i.nombre} (${i.detalle}) x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
+                let it = ''; p.items.forEach(i => it += `<li>${i.nombre} - ${i.detalle} x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
                 if(p.costoEnvio) it += `<li style="color:var(--text-dark);">Envío - $${window.formatearNum(p.costoEnvio)}</li>`;
                 
                 const bP = p.estadoPago ? `<span style="color:var(--text-dark); font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">Registrar Pago</button>`;
@@ -685,7 +724,7 @@
                 return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha.toDate().toLocaleString()}</span></div><span style="font-size:1.1rem; color:var(--text-main);">$${window.formatearNum(p.total)}</span></div>
                 <p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:var(--text-main);">${p.nombreCliente} ${p.apellidoCliente}</span></p>
                 <p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${p.telefono.replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--text-main); text-decoration:none;">${p.telefono}</a></p>
-                <p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main);">${p.metodoEntrega}</span> ${p.direccion!=='Retiro en local'?`(${p.direccion})`:''}</p>
+                <p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main);">${p.metodoEntrega}</span> ${p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p>
                 <ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bP} ${bE}</div></div>`;
             };
             pend.forEach(p => lP.innerHTML += card(p, true)); entr.forEach(p => lH.innerHTML += card(p, false));
@@ -697,7 +736,7 @@
             try {
                 const docRef = doc(db, "pedidos", id); const snap = await getDoc(docRef); const p = snap.data();
                 if(!p.estadoPago) {
-                    await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} (Autocobro)`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 });
+                    await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 });
                     await updateDoc(docRef, { estadoPago: true });
                 }
                 await updateDoc(docRef, { estadoEntrega: true });
@@ -764,7 +803,7 @@
                 document.getElementById('checkout-nombre').value = ""; document.getElementById('checkout-apellido').value = ""; document.getElementById('checkout-telefono').value = ""; document.getElementById('checkout-direccion').value = "";
             } catch (e) {} finally { document.getElementById('btn-comprar').disabled = false; }
         };
-        window.enviarWhatsapp = () => { if(!configTienda.telefono) return; window.open(`https://wa.me/${configTienda.telefono}?text=${encodeURIComponent(`Orden generada en la plataforma.\nCódigo: *#${ultimoIdPedidoCorto}*.`)}`, '_blank'); };
+        window.enviarWhatsapp = () => { if(!configTienda.telefono) return; window.open(`https://wa.me/${configTienda.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Orden generada en la plataforma.\nCódigo: *#${ultimoIdPedidoCorto}*.`)}`, '_blank'); };
 
         // --- RENDERIZADO ---
         function renderizarCatalogoYStock() {
@@ -780,7 +819,7 @@
                 let sT = 0; let sO = ''; let mT = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">';
                 vE.forEach(([id, v]) => { 
                     sT += v.stock; sO += `<option value="${id}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`; 
-                    mT += `<div style="margin-bottom:3px;">${v.detalle}: <span style="color:var(--text-main);">${window.formatearNum(v.stock)}</span></div>`; 
+                    mT += `<div style="margin-bottom:3px;">${v.detalle} - <span style="color:var(--text-main);">${window.formatearNum(v.stock)}</span></div>`; 
                     
                     // Comprobar Alertas
                     if(v.stock === 0) { hAgot += `<li><span>${p.nombre} - ${v.detalle}</span><span style="color:var(--primary);">0</span></li>`; countA++; }
@@ -815,7 +854,7 @@
             else {
                 bc.disabled = false; document.getElementById('checkout-form').style.display = 'block'; document.getElementById('btn-vaciar').style.display = 'inline-block';
                 const cV = {}; carrito.forEach((p, idx) => { const u = p.idProd+'_'+p.idVar; if(!cV[u]) cV[u] = {...p, c:0, idx}; cV[u].c++; t += p.precio; });
-                Object.values(cV).forEach(i => { l.innerHTML += `<div class="carrito-item"><div><span style="color:var(--text-main); font-size:0.95rem; text-transform:uppercase;">${i.nombre}</span><br><span style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">${i.detalle} (x${i.c})</span></div>
+                Object.values(cV).forEach(i => { l.innerHTML += `<div class="carrito-item"><div><span style="color:var(--text-main); font-size:0.95rem; text-transform:uppercase;">${i.nombre}</span><br><span style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">${i.detalle} x${i.c}</span></div>
                     <div style="display:flex; align-items:center; gap:15px;"><span style="color:var(--text-main); font-size:0.95rem;">$${window.formatearNum(i.precio*i.c)}</span><button onclick="window.quitarDelCarrito(${i.idx})" class="danger" style="padding:4px 8px;">X</button></div></div>`; });
                 if(document.getElementById('metodo-entrega') && document.getElementById('metodo-entrega').value === 'Envio' && configTienda.envioDisponible) t += configTienda.envioPrecio;
             } ts.textContent = window.formatearNum(t);
