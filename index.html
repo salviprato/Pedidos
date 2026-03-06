@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sistema de Gestión</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         /* ===== ESTILOS ELEGANTES (MARRONES Y GRISES OSCUROS) ===== */
         :root {
@@ -127,6 +128,8 @@
         .modal-content { background: var(--card-bg); padding: 40px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         .modal-content h3 { font-weight: 400; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; color: var(--accent); }
         
+        #modal-metricas .modal-content { max-width: 800px; } /* Ajuste de ancho para el gráfico */
+
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); }
@@ -271,6 +274,47 @@
         </div>
     </div>
 
+    <div id="modal-metricas" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>📊 Métricas e Informes</h3>
+            <div class="dark-input-group">
+                <div style="flex: 1;">
+                    <label>Período de Tiempo:</label>
+                    <select id="select-periodo-metricas" onchange="window.actualizarGraficos()">
+                        <option value="1y">1 Año (Mes a Mes)</option>
+                        <option value="6m" selected>6 Meses (Mes a Mes)</option>
+                        <option value="3m">3 Meses (Mes a Mes)</option>
+                        <option value="1m">1 Mes (Semanas)</option>
+                        <option value="7d">1 Semana (Días)</option>
+                    </select>
+                </div>
+                <div style="flex: 1;">
+                    <label>Categoría a Analizar:</label>
+                    <select id="select-categoria-metricas" onchange="window.actualizarGraficos()">
+                        <option value="efectivo">Pagos en Efectivo</option>
+                        <option value="transferencia">Pagos en Transferencia</option>
+                        <option value="retiros">Retiros en Local</option>
+                        <option value="envios">Envíos</option>
+                        <option value="productos">Productos Vendidos</option>
+                        <option value="ventas_web">Ventas a través de la Web</option>
+                        <option value="ventas_fisicas">Ventas Físicas (Mostrador)</option>
+                        <option value="neto">Ganancias Netas</option>
+                        <option value="bruto">Ganancias Brutas</option>
+                        <option value="gastos">Gastos</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div style="height: 350px; margin-top: 20px; background: var(--bg-color); padding: 15px; border: 1px solid var(--border); border-radius: 4px;">
+                <canvas id="graficoMetricas"></canvas>
+            </div>
+
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.cerrarModalMetricas()">Cerrar Métricas</button>
+            </div>
+        </div>
+    </div>
+
     <div id="vista-dueno" class="container hidden">
         <h2 style="margin-top: 0; margin-bottom: 30px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--accent);">Administración</h2>
         
@@ -278,6 +322,7 @@
             <button class="secondary" onclick="window.togglePanel('panel-inventario')">Inventario</button>
             <button class="secondary" onclick="window.togglePanel('panel-pedidos')">Pedidos</button>
             <button class="secondary" onclick="window.togglePanel('panel-finanzas')">Finanzas</button>
+            <button class="secondary" onclick="window.abrirModalMetricas()">Métricas</button>
             <button class="secondary" onclick="window.togglePanel('panel-config')" style="margin-left: auto;">Configuración</button>
         </div>
 
@@ -360,25 +405,44 @@
             </div>
 
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>Registrar Ingresos Manuales</span></div>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>Ventas Físicas e Ingresos</span></div>
                 <div id="body-ingresos" class="modulo-body hidden">
+                    
                     <div style="border: 1px solid var(--border); padding: 20px; margin-bottom: 20px;">
                         <label style="display:block; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; color:var(--text-muted);">Venta de Mostrador</label>
                         <div class="dark-input-group">
-                            <div style="flex: 2;"><select id="venta-rapida-prod"><option value="">Seleccionar producto...</option></select></div>
-                            <div><input type="number" id="venta-rapida-efectivo" placeholder="Efectivo $"></div>
-                            <div><input type="number" id="venta-rapida-transf" placeholder="Transf. $"></div>
+                            <div style="flex: 2;">
+                                <select id="mostrador-prod"><option value="">Seleccionar producto...</option></select>
+                            </div>
+                            <div style="flex: 1; max-width: 100px;">
+                                <input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1">
+                            </div>
+                            <div>
+                                <button type="button" class="secondary" onclick="window.agregarItemMostrador()">Añadir</button>
+                            </div>
                         </div>
-                        <button onclick="window.registrarVentaRapida()" style="width:100%;">Registrar Venta</button>
+                        
+                        <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;">
+                            </ul>
+                        <div style="text-align: right; font-weight: 400; margin-bottom: 15px; color: var(--accent); font-size: 1.1rem; border-bottom: 1px solid var(--border); padding-bottom: 10px;">
+                            Total de Venta: $<span id="total-mostrador">0</span>
+                        </div>
+
+                        <div class="dark-input-group">
+                            <div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" id="mostrador-efectivo" placeholder="Efectivo $"></div>
+                            <div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" id="mostrador-transf" placeholder="Transf. $"></div>
+                        </div>
+                        <button onclick="window.registrarVentaMostrador()" style="width:100%;">Registrar Venta Completa</button>
                     </div>
+
                     <div style="border: 1px solid var(--border); padding: 20px;">
-                        <label style="display:block; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; color:var(--text-muted);">Ingreso Extraordinario</label>
+                        <label style="display:block; font-size:0.8rem; text-transform:uppercase; letter-spacing:1px; margin-bottom:15px; color:var(--text-muted);">Ingreso Extraordinario Libre</label>
                         <div class="dark-input-group">
                             <div style="flex: 2;"><input type="text" id="ingreso-manual-detalle" placeholder="Concepto..."></div>
                             <div><input type="number" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div>
                             <div><input type="number" id="ingreso-manual-transf" placeholder="Transf. $"></div>
                         </div>
-                        <button onclick="window.registrarIngresoManual()" style="width:100%;">Registrar Ingreso</button>
+                        <button class="secondary" onclick="window.registrarIngresoManual()" style="width:100%;">Registrar Ingreso Simple</button>
                     </div>
                 </div>
             </div>
@@ -501,6 +565,12 @@
         let ingresosGlobales = []; let gastosGlobales = []; let pedidosGlobales = [];
         let configTienda = { telefono: '', horaApertura: '09:00', horaCierre: '18:00', diasApertura: {}, envioDisponible: false, envioPrecio: 0 };
         let ultimoIdPedidoCorto = "";
+
+        // Chart instance
+        let metricasChart = null;
+
+        // Mostrador state
+        let carritoMostrador = [];
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -664,24 +734,113 @@
             } catch (e) {}
         };
 
-        // --- FINANZAS ---
+        // --- FINANZAS Y MOSTRADOR ---
         window.registrarGasto = async () => {
             const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0;
             if (t && i > 0) { await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo: t, importe: i }); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; }
         };
         window.borrarGasto = async (id) => { await deleteDoc(doc(db, "gastos", id)); };
 
-        window.registrarVentaRapida = async () => {
-            const sel = document.getElementById('venta-rapida-prod'); const opt = sel.options[sel.selectedIndex]; if(!opt.value) return;
-            const efvo = parseFloat(document.getElementById('venta-rapida-efectivo').value) || 0; const transf = parseFloat(document.getElementById('venta-rapida-transf').value) || 0;
-            if (efvo === 0 && transf === 0) return;
-            const u = {}; u[`variantes.${opt.value}.stock`] = increment(-1); await updateDoc(doc(db, "productos", opt.getAttribute('data-idprod')), u);
-            await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'venta', detalle: `Mostrador - ${opt.text.split(' - ')[0].trim()}`, efectivo: efvo, transferencia: transf });
-            document.getElementById('venta-rapida-efectivo').value = ""; document.getElementById('venta-rapida-transf').value = "";
+        // NUEVA LOGICA: CARRITO PARA VENTA MOSTRADOR
+        window.agregarItemMostrador = () => {
+            const sel = document.getElementById('mostrador-prod');
+            const cant = parseInt(document.getElementById('mostrador-cant').value) || 1;
+            const opt = sel.options[sel.selectedIndex];
+            if(!opt.value || cant <= 0) return;
+            
+            const stock = parseInt(opt.getAttribute('data-stock'));
+            let existIdx = carritoMostrador.findIndex(x => x.idVar === opt.value && x.idProd === opt.getAttribute('data-idprod'));
+            
+            let qtyInCart = existIdx !== -1 ? carritoMostrador[existIdx].cantidad : 0;
+            if (cant + qtyInCart > stock) { alert("Stock insuficiente para esta variante."); return; }
+            
+            if(existIdx !== -1) {
+                carritoMostrador[existIdx].cantidad += cant;
+            } else {
+                carritoMostrador.push({
+                    idProd: opt.getAttribute('data-idprod'),
+                    idVar: opt.value,
+                    nombre: opt.text.split(' - ')[0],
+                    detalle: opt.getAttribute('data-detalle'),
+                    precio: parseFloat(opt.getAttribute('data-precio')),
+                    cantidad: cant
+                });
+            }
+            window.renderizarCarritoMostrador();
+            document.getElementById('mostrador-cant').value = '1';
         };
+
+        window.quitarItemMostrador = (idx) => {
+            carritoMostrador.splice(idx, 1);
+            window.renderizarCarritoMostrador();
+        };
+
+        window.renderizarCarritoMostrador = () => {
+            const list = document.getElementById('lista-mostrador');
+            list.innerHTML = '';
+            let total = 0;
+            
+            if(carritoMostrador.length === 0) {
+                list.innerHTML = '<li style="color:var(--text-dark); text-align:center; font-style:italic;">Agrega productos para la venta</li>';
+            } else {
+                carritoMostrador.forEach((item, idx) => {
+                    const subtotal = item.precio * item.cantidad;
+                    total += subtotal;
+                    list.innerHTML += `<li style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border); padding:8px 0; align-items:center;">
+                        <span style="color:var(--text-main); font-size:0.8rem;">${item.nombre} - ${item.detalle} (x${item.cantidad})</span>
+                        <div style="display:flex; align-items:center; gap:10px;">
+                            <span style="color:var(--text-main);">$${window.formatearNum(subtotal)}</span>
+                            <button class="danger" style="padding:2px 6px; font-size:0.7rem;" onclick="window.quitarItemMostrador(${idx})">X</button>
+                        </div>
+                    </li>`;
+                });
+            }
+            document.getElementById('total-mostrador').textContent = window.formatearNum(total);
+        };
+
+        window.registrarVentaMostrador = async () => {
+            if(carritoMostrador.length === 0) { alert("El carrito de mostrador está vacío."); return; }
+            const efe = parseFloat(document.getElementById('mostrador-efectivo').value) || 0; 
+            const trans = parseFloat(document.getElementById('mostrador-transf').value) || 0;
+            const abonado = efe + trans;
+            
+            let total = 0;
+            let countItems = 0;
+            carritoMostrador.forEach(i => { total += (i.precio * i.cantidad); countItems += i.cantidad; });
+            
+            if (abonado === 0 && total > 0) { alert("Ingresa el monto de pago (Efectivo o Transferencia)."); return; }
+            
+            try {
+                // Restar stock de la DB
+                for(const item of carritoMostrador) {
+                    const u = {}; u[`variantes.${item.idVar}.stock`] = increment(-item.cantidad);
+                    await updateDoc(doc(db, "productos", item.idProd), u);
+                }
+                
+                // Registrar el ingreso (Venta Física)
+                await addDoc(collection(db, "ingresos"), { 
+                    fecha: new Date(), 
+                    tipo: 'venta_mostrador', 
+                    detalle: `Venta Mostrador (${countItems} items)`, 
+                    efectivo: efe, 
+                    transferencia: trans,
+                    itemsCount: countItems
+                });
+                
+                // Limpiar todo
+                carritoMostrador = [];
+                window.renderizarCarritoMostrador();
+                document.getElementById('mostrador-efectivo').value = '';
+                document.getElementById('mostrador-transf').value = '';
+                alert("Venta registrada y stock descontado.");
+            } catch (e) {
+                alert("Hubo un error al registrar la venta.");
+            }
+        };
+
         window.registrarIngresoManual = async () => {
             const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0;
-            if (d && (e>0 || t>0)) { await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t }); document.getElementById('ingreso-manual-detalle').value = ""; }
+            if (d && (e>0 || t>0)) { await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t }); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = "";}
         };
 
         window.calcularBalanceEnVivo = () => {
@@ -779,18 +938,220 @@
             }
         };
 
+        // --- MÉTRICAS Y GRÁFICOS (CHART.JS) ---
+        window.abrirModalMetricas = function() { 
+            document.getElementById('modal-metricas').classList.remove('hidden');
+            window.actualizarGraficos();
+        }
+        
+        window.cerrarModalMetricas = function() { 
+            document.getElementById('modal-metricas').classList.add('hidden');
+        }
+
+        // Función para agrupar fechas dinámicamente
+        function obtenerCestasPeriodo(periodo) {
+            let cestas = [];
+            let hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            
+            if(periodo === '7d') {
+                for(let i=6; i>=0; i--) {
+                    let d = new Date(hoy); d.setDate(d.getDate() - i);
+                    cestas.push({ label: `${d.getDate()}/${d.getMonth()+1}`, start: d.getTime(), end: d.getTime() + 86400000 });
+                }
+            } else if(periodo === '1m') {
+                // 4 Semanas
+                for(let i=3; i>=0; i--) {
+                    let end = new Date(hoy); end.setDate(end.getDate() - (i*7));
+                    let start = new Date(end); start.setDate(start.getDate() - 6);
+                    cestas.push({ label: `Sem ${start.getDate()}/${start.getMonth()+1}`, start: start.getTime(), end: end.getTime() + 86400000 });
+                }
+            } else if(periodo === '3m' || periodo === '6m' || periodo === '1y') {
+                let meses = periodo === '3m' ? 3 : (periodo === '6m' ? 6 : 12);
+                for(let i=meses-1; i>=0; i--) {
+                    let d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1);
+                    let n = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+                    let end = new Date(hoy.getFullYear(), hoy.getMonth() - i + 1, 0);
+                    cestas.push({ label: `${n[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`, start: d.getTime(), end: end.getTime() + 86400000 });
+                }
+            }
+            return cestas;
+        }
+
+        window.actualizarGraficos = function() {
+            const periodo = document.getElementById('select-periodo-metricas').value;
+            const categoria = document.getElementById('select-categoria-metricas').value;
+            
+            let cestas = obtenerCestasPeriodo(periodo);
+            let datosBarras = cestas.map(() => 0);
+            let datosLinea = cestas.map(() => 0);
+
+            // Ayudante para sumar a la canasta correcta
+            const addToBucket = (time, valueBar, valueLine) => {
+                for(let i=0; i<cestas.length; i++) {
+                    if(time >= cestas[i].start && time < cestas[i].end) {
+                        datosBarras[i] += valueBar;
+                        datosLinea[i] += valueLine;
+                        break;
+                    }
+                }
+            };
+
+            // 1. RECORRER PEDIDOS WEB
+            pedidosGlobales.forEach(p => {
+                if(!p.fecha) return;
+                let time = p.fecha.toDate().getTime();
+                let cobrado = p.estadoPago === true;
+                let monto = p.total || 0;
+                let cantItems = p.items ? p.items.reduce((s, it) => s + (it.cantidad || 1), 0) : 0;
+                
+                let pagoEfvo = p.metodoPago === 'Efectivo' ? monto : 0;
+                let pagoTrans = p.metodoPago === 'Transferencia' ? monto : 0;
+
+                if (categoria === 'efectivo' && cobrado) addToBucket(time, pagoEfvo, 1);
+                if (categoria === 'transferencia' && cobrado) addToBucket(time, pagoTrans, 1);
+                if (categoria === 'retiros' && p.metodoEntrega === 'Retiro') addToBucket(time, 1, 0);
+                if (categoria === 'envios' && p.metodoEntrega === 'Envio') addToBucket(time, 1, 0);
+                if (categoria === 'productos' && cobrado) addToBucket(time, cantItems, 0);
+                if (categoria === 'ventas_web' && cobrado) addToBucket(time, monto, 1);
+                if ((categoria === 'neto' || categoria === 'bruto') && cobrado) addToBucket(time, monto, 1);
+            });
+
+            // 2. RECORRER INGRESOS EXTRA Y MOSTRADOR
+            ingresosGlobales.forEach(ing => {
+                if(!ing.fecha) return;
+                let time = ing.fecha.toDate().getTime();
+                let monto = (ing.efectivo || 0) + (ing.transferencia || 0);
+                let isMostrador = ing.tipo === 'venta_mostrador' || ing.tipo === 'venta'; // Retrocompatibilidad con la version anterior
+                let cantItems = ing.itemsCount || 1;
+
+                // Solo sumar a las métricas si NO ES un pago de pedido web para evitar duplicados
+                let isAutoPagoWeb = (ing.tipo === 'pago' || ing.tipo === 'pago_auto');
+
+                if (!isAutoPagoWeb) {
+                    if (categoria === 'efectivo') addToBucket(time, ing.efectivo || 0, 1);
+                    if (categoria === 'transferencia') addToBucket(time, ing.transferencia || 0, 1);
+                    
+                    if (categoria === 'productos' && isMostrador) addToBucket(time, cantItems, 0);
+                    if (categoria === 'ventas_fisicas' && isMostrador) addToBucket(time, monto, 1);
+                    
+                    if (categoria === 'neto' || categoria === 'bruto') addToBucket(time, monto, 1);
+                }
+            });
+
+            // 3. RECORRER GASTOS
+            if (categoria === 'gastos' || categoria === 'neto') {
+                gastosGlobales.forEach(g => {
+                    if(!g.fecha) return;
+                    let time = g.fecha.toDate().getTime();
+                    let monto = g.importe || 0;
+                    
+                    if (categoria === 'gastos') addToBucket(time, monto, 1);
+                    if (categoria === 'neto') addToBucket(time, -monto, 0);
+                });
+            }
+
+            // Textos dinámicos
+            let isMoney = ['efectivo', 'transferencia', 'ventas_web', 'ventas_fisicas', 'neto', 'bruto', 'gastos'].includes(categoria);
+            let labelBar = isMoney ? "Monto Total ($)" : "Cantidad Total";
+            let labelLine = isMoney ? "Operaciones Generadas" : "Ventas";
+
+            const etiquetas = cestas.map(c => c.label);
+            const ctx = document.getElementById('graficoMetricas').getContext('2d');
+            
+            if (metricasChart) { metricasChart.destroy(); }
+
+            metricasChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: etiquetas,
+                    datasets: [
+                        {
+                            label: labelBar,
+                            data: datosBarras,
+                            backgroundColor: categoria === 'gastos' ? '#ef4444' : '#5d4037', // Rojo si son gastos, marron primario el resto
+                            borderRadius: 4,
+                            order: 2
+                        },
+                        {
+                            label: labelLine,
+                            data: datosLinea,
+                            type: 'line',
+                            borderColor: '#8d6e63', // Acento marron
+                            backgroundColor: 'rgba(141, 110, 99, 0.1)',
+                            borderWidth: 3,
+                            fill: true,
+                            tension: 0.3,
+                            order: 1
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    color: '#e0e0e0',
+                    plugins: {
+                        legend: { labels: { color: '#e0e0e0', font: { family: "'Helvetica Neue', sans-serif" } } },
+                        tooltip: { 
+                            mode: 'index', 
+                            intersect: false,
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    let value = context.parsed.y;
+                                    if (label) { label += ': '; }
+                                    if (isMoney && context.datasetIndex === 0) {
+                                        label += '$' + value.toLocaleString('es-AR');
+                                    } else {
+                                        label += value;
+                                    }
+                                    return label;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            grid: { color: '#333333' }, // Color bordes oscuro
+                            ticks: { 
+                                color: '#9e9e9e',
+                                callback: function(value) {
+                                    return isMoney ? '$' + value.toLocaleString('es-AR') : value;
+                                }
+                            }
+                        },
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#9e9e9e' }
+                        }
+                    }
+                }
+            });
+        }
+
+
         // --- LISTENERS ---
         onSnapshot(collection(db, "productos"), (s) => {
             productos = s.docs.map(d => { const x=d.data(); if(!x.variantes) x.variantes={'legado':{detalle:'Unica',precio:x.precio||0,costo:x.costo||0,stock:x.stock||0}}; return {id:d.id,...x}; });
             renderizarCatalogoYStock(); document.getElementById('estado-conexion').textContent = "SISTEMA ONLINE";
-            const sel = document.getElementById('venta-rapida-prod'); sel.innerHTML = '<option value="">Seleccionar...</option>';
-            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { if(v.stock>0) sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}">${p.nombre} - ${v.detalle}</option>`; }));
+            const sel = document.getElementById('mostrador-prod'); sel.innerHTML = '<option value="">Seleccionar...</option>';
+            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { if(v.stock>0) sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}" data-precio="${v.precio}" data-detalle="${v.detalle}" data-stock="${v.stock}">${p.nombre} - ${v.detalle}</option>`; }));
         });
-        onSnapshot(collection(db, "gastos"), (s) => { gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); const t = document.getElementById('tabla-gastos'); t.innerHTML = ''; gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem;">${g.titulo}</span></td><td style="color:var(--text-muted);">$${window.formatearNum(g.importe)}</td><td><button class="danger" onclick="window.borrarGasto('${g.id}')">X</button></td></tr>`; }); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
-        onSnapshot(collection(db, "ingresos"), (s) => { ingresosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
-        onSnapshot(collection(db, "pedidos"), (s) => { pedidosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.renderizarPedidos(); });
+        onSnapshot(collection(db, "gastos"), (s) => { 
+            gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); const t = document.getElementById('tabla-gastos'); t.innerHTML = ''; gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem;">${g.titulo}</span></td><td style="color:var(--text-muted);">$${window.formatearNum(g.importe)}</td><td><button class="danger" onclick="window.borrarGasto('${g.id}')">X</button></td></tr>`; }); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
+            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
+        });
+        onSnapshot(collection(db, "ingresos"), (s) => { 
+            ingresosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
+            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
+        });
+        onSnapshot(collection(db, "pedidos"), (s) => { 
+            pedidosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.renderizarPedidos(); 
+            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
+        });
 
-        // --- CARRITO ---
+        // --- CARRITO COMPRADOR ---
         window.cambiarVarianteUI = (id, sel) => {
             const o = sel.options[sel.selectedIndex]; const stk = parseInt(o.getAttribute('data-stock'));
             document.getElementById(`precio-display-${id}`).textContent = `$${window.formatearNum(o.getAttribute('data-precio'))}`;
@@ -851,7 +1212,7 @@
         };
         window.enviarWhatsapp = () => { if(!configTienda.telefono) return; window.open(`https://wa.me/${configTienda.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Orden generada en la plataforma.\nCódigo: *#${ultimoIdPedidoCorto}*.`)}`, '_blank'); };
 
-        // --- RENDERIZADO ---
+        // --- RENDERIZADO DEL CATÁLOGO ---
         function renderizarCatalogoYStock() {
             const c = document.getElementById('catalogo-productos'); const t = document.getElementById('tabla-stock'); c.innerHTML=''; t.innerHTML='';
             const f = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
@@ -905,6 +1266,8 @@
                 if(document.getElementById('metodo-entrega') && document.getElementById('metodo-entrega').value === 'Envio' && configTienda.envioDisponible) t += configTienda.envioPrecio;
             } ts.textContent = window.formatearNum(t);
         };
+        
+        window.renderizarCarritoMostrador();
     </script>
 </body>
 </html>
