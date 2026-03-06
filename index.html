@@ -22,7 +22,7 @@
         button.outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); }
         
         /* Navegación */
-        nav.dev-tools { background: #111827; padding: 15px; border-radius: 8px; margin-bottom: 25px; color: white; display: flex; gap: 10px; align-items: center; }
+        nav.dev-tools { background: #111827; padding: 15px; border-radius: 8px; margin-bottom: 25px; color: white; display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
         
         /* Contenedores */
         .container { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
@@ -53,7 +53,7 @@
         th { background-color: #f9fafb; font-weight: 600; }
 
         /* MÓDULO OSCURO (FINANZAS Y PEDIDOS) */
-        .panel-oscuro-container { background-color: var(--dark-bg); padding: 20px; border-radius: 12px; color: #f9fafb; }
+        .panel-oscuro-container { background-color: var(--dark-bg); padding: 20px; border-radius: 12px; color: #f9fafb; margin-bottom: 20px; }
         .modulo-oscuro { background-color: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
         .modulo-header { background-color: #1f2937; padding: 12px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
         .modulo-body { padding: 20px; border-top: 1px solid var(--dark-border); }
@@ -69,21 +69,21 @@
         .widget-balance { flex: 1; background: #1f2937; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid; min-width: 150px;}
 
         /* Tarjetas de Pedidos */
-        .pedido-card { background: #1f2937; border: 1px solid #4b5563; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-        .pedido-header { display: flex; justify-content: space-between; border-bottom: 1px solid #374151; padding-bottom: 10px; margin-bottom: 10px; }
+        .pedido-card { background: #1f2937; border: 1px solid #4b5563; padding: 15px; border-radius: 8px; margin-bottom: 15px; position: relative; }
+        .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #374151; padding-bottom: 10px; margin-bottom: 10px; }
+        .pedido-id { background: var(--success); color: white; padding: 3px 8px; border-radius: 4px; font-size: 1.1rem; font-weight: bold; margin-bottom: 5px; display: inline-block; }
         .pedido-items { list-style: none; padding: 0; margin: 0 0 15px 0; font-size: 0.9rem; color: #d1d5db; }
         .pedido-items li { margin-bottom: 5px; }
-        .pedido-actions { display: flex; gap: 10px; justify-content: flex-end; }
+        .pedido-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
 
         /* Modal Base */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
         .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; color: var(--text-main); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
-        .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
+        .form-group input, .form-group select { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
         
-        /* Variantes UI Admin */
         .variant-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
         .variant-row input { padding: 6px; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 4px; width: 100%; }
         .variant-row input:disabled { background: #e5e7eb; color: #6b7280; }
@@ -100,46 +100,63 @@
     </nav>
 
     <div id="vista-comprador" class="container">
+        
+        <div id="info-local-comprador" style="background: #e0f2fe; padding: 10px 20px; border-radius: 8px; margin-bottom: 20px; font-size: 0.9rem; color: #1e3a8a; display: none;">
+            </div>
+
         <div class="header-tienda">
             <h2>🛍️ Mi Tienda</h2>
-            <div class="search-container">
-                <span>🔍</span>
-                <input type="text" class="input-busqueda" placeholder="Buscar producto..." onkeyup="window.buscarProductos(this.value)">
-            </div>
-            <button onclick="window.abrirCarrito()" class="btn-carrito-nav">
-                🛒 Mi Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span>
-            </button>
+            <div class="search-container"><span>🔍</span><input type="text" class="input-busqueda" placeholder="Buscar producto..." onkeyup="window.buscarProductos(this.value)"></div>
+            <button onclick="window.abrirCarrito()" class="btn-carrito-nav">🛒 Mi Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span></button>
         </div>
         <div id="catalogo-productos" class="grid-cards"><p>Cargando productos...</p></div>
     </div>
 
     <div id="modal-carrito" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3 style="margin-top: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">🛒 Resumen de Compra</h3>
-            <div id="lista-carrito"></div>
-            <div class="carrito-total">Total a pagar: $<span id="total-carrito">0</span></div>
             
-            <div class="checkout-options" id="checkout-form">
-                <label><strong>Forma de Pago:</strong></label>
-                <select id="metodo-pago"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia Bancaria</option></select>
+            <div id="carrito-vista-lista">
+                <h3 style="margin-top: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">🛒 Resumen de Compra</h3>
+                <div id="lista-carrito"></div>
+                <div class="carrito-total">Total a pagar: $<span id="total-carrito">0</span></div>
                 
-                <label><strong>Método de Entrega:</strong></label>
-                <select id="metodo-entrega" onchange="window.toggleDireccion()"><option value="Retiro">Retirar por el local</option><option value="Envio">Envío a domicilio</option></select>
+                <div class="checkout-options" id="checkout-form">
+                    <label><strong>Forma de Pago:</strong></label>
+                    <select id="metodo-pago"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia Bancaria</option></select>
+                    
+                    <label><strong>Método de Entrega:</strong></label>
+                    <select id="metodo-entrega" onchange="window.toggleDireccion()"><option value="Retiro">Retirar por el local</option><option value="Envio">Envío a domicilio</option></select>
 
-                <label><strong>Teléfono de Contacto:</strong></label>
-                <input type="tel" id="checkout-telefono" placeholder="Ej: 11 1234 5678" required>
+                    <label><strong>Teléfono de Contacto:</strong></label>
+                    <input type="tel" id="checkout-telefono" placeholder="Ej: 351 1234 567" required>
 
-                <div id="caja-direccion" style="display: none;">
-                    <label><strong>Dirección de Envío:</strong></label>
-                    <input type="text" id="checkout-direccion" placeholder="Calle, Número, Localidad">
+                    <div id="caja-direccion" style="display: none;">
+                        <label><strong>Dirección de Envío:</strong></label>
+                        <input type="text" id="checkout-direccion" placeholder="Calle, Número, Localidad">
+                        <small id="aviso-envio" style="color: var(--primary); font-weight: bold; display: block; margin-top: 5px;"></small>
+                    </div>
+                </div>
+
+                <div class="modal-actions">
+                    <button class="secondary" onclick="window.cerrarCarrito()">Seguir Comprando</button>
+                    <button onclick="window.vaciarCarrito()" class="danger" id="btn-vaciar">Vaciar</button>
+                    <button onclick="window.finalizarCompra()" id="btn-comprar" disabled>Confirmar Pedido</button>
                 </div>
             </div>
 
-            <div class="modal-actions">
-                <button class="secondary" onclick="window.cerrarCarrito()">Seguir Comprando</button>
-                <button onclick="window.vaciarCarrito()" class="danger" id="btn-vaciar">Vaciar</button>
-                <button onclick="window.finalizarCompra()" id="btn-comprar" disabled>Confirmar Pedido</button>
+            <div id="carrito-vista-exito" class="hidden" style="text-align: center; padding: 20px 0;">
+                <h2 style="color: var(--success); margin-top: 0;">¡Pedido Confirmado! 🎉</h2>
+                <p style="font-size: 1.1rem; color: #4b5563;">Tu número de orden es:</p>
+                <div id="exito-id" style="background: var(--bg-color); font-size: 2rem; font-weight: bold; color: var(--text-main); padding: 10px; border-radius: 8px; display: inline-block; margin-bottom: 20px; border: 2px dashed #cbd5e1;">#XYZ1</div>
+                <p>Por favor, envianos un mensaje para confirmar tu identidad y coordinar el pago/entrega.</p>
+                
+                <button onclick="window.enviarWhatsapp()" class="success" style="width: 100%; padding: 15px; font-size: 1.2rem; display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 15px;">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 16 16"><path d="M11.42 9.49c-.19-.09-1.1-.54-1.27-.61s-.29-.09-.42.15-.48.6-.59.73-.21.16-.4.07a5.13 5.13 0 0 1-1.51-.93 5.6 5.6 0 0 1-1.04-1.3c-.11-.18-.01-.28.08-.38.09-.09.19-.22.28-.33a1.27 1.27 0 0 0 .19-.32.36.36 0 0 0-.02-.34c-.05-.09-.42-1.02-.58-1.4-.15-.37-.31-.32-.42-.32h-.36c-.13 0-.34.05-.52.24s-.69.67-.69 1.64c0 .97.71 1.91.81 2.05s1.4 2.14 3.39 2.97c.47.2.84.32 1.13.41.47.15.9.13 1.24.08.38-.06 1.1-.45 1.25-.88.16-.43.16-.8.11-.88-.04-.08-.15-.13-.34-.22zM8 14.5a6.5 6.5 0 1 1 0-13 6.5 6.5 0 0 1 0 13zm0-14.5a8 8 0 1 0 0 16 8 8 0 0 0 0-16z"/></svg>
+                    Avisar por WhatsApp
+                </button>
+                <button class="secondary" style="width: 100%; margin-top: 10px; padding: 10px;" onclick="window.cerrarCarritoExito()">Cerrar</button>
             </div>
+
         </div>
     </div>
 
@@ -147,9 +164,10 @@
         <h2 style="margin-top: 0; margin-bottom: 25px;">👑 Panel de Administración</h2>
         
         <div style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
-            <button class="outline" onclick="window.togglePanel('panel-inventario')">📦 Inventario y Productos</button>
-            <button class="outline" onclick="window.togglePanel('panel-finanzas')">💰 Finanzas y Caja</button>
+            <button class="outline" onclick="window.togglePanel('panel-inventario')">📦 Productos</button>
             <button class="outline" onclick="window.togglePanel('panel-pedidos')">🚚 Pedidos Web</button>
+            <button class="outline" onclick="window.togglePanel('panel-finanzas')">💰 Finanzas</button>
+            <button class="outline" onclick="window.togglePanel('panel-config')" style="margin-left: auto;">⚙️ Configuración</button>
         </div>
 
         <div id="panel-inventario" class="panel-seccion hidden">
@@ -174,18 +192,14 @@
             <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-pedidos-pendientes')"><span>⏳ Pedidos Pendientes</span> <span>▼</span></div>
                 <div id="body-pedidos-pendientes" class="modulo-body">
-                    <div id="lista-pedidos-pendientes">
-                        <p style="color:#9ca3af; text-align:center;">No hay pedidos pendientes.</p>
-                    </div>
+                    <div id="lista-pedidos-pendientes"><p style="color:#9ca3af; text-align:center;">No hay pedidos pendientes.</p></div>
                 </div>
             </div>
 
             <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-pedidos-historial')"><span>✅ Historial de Entregas</span> <span>▼</span></div>
                 <div id="body-pedidos-historial" class="modulo-body hidden">
-                    <div id="lista-pedidos-historial">
-                        <p style="color:#9ca3af; text-align:center;">No hay entregas registradas.</p>
-                    </div>
+                    <div id="lista-pedidos-historial"><p style="color:#9ca3af; text-align:center;">No hay entregas registradas.</p></div>
                 </div>
             </div>
         </div>
@@ -216,12 +230,12 @@
             </div>
 
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>📈 Registrar Ingresos y Ventas</span> <span>▼</span></div>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>📈 Registrar Ingresos y Ventas Rapidas</span> <span>▼</span></div>
                 <div id="body-ingresos" class="modulo-body hidden">
                     <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #1f2937;">
                         <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px; color:#60a5fa;">▶ Venta Rápida (Descuenta Stock):</label>
                         <div class="dark-input-group">
-                            <div style="flex: 2;"><select id="venta-rapida-prod" class="dark-input"><option value="">Selecciona variante para vender...</option></select></div>
+                            <div style="flex: 2;"><select id="venta-rapida-prod" class="dark-input"><option value="">Selecciona variante...</option></select></div>
                             <div><input type="number" id="venta-rapida-efectivo" class="dark-input" placeholder="Efectivo $"></div>
                             <div><input type="number" id="venta-rapida-transf" class="dark-input" placeholder="Transf. $"></div>
                         </div>
@@ -230,7 +244,7 @@
                     <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #1f2937;">
                         <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px; color:#60a5fa;">▶ Ingreso Manual Libre:</label>
                         <div class="dark-input-group">
-                            <div style="flex: 2;"><input type="text" id="ingreso-manual-detalle" class="dark-input" placeholder="Motivo del ingreso..."></div>
+                            <div style="flex: 2;"><input type="text" id="ingreso-manual-detalle" class="dark-input" placeholder="Motivo..."></div>
                             <div><input type="number" id="ingreso-manual-efectivo" class="dark-input" placeholder="Efectivo $"></div>
                             <div><input type="number" id="ingreso-manual-transf" class="dark-input" placeholder="Transf. $"></div>
                         </div>
@@ -247,11 +261,43 @@
                         <div><label>Importe Gastado $</label><input type="number" id="gasto-importe" class="dark-input"></div>
                     </div>
                     <button class="btn-dark-action" onclick="window.registrarGasto()" style="background: var(--danger);">Registrar Salida de Dinero</button>
+                    <table class="dark-table" style="margin-top: 20px;"><thead><tr><th>Detalle del Gasto</th><th>Importe</th><th>Borrar</th></tr></thead><tbody id="tabla-gastos"></tbody></table>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-config" class="panel-oscuro-container hidden">
+            <h3 style="margin-top: 0; margin-bottom: 20px;">⚙️ Configuración del Local</h3>
+            <div class="modulo-oscuro">
+                <div class="modulo-header"><span>Datos Generales (Visibles para el cliente)</span></div>
+                <div class="modulo-body">
+                    <div class="dark-input-group">
+                        <div>
+                            <label>Teléfono WhatsApp (Con código de país, sin el +)</label>
+                            <input type="text" id="conf-tel" class="dark-input" placeholder="Ej: 5493512345678">
+                        </div>
+                        <div>
+                            <label>Días y Horarios de Atención</label>
+                            <input type="text" id="conf-horarios" class="dark-input" placeholder="Ej: Lunes a Viernes 9:00 a 18:00hs">
+                        </div>
+                    </div>
                     
-                    <table class="dark-table" style="margin-top: 20px;">
-                        <thead><tr><th>Detalle del Gasto</th><th>Importe</th><th>Borrar</th></tr></thead>
-                        <tbody id="tabla-gastos"></tbody>
-                    </table>
+                    <h4 style="margin: 20px 0 10px 0; color: #60a5fa; font-size: 0.9rem;">Configuración de Envíos</h4>
+                    <div class="dark-input-group">
+                        <div>
+                            <label>¿Realizan envíos a domicilio?</label>
+                            <select id="conf-envio-disp" class="dark-input">
+                                <option value="si">Sí, hacemos envíos</option>
+                                <option value="no">No, solo retiro en local</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label>Costo Fijo de Envío $</label>
+                            <input type="number" id="conf-envio-precio" class="dark-input" placeholder="Ej: 1500">
+                        </div>
+                    </div>
+
+                    <button class="btn-dark-action" style="background: var(--success); margin-top: 15px;" onclick="window.guardarConfiguracion()">Guardar Configuración</button>
                 </div>
             </div>
         </div>
@@ -263,15 +309,12 @@
             <input type="hidden" id="prod-id">
             <div class="form-group"><label>Nombre del Producto Base (Ej: Coca Cola)</label><input type="text" id="prod-nombre"></div>
             <div class="form-group"><label>URL Imagen (Solo links directos .jpg .png)</label><input type="text" id="prod-imagen" placeholder="https://ejemplo.com/foto.jpg"></div>
-            
             <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                 <label style="font-weight: bold; margin:0;">Opciones y Tamaños (Variantes)</label>
                 <button type="button" class="success" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.agregarFilaVariante()">+ Añadir Opción</button>
             </div>
-            
             <div id="contenedor-variantes"></div>
-
             <div class="modal-actions" style="margin-top: 30px;">
                 <button class="secondary" onclick="window.cerrarModal()">Cancelar</button>
                 <button onclick="window.guardarProducto()">Guardar Producto Completo</button>
@@ -284,19 +327,13 @@
             <h3 style="margin-top: 0; color: var(--success);">➕ Reponer Stock</h3>
             <p id="stock-nombre-prod" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 15px;"></p>
             <input type="hidden" id="stock-id-prod">
-            
-            <div class="form-group">
-                <label>¿A qué variante o tamaño le repone stock?</label>
-                <select id="stock-select-var" class="select-variante" style="width: 100%;"></select>
-            </div>
-
+            <div class="form-group"><label>¿A qué variante o tamaño le repone stock?</label><select id="stock-select-var" class="select-variante"></select></div>
             <div class="form-group"><label>Cantidad de unidades a sumar</label><input type="number" id="stock-cantidad" min="1" value="1"></div>
             <div class="form-group">
                 <label>Costo pagado por CADA UNIDAD en esta compra</label>
                 <input type="number" id="stock-nuevo-costo" placeholder="Ej: 500">
-                <small style="color:#6b7280; display:block; margin-top:5px;">Esto generará un Gasto automático de (Cantidad x Costo) en Finanzas.</small>
+                <small style="color:#6b7280; display:block; margin-top:5px;">Generará un Gasto automático de (Cantidad x Costo) en Finanzas.</small>
             </div>
-            
             <div class="modal-actions">
                 <button class="secondary" onclick="window.cerrarModalStock()">Cancelar</button>
                 <button class="success" onclick="window.guardarNuevoStock()">Confirmar Reposición</button>
@@ -306,7 +343,8 @@
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, increment, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        // Añadimos getDoc y setDoc para la configuración global
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, increment, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
@@ -323,65 +361,105 @@
         // --- ESTADOS Y FORMATEO ---
         let productos = []; let carrito = []; let terminoBusqueda = "";
         let ingresosGlobales = []; let gastosGlobales = []; let pedidosGlobales = [];
+        let configTienda = { telefono: '', horarios: '', envioDisponible: false, envioPrecio: 0 };
+        let ultimoIdPedidoCorto = "";
 
-        // Función vital para poner los puntos cada tres cifras
-        window.formatearNum = (num) => {
-            return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
-        };
+        window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
+        const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
 
+        // --- NAVEGACIÓN BÁSICA ---
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
-            
-            if(rol === 'dueno') {
-                document.getElementById('panel-inventario').classList.remove('hidden');
-                document.getElementById('panel-finanzas').classList.add('hidden');
-                document.getElementById('panel-pedidos').classList.add('hidden');
-            }
+            if(rol === 'dueno') window.togglePanel('panel-inventario');
         };
         
         window.togglePanel = (id) => {
-            document.getElementById('panel-inventario').classList.add('hidden');
-            document.getElementById('panel-finanzas').classList.add('hidden');
-            document.getElementById('panel-pedidos').classList.add('hidden');
+            ['panel-inventario', 'panel-finanzas', 'panel-pedidos', 'panel-config'].forEach(p => document.getElementById(p).classList.add('hidden'));
             document.getElementById(id).classList.remove('hidden');
         };
         
         window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
         window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); renderizarCatalogoYStock(); };
-        window.toggleDireccion = () => {
-            const metodo = document.getElementById('metodo-entrega').value;
-            document.getElementById('caja-direccion').style.display = metodo === 'Envio' ? 'block' : 'none';
+
+        // --- CONFIGURACIÓN GLOBAL DE LA TIENDA ---
+        onSnapshot(doc(db, "config", "tienda"), (docSnap) => {
+            if(docSnap.exists()) {
+                configTienda = docSnap.data();
+                
+                // Actualizar Admin UI
+                document.getElementById('conf-tel').value = configTienda.telefono || '';
+                document.getElementById('conf-horarios').value = configTienda.horarios || '';
+                document.getElementById('conf-envio-disp').value = configTienda.envioDisponible ? 'si' : 'no';
+                document.getElementById('conf-envio-precio').value = configTienda.envioPrecio || 0;
+
+                // Actualizar Comprador UI (Header)
+                const infoComprador = document.getElementById('info-local-comprador');
+                let infoHtml = '';
+                if(configTienda.horarios) infoHtml += `🕘 <strong>Horarios:</strong> ${configTienda.horarios}`;
+                if(configTienda.envioDisponible) infoHtml += `<span style="margin-left: 15px;">🚚 <strong>Envíos:</strong> Disponibles ($${window.formatearNum(configTienda.envioPrecio)})</span>`;
+                else infoHtml += `<span style="margin-left: 15px; color:#991b1b;">🚚 <strong>Envíos:</strong> No disponibles (Solo retiro)</span>`;
+                
+                if(infoHtml) { infoComprador.innerHTML = infoHtml; infoComprador.style.display = 'block'; }
+                else { infoComprador.style.display = 'none'; }
+                
+                window.renderizarCarrito(); // Por si cambió el precio del envío mientras miraba
+            }
+        });
+
+        window.guardarConfiguracion = async () => {
+            const telefono = document.getElementById('conf-tel').value.replace(/[^0-9]/g, ''); // Limpiar a solo números
+            const horarios = document.getElementById('conf-horarios').value;
+            const envioDisponible = document.getElementById('conf-envio-disp').value === 'si';
+            const envioPrecio = parseFloat(document.getElementById('conf-envio-precio').value) || 0;
+            
+            try {
+                await setDoc(doc(db, "config", "tienda"), { telefono, horarios, envioDisponible, envioPrecio });
+                alert("Configuración actualizada correctamente.");
+            } catch(e) { alert("Error al guardar la configuración."); }
         };
 
-        // --- LÓGICA DE VARIANTES (MODAL ADMIN) ---
+        window.toggleDireccion = () => {
+            const metodo = document.getElementById('metodo-entrega').value;
+            const cajaDir = document.getElementById('caja-direccion');
+            const avisoEnvio = document.getElementById('aviso-envio');
+
+            if (metodo === 'Envio') {
+                if(!configTienda.envioDisponible) {
+                    alert("Lo sentimos, actualmente no estamos realizando envíos a domicilio.");
+                    document.getElementById('metodo-entrega').value = 'Retiro';
+                    cajaDir.style.display = 'none';
+                    return;
+                }
+                cajaDir.style.display = 'block';
+                avisoEnvio.textContent = `+ Se sumarán $${window.formatearNum(configTienda.envioPrecio)} de costo de envío al total.`;
+            } else {
+                cajaDir.style.display = 'none';
+            }
+            window.renderizarCarrito(); // Recalcula el total sumando/restando envío
+        };
+
+
+        // --- LÓGICA DE VARIANTES Y PRODUCTOS (MODAL ADMIN) ---
         window.agregarFilaVariante = (idVar = '', detalle = '', costo = '', precio = '', stock = '', bloqueado = false) => {
             const container = document.getElementById('contenedor-variantes');
             const vId = idVar || 'var_' + Date.now() + Math.floor(Math.random() * 1000);
-            const div = document.createElement('div');
-            div.className = 'variant-row'; div.id = `row-${vId}`;
-            div.innerHTML = `
-                <input type="hidden" class="v-id" value="${vId}">
+            const div = document.createElement('div'); div.className = 'variant-row'; div.id = `row-${vId}`;
+            div.innerHTML = `<input type="hidden" class="v-id" value="${vId}">
                 <div style="flex:2"><span class="mini-label">Tamaño/Tipo</span><input type="text" class="v-detalle" placeholder="Ej: 1L Zero" value="${detalle}"></div>
                 <div><span class="mini-label">Costo Inicial</span><input type="number" class="v-costo" placeholder="0" value="${costo}" ${bloqueado ? 'disabled' : ''}></div>
                 <div><span class="mini-label">Precio Venta</span><input type="number" class="v-precio" placeholder="0" value="${precio}"></div>
                 <div><span class="mini-label">Stock Inicial</span><input type="number" class="v-stock" placeholder="0" value="${stock}" ${bloqueado ? 'disabled' : ''}></div>
-                <button type="button" class="btn-trash" style="margin-top: 15px;" onclick="this.parentElement.remove()">X</button>
-            `;
+                <button type="button" class="btn-trash" style="margin-top: 15px;" onclick="this.parentElement.remove()">X</button>`;
             container.appendChild(div);
         };
 
         window.abrirModal = (idProducto = null) => {
-            const modal = document.getElementById('modal-producto');
-            const container = document.getElementById('contenedor-variantes');
-            container.innerHTML = '';
-            
+            const modal = document.getElementById('modal-producto'); const container = document.getElementById('contenedor-variantes'); container.innerHTML = '';
             if (idProducto) {
                 const prod = productos.find(p => p.id === idProducto);
                 document.getElementById('modal-titulo').textContent = "Editar Producto";
-                document.getElementById('prod-id').value = prod.id;
-                document.getElementById('prod-nombre').value = prod.nombre;
-                document.getElementById('prod-imagen').value = prod.imagen || "";
+                document.getElementById('prod-id').value = prod.id; document.getElementById('prod-nombre').value = prod.nombre; document.getElementById('prod-imagen').value = prod.imagen || "";
                 Object.entries(prod.variantes || {}).forEach(([vId, v]) => window.agregarFilaVariante(vId, v.detalle, v.costo, v.precio, v.stock, true));
             } else {
                 document.getElementById('modal-titulo').textContent = "Agregar Nuevo Producto";
@@ -393,163 +471,90 @@
         window.cerrarModal = () => document.getElementById('modal-producto').classList.add('hidden');
 
         window.guardarProducto = async () => {
-            const id = document.getElementById('prod-id').value;
-            const nombre = document.getElementById('prod-nombre').value;
-            const imagen = document.getElementById('prod-imagen').value;
+            const id = document.getElementById('prod-id').value; const nombre = document.getElementById('prod-nombre').value; const imagen = document.getElementById('prod-imagen').value;
             if (!nombre) return alert("Nombre obligatorio.");
-
-            const variantesNuevas = {};
-            const filas = document.querySelectorAll('.variant-row');
-            if (filas.length === 0) return alert("Debes agregar al menos una variante.");
+            const variantesNuevas = {}; const filas = document.querySelectorAll('.variant-row');
+            if (filas.length === 0) return alert("Agrega al menos una variante.");
 
             filas.forEach(fila => {
-                const vId = fila.querySelector('.v-id').value;
-                const detalle = fila.querySelector('.v-detalle').value || 'Variante';
-                const precio = parseFloat(fila.querySelector('.v-precio').value) || 0;
-                const inputCosto = fila.querySelector('.v-costo');
-                const inputStock = fila.querySelector('.v-stock');
-                
+                const vId = fila.querySelector('.v-id').value; const detalle = fila.querySelector('.v-detalle').value || 'Variante'; const precio = parseFloat(fila.querySelector('.v-precio').value) || 0;
+                const inputCosto = fila.querySelector('.v-costo'); const inputStock = fila.querySelector('.v-stock');
                 variantesNuevas[vId] = { detalle, precio };
-                if (!inputCosto.disabled) {
-                    variantesNuevas[vId].costo = parseFloat(inputCosto.value) || 0;
-                    variantesNuevas[vId].stock = parseInt(inputStock.value) || 0;
-                }
+                if (!inputCosto.disabled) { variantesNuevas[vId].costo = parseFloat(inputCosto.value) || 0; variantesNuevas[vId].stock = parseInt(inputStock.value) || 0; }
             });
 
             try {
                 if (id) {
                     const prodActual = productos.find(p => p.id === id);
-                    Object.keys(variantesNuevas).forEach(vId => {
-                        if (prodActual.variantes && prodActual.variantes[vId]) {
-                            variantesNuevas[vId].stock = prodActual.variantes[vId].stock;
-                            variantesNuevas[vId].costo = prodActual.variantes[vId].costo;
-                        }
-                    });
+                    Object.keys(variantesNuevas).forEach(vId => { if (prodActual.variantes && prodActual.variantes[vId]) { variantesNuevas[vId].stock = prodActual.variantes[vId].stock; variantesNuevas[vId].costo = prodActual.variantes[vId].costo; } });
                     await updateDoc(doc(db, "productos", id), { nombre, imagen, variantes: variantesNuevas });
-                } else {
-                    await addDoc(collection(db, "productos"), { nombre, imagen, variantes: variantesNuevas });
-                }
+                } else { await addDoc(collection(db, "productos"), { nombre, imagen, variantes: variantesNuevas }); }
                 window.cerrarModal();
             } catch (e) { alert("Error al guardar."); }
         };
 
-        // --- LÓGICA: REPONER STOCK Y GENERAR GASTO ---
         window.abrirModalStock = (id) => {
             const prod = productos.find(p => p.id === id);
-            document.getElementById('stock-id-prod').value = prod.id;
-            document.getElementById('stock-nombre-prod').textContent = `📦 ${prod.nombre}`;
-            document.getElementById('stock-cantidad').value = 1;
-            document.getElementById('stock-nuevo-costo').value = ""; 
-            
-            const selectVar = document.getElementById('stock-select-var');
-            selectVar.innerHTML = '';
-            Object.entries(prod.variantes || {}).forEach(([vId, v]) => {
-                selectVar.innerHTML += `<option value="${vId}">${v.detalle} (Stock actual: ${window.formatearNum(v.stock)})</option>`;
-            });
+            document.getElementById('stock-id-prod').value = prod.id; document.getElementById('stock-nombre-prod').textContent = `📦 ${prod.nombre}`;
+            document.getElementById('stock-cantidad').value = 1; document.getElementById('stock-nuevo-costo').value = ""; 
+            const selectVar = document.getElementById('stock-select-var'); selectVar.innerHTML = '';
+            Object.entries(prod.variantes || {}).forEach(([vId, v]) => selectVar.innerHTML += `<option value="${vId}">${v.detalle} (Stock: ${window.formatearNum(v.stock)})</option>`);
             document.getElementById('modal-stock').classList.remove('hidden');
         };
-        
         window.cerrarModalStock = () => document.getElementById('modal-stock').classList.add('hidden');
 
         window.guardarNuevoStock = async () => {
-            const idProd = document.getElementById('stock-id-prod').value;
-            const idVar = document.getElementById('stock-select-var').value;
-            const cant = parseInt(document.getElementById('stock-cantidad').value) || 0;
-            const costoUnitario = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0;
-            
-            if (cant <= 0 || !idVar) return alert("Cantidad inválida.");
-            if (costoUnitario < 0) return alert("Costo inválido.");
+            const idProd = document.getElementById('stock-id-prod').value; const idVar = document.getElementById('stock-select-var').value;
+            const cant = parseInt(document.getElementById('stock-cantidad').value) || 0; const costoUnitario = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0;
+            if (cant <= 0 || !idVar) return alert("Cantidad inválida."); if (costoUnitario < 0) return alert("Costo inválido.");
 
-            const prod = productos.find(p => p.id === idProd);
-            const nombreVariante = prod.variantes[idVar].detalle;
-            const costoTotal = cant * costoUnitario;
-
+            const prod = productos.find(p => p.id === idProd); const nombreVariante = prod.variantes[idVar].detalle; const costoTotal = cant * costoUnitario;
             try {
-                // 1. Actualizamos el stock
-                const updates = {};
-                updates[`variantes.${idVar}.stock`] = increment(cant);
+                const updates = {}; updates[`variantes.${idVar}.stock`] = increment(cant);
                 await updateDoc(doc(db, "productos", idProd), updates);
-                
-                // 2. Registramos el Gasto mostrando explícitamente cantidad y costo unitario formatados
                 if(costoTotal > 0) {
-                    await addDoc(collection(db, "gastos"), {
-                        fecha: new Date(),
-                        titulo: "Reposición de Stock",
-                        descripcion: `${prod.nombre} (${nombreVariante}) - Repuesto: ${window.formatearNum(cant)} un. a $${window.formatearNum(costoUnitario)} c/u`,
-                        importe: costoTotal
-                    });
+                    await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo: "Reposición de Stock", descripcion: `${prod.nombre} (${nombreVariante}) - Repuesto: ${window.formatearNum(cant)} un. a $${window.formatearNum(costoUnitario)} c/u`, importe: costoTotal });
                 }
                 window.cerrarModalStock();
             } catch (e) { alert("Error al reponer stock."); }
         };
 
-        // ==========================================
-        // SISTEMA FINANCIERO AUTOMÁTICO
-        // ==========================================
-
+        // --- SISTEMA FINANCIERO ---
         window.registrarGasto = async () => {
-            const titulo = document.getElementById('gasto-titulo').value;
-            const importe = parseFloat(document.getElementById('gasto-importe').value) || 0;
-            const desc = document.getElementById('gasto-desc').value;
-            if (!titulo || importe <= 0) return alert("Título e importe obligatorios.");
-            try {
-                await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo, importe, descripcion: desc });
-                document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; document.getElementById('gasto-desc').value = "";
-            } catch (e) { alert("Error al registrar gasto."); }
+            const titulo = document.getElementById('gasto-titulo').value; const importe = parseFloat(document.getElementById('gasto-importe').value) || 0;
+            if (!titulo || importe <= 0) return alert("Obligatorio.");
+            try { await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo, importe }); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; } catch (e) {}
         };
-
-        window.borrarGasto = async (id) => { if(confirm("¿Eliminar este gasto permanentemente?")) await deleteDoc(doc(db, "gastos", id)); };
+        window.borrarGasto = async (id) => { if(confirm("¿Eliminar gasto?")) await deleteDoc(doc(db, "gastos", id)); };
 
         window.registrarVentaRapida = async () => {
-            const selectVar = document.getElementById('venta-rapida-prod');
-            const selectedOption = selectVar.options[selectVar.selectedIndex];
-            if(!selectedOption.value) return alert("Selecciona un producto.");
-            
-            const idProd = selectedOption.getAttribute('data-idprod');
-            const idVar = selectedOption.value;
-            const nombreCompleto = selectedOption.text.split('(')[0].trim();
-            
-            const efvo = parseFloat(document.getElementById('venta-rapida-efectivo').value) || 0;
-            const transf = parseFloat(document.getElementById('venta-rapida-transf').value) || 0;
-            if (efvo === 0 && transf === 0) return alert("Ingresa un monto de pago.");
-
+            const selectVar = document.getElementById('venta-rapida-prod'); const opt = selectVar.options[selectVar.selectedIndex];
+            if(!opt.value) return alert("Selecciona producto.");
+            const idProd = opt.getAttribute('data-idprod'); const idVar = opt.value; const nombreCompleto = opt.text.split('(')[0].trim();
+            const efvo = parseFloat(document.getElementById('venta-rapida-efectivo').value) || 0; const transf = parseFloat(document.getElementById('venta-rapida-transf').value) || 0;
+            if (efvo === 0 && transf === 0) return alert("Monto vacío.");
             try {
-                const updates = {};
-                updates[`variantes.${idVar}.stock`] = increment(-1);
-                await updateDoc(doc(db, "productos", idProd), updates);
-                
-                await addDoc(collection(db, "ingresos"), {
-                    fecha: new Date(), tipo: 'venta_rapida', detalle: `Vta Local: ${nombreCompleto}`, efectivo: efvo, transferencia: transf
-                });
+                const updates = {}; updates[`variantes.${idVar}.stock`] = increment(-1); await updateDoc(doc(db, "productos", idProd), updates);
+                await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'venta_rapida', detalle: `Vta Local: ${nombreCompleto}`, efectivo: efvo, transferencia: transf });
                 document.getElementById('venta-rapida-efectivo').value = ""; document.getElementById('venta-rapida-transf').value = "";
-            } catch (e) { alert("Error en venta rápida."); }
+            } catch (e) {}
         };
-
         window.registrarIngresoManual = async () => {
-            const detalle = document.getElementById('ingreso-manual-detalle').value;
-            const efvo = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0;
-            const transf = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0;
-            if (!detalle || (efvo === 0 && transf === 0)) return alert("Detalle y monto obligatorios.");
+            const detalle = document.getElementById('ingreso-manual-detalle').value; const efvo = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const transf = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0;
+            if (!detalle || (efvo === 0 && transf === 0)) return alert("Obligatorio.");
             try { await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'manual', detalle, efectivo: efvo, transferencia: transf }); } catch (e) {}
         };
-        window.borrarIngreso = async (id) => { if(confirm("¿Eliminar este ingreso? (No devuelve stock)")) await deleteDoc(doc(db, "ingresos", id)); };
+        window.borrarIngreso = async (id) => { if(confirm("¿Eliminar ingreso?")) await deleteDoc(doc(db, "ingresos", id)); };
 
         window.calcularBalanceEnVivo = () => {
-            const periodo = document.getElementById('filtro-periodo').value;
-            const ahora = new Date();
-            let diasLimite = periodo === 'hoy' ? 1 : periodo === 'semana' ? 7 : periodo === 'mes' ? 30 : 99999;
-            let totalIngresos = 0; let totalGastos = 0;
-
-            ingresosGlobales.forEach(i => { if((ahora - i.fecha.toDate())/(1000*60*60*24) <= diasLimite) totalIngresos += (i.efectivo + i.transferencia); });
-            gastosGlobales.forEach(g => { if((ahora - g.fecha.toDate())/(1000*60*60*24) <= diasLimite) totalGastos += g.importe; });
-            
-            const neta = totalIngresos - totalGastos;
-            
-            // Aplicamos formato de separador de miles a los balances
-            document.getElementById('bal-ingresos').textContent = `$${window.formatearNum(totalIngresos)}`;
-            document.getElementById('bal-gastos').textContent = `$${window.formatearNum(totalGastos)}`;
-            document.getElementById('bal-neta').textContent = `${neta >= 0 ? '+' : '-'}$${window.formatearNum(Math.abs(neta))}`;
-            document.getElementById('bal-neta').style.color = neta >= 0 ? 'var(--success)' : '#fca5a5';
+            const periodo = document.getElementById('filtro-periodo').value; const ahora = new Date();
+            let dias = periodo === 'hoy' ? 1 : periodo === 'semana' ? 7 : periodo === 'mes' ? 30 : 99999;
+            let tIng = 0; let tGas = 0;
+            ingresosGlobales.forEach(i => { if((ahora - i.fecha.toDate())/(86400000) <= dias) tIng += (i.efectivo + i.transferencia); });
+            gastosGlobales.forEach(g => { if((ahora - g.fecha.toDate())/(86400000) <= dias) tGas += g.importe; });
+            const neta = tIng - tGas;
+            document.getElementById('bal-ingresos').textContent = `$${window.formatearNum(tIng)}`; document.getElementById('bal-gastos').textContent = `$${window.formatearNum(tGas)}`;
+            document.getElementById('bal-neta').textContent = `${neta >= 0 ? '+' : '-'}$${window.formatearNum(Math.abs(neta))}`; document.getElementById('bal-neta').style.color = neta >= 0 ? 'var(--success)' : '#fca5a5';
         };
 
         window.renderizarTransacciones = () => {
@@ -557,305 +562,214 @@
             ingresosGlobales.forEach(i => trans.push({ id: i.id, fecha: i.fecha.toDate(), tipo: 'ingreso', detalle: i.detalle, monto: i.efectivo + i.transferencia }));
             gastosGlobales.forEach(g => trans.push({ id: g.id, fecha: g.fecha.toDate(), tipo: 'gasto', detalle: g.titulo + (g.descripcion?` - ${g.descripcion}`:''), monto: g.importe }));
             trans.sort((a, b) => b.fecha - a.fecha);
-
             const tabla = document.getElementById('tabla-transacciones'); tabla.innerHTML = '';
             trans.forEach(t => {
                 const isIng = t.tipo === 'ingreso';
-                const badge = isIng ? '<span style="background:#064e3b; color:#34d399; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Ingreso</span>' 
-                                    : '<span style="background:#7f1d1d; color:#fca5a5; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Egreso</span>';
-                
-                // Aplicamos formato de miles a los montos de la tabla
-                tabla.innerHTML += `<tr>
-                    <td style="color:#9ca3af;">${t.fecha.toLocaleString('es-ES', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td>
-                    <td>${badge}</td><td>${t.detalle}</td>
-                    <td style="color: ${isIng?'var(--success)':'#fca5a5'}; font-weight: bold;">${isIng?'+':'-'}$${window.formatearNum(t.monto)}</td>
-                </tr>`;
+                const badge = isIng ? '<span style="background:#064e3b; color:#34d399; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Ingreso</span>' : '<span style="background:#7f1d1d; color:#fca5a5; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Egreso</span>';
+                tabla.innerHTML += `<tr><td style="color:#9ca3af;">${t.fecha.toLocaleString('es-ES', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td><td>${badge}</td><td>${t.detalle}</td><td style="color: ${isIng?'var(--success)':'#fca5a5'}; font-weight: bold;">${isIng?'+':'-'}$${window.formatearNum(t.monto)}</td></tr>`;
             });
         };
 
-        // --- SISTEMA DE PEDIDOS WEB (ADMIN) ---
+        // --- SISTEMA DE PEDIDOS WEB ---
         window.renderizarPedidos = () => {
-            const listPendientes = document.getElementById('lista-pedidos-pendientes');
-            const listHistorial = document.getElementById('lista-pedidos-historial');
-            listPendientes.innerHTML = ''; listHistorial.innerHTML = '';
-
+            const listP = document.getElementById('lista-pedidos-pendientes'); const listH = document.getElementById('lista-pedidos-historial');
+            listP.innerHTML = ''; listH.innerHTML = '';
             const pendientes = pedidosGlobales.filter(p => !p.estadoEntrega).sort((a,b) => b.fecha.toDate() - a.fecha.toDate());
             const entregados = pedidosGlobales.filter(p => p.estadoEntrega).sort((a,b) => b.fecha.toDate() - a.fecha.toDate());
 
-            if(pendientes.length === 0) listPendientes.innerHTML = '<p style="color:#9ca3af; text-align:center;">No hay pedidos pendientes.</p>';
-            if(entregados.length === 0) listHistorial.innerHTML = '<p style="color:#9ca3af; text-align:center;">No hay entregas registradas.</p>';
+            if(pendientes.length === 0) listP.innerHTML = '<p style="color:#9ca3af; text-align:center;">No hay pedidos pendientes.</p>';
+            if(entregados.length === 0) listH.innerHTML = '<p style="color:#9ca3af; text-align:center;">No hay entregas registradas.</p>';
 
             const crearCard = (p, esPendiente) => {
                 let itemsHTML = '';
                 p.items.forEach(i => itemsHTML += `<li>• ${i.nombre} (${i.detalle}) x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
+                const envioHTML = p.costoEnvio ? `<li style="color:#60a5fa;">• Costo de Envío - $${window.formatearNum(p.costoEnvio)}</li>` : '';
                 
-                const btnPago = p.estadoPago 
-                    ? `<button disabled style="background:#064e3b; color:#34d399;">✅ Pagado</button>`
-                    : `<button class="success" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}')">💰 Cobrar $${window.formatearNum(p.total)}</button>`;
-                
-                const btnEntrega = esPendiente 
-                    ? `<button class="primary" onclick="window.marcarEntregado('${p.id}')">🚚 Marcar Entregado</button>`
-                    : `<span style="color:#9ca3af; font-size:0.9rem;">Entregado ✅</span>`;
+                const btnPago = p.estadoPago ? `<button disabled style="background:#064e3b; color:#34d399;">✅ Pagado</button>` : `<button class="success" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">💰 Cobrar $${window.formatearNum(p.total)}</button>`;
+                const btnEntrega = esPendiente ? `<button class="primary" onclick="window.marcarEntregado('${p.id}')">🚚 Marcar Entregado</button>` : `<span style="color:#9ca3af; font-size:0.9rem;">Entregado ✅</span>`;
 
-                return `
-                    <div class="pedido-card">
+                return `<div class="pedido-card">
                         <div class="pedido-header">
-                            <strong style="color: #60a5fa;">Pedido del ${p.fecha.toDate().toLocaleString('es-ES')}</strong>
-                            <span style="font-size:0.9rem; color:#9ca3af;">Monto: $${window.formatearNum(p.total)}</span>
+                            <div>
+                                <span class="pedido-id">#${p.idCorto}</span><br>
+                                <span style="font-size:0.8rem; color:#9ca3af;">${p.fecha.toDate().toLocaleString('es-ES')}</span>
+                            </div>
+                            <span style="font-size:1.2rem; font-weight:bold; color:white;">Total: $${window.formatearNum(p.total)}</span>
                         </div>
-                        <p style="margin:5px 0;">📞 Teléfono: <strong>${p.telefono}</strong></p>
+                        <p style="margin:5px 0;">📞 Teléfono: <a href="https://wa.me/${p.telefono.replace(/[^0-9]/g, '')}" target="_blank" style="color:#60a5fa;">${p.telefono}</a></p>
                         <p style="margin:5px 0 15px 0;">📍 Entrega: <strong>${p.metodoEntrega}</strong> ${p.direccion !== 'Retira en local' ? `(${p.direccion})` : ''}</p>
-                        <ul class="pedido-items">${itemsHTML}</ul>
+                        <ul class="pedido-items">${itemsHTML}${envioHTML}</ul>
                         <div class="pedido-actions">${btnPago} ${btnEntrega}</div>
-                    </div>
-                `;
+                    </div>`;
             };
-
-            pendientes.forEach(p => listPendientes.innerHTML += crearCard(p, true));
-            entregados.forEach(p => listHistorial.innerHTML += crearCard(p, false));
+            pendientes.forEach(p => listP.innerHTML += crearCard(p, true)); entregados.forEach(p => listH.innerHTML += crearCard(p, false));
         };
 
-        window.marcarPagado = async (idPedido, total, metodo) => {
+        window.marcarPagado = async (idPedido, total, metodo, idCorto) => {
             if(!confirm(`¿Confirmar cobro por $${window.formatearNum(total)}? Esto sumará el ingreso a Finanzas.`)) return;
             try {
                 await updateDoc(doc(db, "pedidos", idPedido), { estadoPago: true });
-                await addDoc(collection(db, "ingresos"), {
-                    fecha: new Date(), tipo: 'pago_pedido', detalle: `Cobro Pedido Web (${metodo})`, 
-                    efectivo: metodo === 'Efectivo' ? total : 0,
-                    transferencia: metodo === 'Transferencia' ? total : 0
-                });
+                await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'pago_pedido', detalle: `Cobro Pedido #${idCorto}`, efectivo: metodo === 'Efectivo' ? total : 0, transferencia: metodo === 'Transferencia' ? total : 0 });
             } catch(e) {}
         };
-
         window.marcarEntregado = async (idPedido) => {
             if(!confirm("¿Confirmar entrega al cliente? Se archivará en el historial.")) return;
             try { await updateDoc(doc(db, "pedidos", idPedido), { estadoEntrega: true }); } catch(e) {}
         };
 
-
         // --- ESCUCHAS FIREBASE MULTIPLES ---
-        onSnapshot(collection(db, "productos"), (snapshot) => {
-            productos = snapshot.docs.map(doc => {
-                const data = doc.data();
-                if (!data.variantes) data.variantes = { 'legado': { detalle: 'Normal', precio: data.precio || 0, costo: data.costo || 0, stock: data.stock || 0 } };
-                return { id: doc.id, ...data };
-            });
+        onSnapshot(collection(db, "productos"), (s) => {
+            productos = s.docs.map(d => { const data = d.data(); if (!data.variantes) data.variantes = { 'legado': { detalle: 'Normal', precio: data.precio || 0, costo: data.costo || 0, stock: data.stock || 0 } }; return { id: d.id, ...data }; });
             renderizarCatalogoYStock();
-            document.getElementById('estado-conexion').textContent = "🟢 Conectado";
-            
-            const selectVenta = document.getElementById('venta-rapida-prod');
-            selectVenta.innerHTML = '<option value="">Selecciona variante para vender...</option>';
-            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => {
-                if(v.stock > 0) selectVenta.innerHTML += `<option value="${vId}" data-idprod="${p.id}">${p.nombre} - ${v.detalle} (Stock: ${v.stock})</option>`;
-            }));
+            const selectVenta = document.getElementById('venta-rapida-prod'); selectVenta.innerHTML = '<option value="">Selecciona variante...</option>';
+            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { if(v.stock > 0) selectVenta.innerHTML += `<option value="${vId}" data-idprod="${p.id}">${p.nombre} - ${v.detalle} (Stock: ${window.formatearNum(v.stock)})</option>`; }));
         });
-
-        onSnapshot(collection(db, "gastos"), (s) => { 
-            gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); 
-            
-            // Actualizar tabla de gastos externa
-            const tablaG = document.getElementById('tabla-gastos'); tablaG.innerHTML = '';
-            gastosGlobales.forEach(g => {
-                tablaG.innerHTML += `<tr>
-                    <td><strong>${g.titulo}</strong><br><span style="color:#9ca3af; font-size:0.75rem;">${g.descripcion||''}</span></td>
-                    <td style="color:#fca5a5">-$${window.formatearNum(g.importe)}</td>
-                    <td><button class="btn-trash" onclick="window.borrarGasto('${g.id}')">🗑️</button></td>
-                </tr>`;
-            });
-            window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
-        });
-
+        onSnapshot(collection(db, "gastos"), (s) => { gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); const t = document.getElementById('tabla-gastos'); t.innerHTML = ''; gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><strong>${g.titulo}</strong><br><span style="color:#9ca3af; font-size:0.75rem;">${g.descripcion||''}</span></td><td style="color:#fca5a5">-$${window.formatearNum(g.importe)}</td><td><button class="btn-trash" onclick="window.borrarGasto('${g.id}')">🗑️</button></td></tr>`; }); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
         onSnapshot(collection(db, "ingresos"), (s) => { ingresosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
         onSnapshot(collection(db, "pedidos"), (s) => { pedidosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.renderizarPedidos(); });
 
-        // --- UI COMPRADOR (MANEJO DE VARIANTES Y CARRITO) ---
+        // --- CARRITO COMPRADOR Y FINALIZAR (CON WHATSAPP) ---
         window.cambiarVarianteUI = (idProducto, selectElem) => {
-            const selectedOption = selectElem.options[selectElem.selectedIndex];
-            const precio = selectedOption.getAttribute('data-precio');
-            const stock = parseInt(selectedOption.getAttribute('data-stock'));
-            
-            document.getElementById(`precio-display-${idProducto}`).textContent = `$${window.formatearNum(precio)}`;
-            const btnAdd = document.getElementById(`btn-add-${idProducto}`);
-            const inputCant = document.getElementById(`cant-${idProducto}`);
-            
-            document.getElementById(`stock-disp-${idProducto}`).textContent = `Stock: ${window.formatearNum(stock)} un.`;
-            inputCant.max = stock;
-            
-            if(stock <= 0) { btnAdd.disabled = true; btnAdd.textContent = 'Agotado'; inputCant.disabled = true; } 
-            else { btnAdd.disabled = false; btnAdd.textContent = 'Agregar'; inputCant.disabled = false; }
+            const opt = selectElem.options[selectElem.selectedIndex]; const stock = parseInt(opt.getAttribute('data-stock'));
+            document.getElementById(`precio-display-${idProducto}`).textContent = `$${window.formatearNum(opt.getAttribute('data-precio'))}`;
+            const btn = document.getElementById(`btn-add-${idProducto}`); const inp = document.getElementById(`cant-${idProducto}`);
+            document.getElementById(`stock-disp-${idProducto}`).textContent = `Stock: ${window.formatearNum(stock)} un.`; inp.max = stock;
+            if(stock <= 0) { btn.disabled = true; btn.textContent = 'Agotado'; inp.disabled = true; } else { btn.disabled = false; btn.textContent = 'Agregar'; inp.disabled = false; }
         };
 
-        window.abrirCarrito = () => document.getElementById('modal-carrito').classList.remove('hidden');
+        window.abrirCarrito = () => {
+            document.getElementById('modal-carrito').classList.remove('hidden');
+            document.getElementById('carrito-vista-lista').classList.remove('hidden');
+            document.getElementById('carrito-vista-exito').classList.add('hidden');
+        };
         window.cerrarCarrito = () => document.getElementById('modal-carrito').classList.add('hidden');
+        window.cerrarCarritoExito = () => { window.vaciarCarrito(); window.cerrarCarrito(); }
 
         window.agregarAlCarrito = (idProducto) => {
-            const producto = productos.find(p => p.id === idProducto);
-            const selectElem = document.getElementById(`sel-var-${idProducto}`);
-            const idVariante = selectElem.value;
-            const varianteData = producto.variantes[idVariante];
-            
-            const inputCantidad = document.getElementById(`cant-${idProducto}`);
-            const cantidadDeseada = parseInt(inputCantidad.value) || 1;
-            const enCarrito = carrito.filter(item => item.idProd === idProducto && item.idVar === idVariante).length;
-            
-            if (enCarrito + cantidadDeseada > varianteData.stock) return alert(`Solo quedan ${varianteData.stock} uds.`);
-            
-            for(let i=0; i<cantidadDeseada; i++) carrito.push({ idProd: producto.id, idVar: idVariante, nombre: producto.nombre, detalle: varianteData.detalle, precio: varianteData.precio });
-            
+            const p = productos.find(x => x.id === idProducto); const vId = document.getElementById(`sel-var-${idProducto}`).value; const v = p.variantes[vId];
+            const cant = parseInt(document.getElementById(`cant-${idProducto}`).value) || 1;
+            if (carrito.filter(i => i.idProd === idProducto && i.idVar === vId).length + cant > v.stock) return alert(`Solo quedan ${v.stock} uds.`);
+            for(let i=0; i<cant; i++) carrito.push({ idProd: p.id, idVar: vId, nombre: p.nombre, detalle: v.detalle, precio: v.precio });
             actualizarBadge(); renderizarCarrito();
-            const btn = document.getElementById(`btn-add-${idProducto}`);
-            const textoOriginal = btn.textContent;
-            btn.textContent = `¡Agregado!`; btn.style.backgroundColor = "var(--success)"; 
-            inputCantidad.value = 1;
-            setTimeout(() => { btn.textContent = textoOriginal; btn.style.backgroundColor = ""; }, 1000);
+            const btn = document.getElementById(`btn-add-${idProducto}`); const txt = btn.textContent; btn.textContent = `¡Agregado!`; btn.style.backgroundColor = "var(--success)"; document.getElementById(`cant-${idProducto}`).value = 1; setTimeout(() => { btn.textContent = txt; btn.style.backgroundColor = ""; }, 1000);
         };
-        
         window.quitarDelCarrito = (index) => { carrito.splice(index, 1); actualizarBadge(); renderizarCarrito(); };
         window.vaciarCarrito = () => { carrito = []; actualizarBadge(); renderizarCarrito(); };
-        function actualizarBadge() { const badge = document.getElementById('badge-carrito'); badge.textContent = carrito.length; badge.style.display = carrito.length > 0 ? 'block' : 'none'; }
+        function actualizarBadge() { const b = document.getElementById('badge-carrito'); b.textContent = carrito.length; b.style.display = carrito.length > 0 ? 'block' : 'none'; }
 
-        // --- CHECKOUT WEB ---
         window.finalizarCompra = async () => {
             if (carrito.length === 0) return;
+            const tel = document.getElementById('checkout-telefono').value; if (!tel) return alert("Ingrese teléfono.");
+            const metodoEntrega = document.getElementById('metodo-entrega').value; const dir = document.getElementById('checkout-direccion').value;
+            if (metodoEntrega === 'Envio' && !dir) return alert("Ingrese dirección de envío.");
             
-            const tel = document.getElementById('checkout-telefono').value;
-            if (!tel) return alert("Por favor, ingrese un teléfono de contacto.");
-            
-            const metodoEntrega = document.getElementById('metodo-entrega').value;
-            const dir = document.getElementById('checkout-direccion').value;
-            if (metodoEntrega === 'Envio' && !dir) return alert("La dirección es obligatoria para envíos a domicilio.");
-
-            const metodoPago = document.getElementById('metodo-pago').value;
             document.getElementById('btn-comprar').disabled = true; document.getElementById('btn-comprar').textContent = "Procesando...";
 
             try {
-                let totalVenta = 0; 
-                const conteoPorProducto = {};
-                const itemsParaPedido = [];
-                
-                const conteoVisual = {};
-                carrito.forEach(item => { 
-                    if(!conteoPorProducto[item.idProd]) conteoPorProducto[item.idProd] = {};
-                    conteoPorProducto[item.idProd][item.idVar] = (conteoPorProducto[item.idProd][item.idVar] || 0) + 1;
-                    totalVenta += item.precio; 
-                    
-                    const uid = item.idProd + '_' + item.idVar;
-                    if(!conteoVisual[uid]) conteoVisual[uid] = { ...item, cantidad: 0 };
-                    conteoVisual[uid].cantidad++;
+                let totalItems = 0; const conteoProd = {}; const itemsP = []; const conteoVis = {};
+                carrito.forEach(i => { 
+                    if(!conteoProd[i.idProd]) conteoProd[i.idProd] = {}; conteoProd[i.idProd][i.idVar] = (conteoProd[i.idProd][i.idVar] || 0) + 1; totalItems += i.precio; 
+                    const u = i.idProd + '_' + i.idVar; if(!conteoVis[u]) conteoVis[u] = { ...i, cantidad: 0 }; conteoVis[u].cantidad++;
                 });
+                Object.values(conteoVis).forEach(i => itemsP.push({nombre: i.nombre, detalle: i.detalle, precio: i.precio, cantidad: i.cantidad}));
 
-                Object.values(conteoVisual).forEach(i => itemsParaPedido.push({nombre: i.nombre, detalle: i.detalle, precio: i.precio, cantidad: i.cantidad}));
+                // Sumar costo de envío si aplica
+                let costoEnvioFinal = 0;
+                if(metodoEntrega === 'Envio' && configTienda.envioDisponible) {
+                    costoEnvioFinal = configTienda.envioPrecio;
+                }
+                const totalFinalPedido = totalItems + costoEnvioFinal;
 
-                for (const [idProd, variables] of Object.entries(conteoPorProducto)) {
-                    const docUpdates = {};
-                    for (const [idVar, cantidadComprada] of Object.entries(variables)) {
-                        docUpdates[`variantes.${idVar}.stock`] = increment(-cantidadComprada);
-                    }
-                    await updateDoc(doc(db, "productos", idProd), docUpdates);
+                // Descontar Stock
+                for (const [idProd, vars] of Object.entries(conteoProd)) {
+                    const upd = {}; for (const [idVar, c] of Object.entries(vars)) upd[`variantes.${idVar}.stock`] = increment(-c);
+                    await updateDoc(doc(db, "productos", idProd), upd);
                 }
 
+                const idCorto = generarIdCorto();
+                
                 await addDoc(collection(db, "pedidos"), {
-                    fecha: new Date(), telefono: tel, direccion: metodoEntrega === 'Envio' ? dir : 'Retira en local',
-                    metodoPago: metodoPago, metodoEntrega: metodoEntrega, estadoPago: false, estadoEntrega: false,
-                    total: totalVenta, items: itemsParaPedido
+                    idCorto: idCorto, fecha: new Date(), telefono: tel, direccion: metodoEntrega === 'Envio' ? dir : 'Retira en local',
+                    metodoPago: document.getElementById('metodo-pago').value, metodoEntrega, estadoPago: false, estadoEntrega: false,
+                    total: totalFinalPedido, costoEnvio: costoEnvioFinal, items: itemsP
                 });
 
-                alert("¡Pedido realizado con éxito!\n\nEl local se pondrá en contacto con usted a la brevedad al número ingresado para confirmar detalles.");
-                
-                document.getElementById('checkout-telefono').value = ""; document.getElementById('checkout-direccion').value = "";
-                window.vaciarCarrito(); window.cerrarCarrito();
+                // Guardar ID corto para el botón de WhatsApp y cambiar de vista
+                ultimoIdPedidoCorto = idCorto;
+                document.getElementById('exito-id').textContent = `#${idCorto}`;
+                document.getElementById('carrito-vista-lista').classList.add('hidden');
+                document.getElementById('carrito-vista-exito').classList.remove('hidden');
 
-            } catch (e) { alert("Error al procesar el pedido."); } 
-            finally { document.getElementById('btn-comprar').textContent = "Confirmar Pedido"; document.getElementById('btn-comprar').disabled = carrito.length === 0; }
+            } catch (e) { alert("Error al procesar."); } 
+            finally { document.getElementById('btn-comprar').textContent = "Confirmar Pedido"; document.getElementById('btn-comprar').disabled = false; }
         };
 
-        // --- RENDERIZADO VISUAL ---
+        window.enviarWhatsapp = () => {
+            let numeroLocal = configTienda.telefono || '';
+            if(!numeroLocal) { alert("El local aún no configuró su número."); return; }
+            numeroLocal = numeroLocal.replace(/[^0-9]/g, ''); // Remueve signos + o espacios
+            
+            const msj = `¡Hola! Acabo de realizar un pedido en la web.\nMi código de pedido es *#${ultimoIdPedidoCorto}*.`;
+            const url = `https://wa.me/${numeroLocal}?text=${encodeURIComponent(msj)}`;
+            window.open(url, '_blank');
+        };
+
+        // --- RENDERIZAR VISTAS ---
         function renderizarCatalogoYStock() {
             const catalogo = document.getElementById('catalogo-productos'); const tabla = document.getElementById('tabla-stock');
             catalogo.innerHTML = ''; tabla.innerHTML = '';
             const filtrados = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
-
             if(filtrados.length === 0) { catalogo.innerHTML = `<p>No hay productos.</p>`; tabla.innerHTML = `<tr><td colspan="4">No hay resultados.</td></tr>`; return; }
 
             filtrados.forEach(prod => {
-                const imgPlaceholder = 'https://via.placeholder.com/300x200?text=Error+Imagen';
-                const imagenSrc = prod.imagen ? prod.imagen : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+                const imgPlaceholder = 'https://via.placeholder.com/300x200?text=Error+Imagen'; const imagenSrc = prod.imagen ? prod.imagen : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+                const vEnt = Object.entries(prod.variantes || {}); if(vEnt.length === 0) return;
                 
-                const variantesEntries = Object.entries(prod.variantes || {});
-                if(variantesEntries.length === 0) return;
-                
-                const primerVariante = variantesEntries[0][1];
-                let stockTotal = 0; let selectOptionsHTML = ''; let miniTableHTML = '<div style="font-size: 0.8rem; color: #6b7280;">';
-                
-                variantesEntries.forEach(([vId, v]) => {
-                    stockTotal += v.stock;
-                    selectOptionsHTML += `<option value="${vId}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`;
-                    miniTableHTML += `<div>• ${v.detalle}: <b style="color:${v.stock<5?'#ef4444':'#1f2937'}">${window.formatearNum(v.stock)} un.</b> ($${window.formatearNum(v.precio)})</div>`;
-                });
-                miniTableHTML += '</div>';
+                let stockT = 0; let sOpt = ''; let mTab = '<div style="font-size: 0.8rem; color: #6b7280;">';
+                vEnt.forEach(([vId, v]) => {
+                    stockT += v.stock; sOpt += `<option value="${vId}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`;
+                    mTab += `<div>• ${v.detalle}: <b style="color:${v.stock<5?'#ef4444':'#1f2937'}">${window.formatearNum(v.stock)} un.</b> ($${window.formatearNum(v.precio)})</div>`;
+                }); mTab += '</div>';
 
-                // Vista Comprador
-                catalogo.innerHTML += `
-                    <div class="card">
-                        <img src="${imagenSrc}" class="card-img" onerror="this.src='${imgPlaceholder}'">
-                        <h3 style="margin-top:0; margin-bottom:10px;">${prod.nombre}</h3>
-                        <select id="sel-var-${prod.id}" class="select-variante" onchange="window.cambiarVarianteUI('${prod.id}', this)">${selectOptionsHTML}</select>
-                        <p id="precio-display-${prod.id}" style="font-size: 1.4rem; font-weight: bold; color: var(--primary); margin: 0 0 5px 0;">$${window.formatearNum(primerVariante.precio)}</p>
-                        <p id="stock-disp-${prod.id}" style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock: ${window.formatearNum(primerVariante.stock)} un.</p>
-                        <div class="acciones-compra">
-                            <input type="number" id="cant-${prod.id}" class="input-cantidad" value="1" min="1" max="${primerVariante.stock}" ${primerVariante.stock === 0 ? 'disabled' : ''}>
-                            <button id="btn-add-${prod.id}" style="flex-grow: 1;" onclick="window.agregarAlCarrito('${prod.id}')" ${primerVariante.stock === 0 ? 'disabled' : ''}>
-                                ${primerVariante.stock === 0 ? 'Agotado' : 'Agregar'}
-                            </button>
-                        </div>
-                    </div>`;
+                catalogo.innerHTML += `<div class="card"><img src="${imagenSrc}" class="card-img" onerror="this.src='${imgPlaceholder}'"><h3 style="margin-top:0; margin-bottom:10px;">${prod.nombre}</h3>
+                    <select id="sel-var-${prod.id}" class="select-variante" onchange="window.cambiarVarianteUI('${prod.id}', this)">${sOpt}</select>
+                    <p id="precio-display-${prod.id}" style="font-size: 1.4rem; font-weight: bold; color: var(--primary); margin: 0 0 5px 0;">$${window.formatearNum(vEnt[0][1].precio)}</p>
+                    <p id="stock-disp-${prod.id}" style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock: ${window.formatearNum(vEnt[0][1].stock)} un.</p>
+                    <div class="acciones-compra"><input type="number" id="cant-${prod.id}" class="input-cantidad" value="1" min="1" max="${vEnt[0][1].stock}" ${vEnt[0][1].stock === 0 ? 'disabled' : ''}>
+                    <button id="btn-add-${prod.id}" style="flex-grow: 1;" onclick="window.agregarAlCarrito('${prod.id}')" ${vEnt[0][1].stock === 0 ? 'disabled' : ''}>${vEnt[0][1].stock === 0 ? 'Agotado' : 'Agregar'}</button></div></div>`;
 
-                // Vista Dueño
-                tabla.innerHTML += `
-                    <tr>
-                        <td>
-                            <div style="display: flex; align-items: center; gap: 10px;">
-                                <img src="${imagenSrc}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='${imgPlaceholder}'">
-                                <strong>${prod.nombre}</strong>
-                            </div>
-                        </td>
-                        <td>${miniTableHTML}</td>
-                        <td style="font-size: 1.1rem; font-weight:bold; color: ${stockTotal===0?'#ef4444':'inherit'}">${window.formatearNum(stockTotal)} un.</td>
-                        <td>
-                            <button class="secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="window.abrirModal('${prod.id}')">✏️ Editar Opciones</button>
-                            <button class="success" style="padding: 5px 10px; font-size: 0.85rem; margin-top: 5px;" onclick="window.abrirModalStock('${prod.id}')">➕ Reponer</button>
-                        </td>
-                    </tr>`;
+                tabla.innerHTML += `<tr><td><div style="display: flex; align-items: center; gap: 10px;"><img src="${imagenSrc}" style="width: 40px; height: 40px; object-fit: cover; border-radius: 4px;" onerror="this.src='${imgPlaceholder}'"><strong>${prod.nombre}</strong></div></td>
+                    <td>${mTab}</td><td style="font-size: 1.1rem; font-weight:bold; color: ${stockT===0?'#ef4444':'inherit'}">${window.formatearNum(stockT)} un.</td>
+                    <td><button class="secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="window.abrirModal('${prod.id}')">✏️ Opciones</button>
+                    <button class="success" style="padding: 5px 10px; font-size: 0.85rem; margin-top: 5px;" onclick="window.abrirModalStock('${prod.id}')">➕ Reponer</button></td></tr>`;
             });
         }
 
-        function renderizarCarrito() {
+        window.renderizarCarrito = () => {
             const lista = document.getElementById('lista-carrito'); const totalSpan = document.getElementById('total-carrito');
             const btnComprar = document.getElementById('btn-comprar'); const btnVaciar = document.getElementById('btn-vaciar');
-            const checkoutForm = document.getElementById('checkout-form');
-            lista.innerHTML = ''; let total = 0;
+            lista.innerHTML = ''; let totalItems = 0;
 
             if (carrito.length === 0) {
                 lista.innerHTML = '<p style="text-align: center; color: #6b7280;">Tu carrito está vacío</p>';
-                btnComprar.disabled = true; btnVaciar.style.display = 'none'; checkoutForm.style.display = 'none';
+                btnComprar.disabled = true; btnVaciar.style.display = 'none'; document.getElementById('checkout-form').style.display = 'none';
             } else {
-                btnComprar.disabled = false; btnVaciar.style.display = 'inline-block'; checkoutForm.style.display = 'block';
-                const conteoVisual = {}; 
-                carrito.forEach((p, idx) => { 
-                    const uid = p.idProd + '_' + p.idVar; 
-                    if(!conteoVisual[uid]) conteoVisual[uid] = { ...p, cantidad: 0, indexReal: idx }; 
-                    conteoVisual[uid].cantidad++; total += p.precio; 
-                });
+                btnComprar.disabled = false; btnVaciar.style.display = 'inline-block'; document.getElementById('checkout-form').style.display = 'block';
+                const conteoVis = {}; 
+                carrito.forEach((p, idx) => { const u = p.idProd + '_' + p.idVar; if(!conteoVis[u]) conteoVis[u] = { ...p, cantidad: 0, indexReal: idx }; conteoVis[u].cantidad++; totalItems += p.precio; });
 
-                Object.values(conteoVisual).forEach(item => {
-                    lista.innerHTML += `
-                        <div class="carrito-item">
-                            <div><strong>${item.nombre}</strong> <br> <span style="color: #6b7280; font-size:0.8rem;">(${item.detalle}) x${item.cantidad}</span></div>
-                            <div><strong>$${window.formatearNum(item.precio * item.cantidad)}</strong> <button onclick="window.quitarDelCarrito(${item.indexReal})" class="danger" style="padding: 2px 8px; margin-left: 10px; font-size: 0.8rem;">X</button></div>
-                        </div>`;
+                Object.values(conteoVis).forEach(item => {
+                    lista.innerHTML += `<div class="carrito-item"><div><strong>${item.nombre}</strong> <br> <span style="color: #6b7280; font-size:0.8rem;">(${item.detalle}) x${item.cantidad}</span></div>
+                        <div><strong>$${window.formatearNum(item.precio * item.cantidad)}</strong> <button onclick="window.quitarDelCarrito(${item.indexReal})" class="danger" style="padding: 2px 8px; margin-left: 10px; font-size: 0.8rem;">X</button></div></div>`;
                 });
+                
+                // Sumar envío si aplica
+                const metodo = document.getElementById('metodo-entrega') ? document.getElementById('metodo-entrega').value : 'Retiro';
+                if(metodo === 'Envio' && configTienda.envioDisponible) {
+                    totalItems += configTienda.envioPrecio;
+                }
             }
-            totalSpan.textContent = window.formatearNum(total);
+            totalSpan.textContent = window.formatearNum(totalItems);
         }
         actualizarBadge();
     </script>
