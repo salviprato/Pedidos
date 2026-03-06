@@ -37,19 +37,22 @@
         .btn-carrito-nav:hover { background: #f9fafb; }
         .badge { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 0.8rem; font-weight: bold; }
 
+        /* Controles de Cantidad en la Tarjeta */
+        .acciones-compra { display: flex; gap: 8px; margin-top: auto; }
+        .input-cantidad { width: 60px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-size: 1rem; }
+
         /* Lista del Carrito (Modal) */
         .carrito-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: center; }
         .carrito-total { font-size: 1.4rem; font-weight: bold; text-align: right; margin: 20px 0; color: var(--primary); }
-        
-        /* Opciones de Checkout */
         .checkout-options { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
         .checkout-options select { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 15px; border-radius: 6px; border: 1px solid var(--border); }
 
         /* Panel Financiero */
-        .metric-card { padding: 20px; border-radius: 8px; border-left: 4px solid; }
-        .metric-bruta { background: #eff6ff; border-left-color: #3b82f6; }
-        .metric-neta { background: #f0fdf4; border-left-color: #22c55e; }
-        .metric-stock { background: #fef2f2; border-left-color: #ef4444; }
+        .panel-finanzas-container { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid var(--border); }
+        .metric-card { padding: 20px; border-radius: 8px; border-left: 4px solid; background: white; }
+        .metric-bruta { border-left-color: #3b82f6; }
+        .metric-neta { border-left-color: #22c55e; }
+        .metric-stock { border-left-color: #ef4444; }
         .metric-card h3 { margin: 0 0 10px 0; font-size: 0.9rem; color: #4b5563; text-transform: uppercase; }
         .metric-card p { margin: 0; font-size: 1.8rem; font-weight: bold; }
 
@@ -81,7 +84,7 @@
             <h2>🛍️ Mi Tienda</h2>
             <button onclick="window.abrirCarrito()" class="btn-carrito-nav">
                 🛒 Mi Carrito
-                <span id="badge-carrito" class="badge">0</span>
+                <span id="badge-carrito" class="badge" style="display: none;">0</span>
             </button>
         </div>
 
@@ -94,9 +97,7 @@
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">🛒 Resumen de Compra</h3>
             
-            <div id="lista-carrito">
-                <p style="color: #6b7280; font-style: italic;">El carrito está vacío</p>
-            </div>
+            <div id="lista-carrito"></div>
             
             <div class="carrito-total">
                 Total a pagar: $<span id="total-carrito">0.00</span>
@@ -125,26 +126,31 @@
     </div>
 
     <div id="vista-dueno" class="container hidden">
-        <h2>📊 Dashboard Financiero y Operativo</h2>
         
-        <div class="grid-cards" style="margin-bottom: 30px;">
-            <div class="metric-card metric-bruta">
-                <h3>Ventas Brutas</h3>
-                <p id="metric-bruta">$0.00</p>
-            </div>
-            <div class="metric-card metric-neta">
-                <h3>Ganancia Neta</h3>
-                <p id="metric-neta">$0.00</p>
-            </div>
-            <div class="metric-card metric-stock">
-                <h3>Artículos Vendidos</h3>
-                <p id="metric-ventas-stock">0 un.</p>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid var(--border); padding-bottom: 15px;">
+            <h2 style="margin: 0;">📦 Control de Inventario</h2>
+            <div>
+                <button onclick="window.toggleFinanzas()" class="secondary" style="margin-right: 10px;">💰 Ver Finanzas</button>
+                <button onclick="window.abrirModal()">+ Nuevo Producto</button>
             </div>
         </div>
 
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <h3 style="margin: 0;">Control de Inventario</h3>
-            <button onclick="window.abrirModal()">+ Nuevo Producto</button>
+        <div id="panel-finanzas" class="panel-finanzas-container hidden">
+            <h3 style="margin-top: 0; color: #374151;">Dashboard Financiero</h3>
+            <div class="grid-cards">
+                <div class="metric-card metric-bruta">
+                    <h3>Ventas Brutas</h3>
+                    <p id="metric-bruta">$0.00</p>
+                </div>
+                <div class="metric-card metric-neta">
+                    <h3>Ganancia Neta</h3>
+                    <p id="metric-neta">$0.00</p>
+                </div>
+                <div class="metric-card metric-stock">
+                    <h3>Artículos Vendidos</h3>
+                    <p id="metric-ventas-stock">0 un.</p>
+                </div>
+            </div>
         </div>
         
         <table>
@@ -200,6 +206,12 @@
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
+        };
+
+        // --- LÓGICA DE UI DUEÑO ---
+        window.toggleFinanzas = () => {
+            const panel = document.getElementById('panel-finanzas');
+            panel.classList.toggle('hidden');
         };
 
         // --- LÓGICA DE MODALES ---
@@ -277,26 +289,42 @@
             document.getElementById('metric-ventas-stock').textContent = `${cant} un.`;
         });
 
-        // --- LÓGICA DEL CARRITO ---
+        // --- LÓGICA DEL CARRITO (AHORA SOPORTA CANTIDAD) ---
         window.agregarAlCarrito = (idProducto) => {
             const producto = productos.find(p => p.id === idProducto);
+            
+            // Leemos el valor del input numérico
+            const inputCantidad = document.getElementById(`cant-${idProducto}`);
+            const cantidadDeseada = parseInt(inputCantidad.value) || 1;
+            
+            // Verificamos cuánto hay ya en el carrito
             const enCarrito = carrito.filter(item => item.id === idProducto).length;
-            if (enCarrito >= producto.stock) {
-                return alert("No hay más stock disponible de este producto.");
+            
+            if (enCarrito + cantidadDeseada > producto.stock) {
+                return alert(`Solo quedan ${producto.stock} unidades en stock. Ya tienes ${enCarrito} en tu carrito.`);
             }
-            carrito.push(producto);
+            
+            // Agregamos el producto N veces al array del carrito
+            for(let i = 0; i < cantidadDeseada; i++) {
+                carrito.push(producto);
+            }
+            
             actualizarBadge();
             renderizarCarrito();
             
-            // Opcional: Mostrar una pequeña alerta o feedback visual
-            const btn = event.target;
+            // Feedback visual en el botón
+            const btn = document.getElementById(`btn-add-${idProducto}`);
             const textoOriginal = btn.textContent;
-            btn.textContent = "¡Agregado!";
-            btn.style.backgroundColor = "#10b981"; // Verde
+            btn.textContent = `¡Agregado (${cantidadDeseada})!`;
+            btn.style.backgroundColor = "#10b981"; 
+            
+            // Reseteamos el input a 1
+            inputCantidad.value = 1;
+
             setTimeout(() => {
                 btn.textContent = textoOriginal;
                 btn.style.backgroundColor = "";
-            }, 1000);
+            }, 1200);
         };
 
         window.quitarDelCarrito = (index) => {
@@ -314,17 +342,12 @@
         function actualizarBadge() {
             const badge = document.getElementById('badge-carrito');
             badge.textContent = carrito.length;
-            if (carrito.length > 0) {
-                badge.style.display = 'block';
-            } else {
-                badge.style.display = 'none';
-            }
+            badge.style.display = carrito.length > 0 ? 'block' : 'none';
         }
 
         window.finalizarCompra = async () => {
             if (carrito.length === 0) return;
 
-            // Obtener los valores del formulario de checkout
             const metodoPago = document.getElementById('metodo-pago').value;
             const metodoEntrega = document.getElementById('metodo-entrega').value;
 
@@ -346,14 +369,13 @@
                     await updateDoc(doc(db, "productos", id), { stock: increment(-cantidad) });
                 }
 
-                // Guardar la venta en Firebase incluyendo los nuevos datos
                 await addDoc(collection(db, "ventas"), {
                     fecha: new Date(),
                     totalVenta: totalVenta,
                     gananciaNeta: totalVenta - costoTotal,
                     cantidadArticulos: carrito.length,
-                    metodoPago: metodoPago,       // Nuevo campo
-                    metodoEntrega: metodoEntrega, // Nuevo campo
+                    metodoPago: metodoPago,
+                    metodoEntrega: metodoEntrega,
                     items: carrito.map(p => ({ id: p.id, nombre: p.nombre, precio: p.precio }))
                 });
 
@@ -385,16 +407,20 @@
             productos.forEach(prod => {
                 const imagenSrc = prod.imagen ? prod.imagen : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
 
-                // Catálogo del cliente
+                // Catálogo del cliente (AHORA CON SELECTOR DE CANTIDAD)
                 catalogo.innerHTML += `
                     <div class="card">
                         <img src="${imagenSrc}" alt="${prod.nombre}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=Error+de+Imagen'">
                         <h3 style="margin-top:0;">${prod.nombre}</h3>
                         <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary); margin: 5px 0;">$${prod.precio}</p>
                         <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock disponible: ${prod.stock}</p>
-                        <button style="margin-top: auto;" onclick="window.agregarAlCarrito('${prod.id}')" ${prod.stock === 0 ? 'disabled' : ''}>
-                            ${prod.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
-                        </button>
+                        
+                        <div class="acciones-compra">
+                            <input type="number" id="cant-${prod.id}" class="input-cantidad" value="1" min="1" max="${prod.stock}" ${prod.stock === 0 ? 'disabled' : ''}>
+                            <button id="btn-add-${prod.id}" style="flex-grow: 1;" onclick="window.agregarAlCarrito('${prod.id}')" ${prod.stock === 0 ? 'disabled' : ''}>
+                                ${prod.stock === 0 ? 'Agotado' : 'Agregar'}
+                            </button>
+                        </div>
                     </div>
                 `;
 
@@ -436,13 +462,12 @@
                 lista.innerHTML = '<p style="color: #6b7280; font-style: italic; text-align: center; padding: 20px 0;">Tu carrito está vacío</p>';
                 btnComprar.disabled = true;
                 btnVaciar.style.display = 'none';
-                checkoutForm.style.display = 'none'; // Ocultar opciones de pago si no hay items
+                checkoutForm.style.display = 'none';
             } else {
                 btnComprar.disabled = false;
                 btnVaciar.style.display = 'inline-block';
-                checkoutForm.style.display = 'block'; // Mostrar opciones de pago
+                checkoutForm.style.display = 'block';
                 
-                // Agrupar items idénticos visualmente (opcional pero bueno para UX)
                 const conteoVisual = {};
                 carrito.forEach(p => {
                     if(!conteoVisual[p.id]) conteoVisual[p.id] = { ...p, cantidad: 0 };
@@ -450,9 +475,7 @@
                     total += p.precio;
                 });
 
-                // Renderizamos la lista visual
                 Object.values(conteoVisual).forEach(item => {
-                    // Buscamos el índice real en el array carrito original para poder borrar 1 unidad
                     const indexReal = carrito.findIndex(c => c.id === item.id);
                     lista.innerHTML += `
                         <div class="carrito-item">
@@ -470,7 +493,6 @@
             totalSpan.textContent = total.toFixed(2);
         }
         
-        // Inicializar el badge oculto
         actualizarBadge();
     </script>
 </body>
