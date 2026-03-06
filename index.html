@@ -117,7 +117,7 @@
         <div class="modal-content">
             <h3 style="margin-top: 0; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;">🛒 Resumen de Compra</h3>
             <div id="lista-carrito"></div>
-            <div class="carrito-total">Total a pagar: $<span id="total-carrito">0.00</span></div>
+            <div class="carrito-total">Total a pagar: $<span id="total-carrito">0</span></div>
             
             <div class="checkout-options" id="checkout-form">
                 <label><strong>Forma de Pago:</strong></label>
@@ -203,9 +203,9 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                        <div class="widget-balance" style="border-color: var(--success);"><h4 style="margin: 0 0 5px 0; color: #9ca3af; font-size: 0.8rem;">Ingresos Totales</h4><p id="bal-ingresos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--success);">$0.00</p></div>
-                        <div class="widget-balance" style="border-color: var(--danger);"><h4 style="margin: 0 0 5px 0; color: #9ca3af; font-size: 0.8rem;">Gastos Totales</h4><p id="bal-gastos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--danger);">$0.00</p></div>
-                        <div class="widget-balance" style="border-color: #3b82f6; background-color: #1e3a8a;"><h4 style="margin: 0 0 5px 0; color: #93c5fd; font-size: 0.8rem;">Ganancia Neta</h4><p id="bal-neta" style="margin: 0; font-size: 2.2rem; font-weight: bold; color: white;">$0.00</p></div>
+                        <div class="widget-balance" style="border-color: var(--success);"><h4 style="margin: 0 0 5px 0; color: #9ca3af; font-size: 0.8rem;">Ingresos Totales</h4><p id="bal-ingresos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--success);">$0</p></div>
+                        <div class="widget-balance" style="border-color: var(--danger);"><h4 style="margin: 0 0 5px 0; color: #9ca3af; font-size: 0.8rem;">Gastos Totales</h4><p id="bal-gastos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--danger);">$0</p></div>
+                        <div class="widget-balance" style="border-color: #3b82f6; background-color: #1e3a8a;"><h4 style="margin: 0 0 5px 0; color: #93c5fd; font-size: 0.8rem;">Ganancia Neta</h4><p id="bal-neta" style="margin: 0; font-size: 2.2rem; font-weight: bold; color: white;">$0</p></div>
                     </div>
                 </div>
             </div>
@@ -247,6 +247,11 @@
                         <div><label>Importe Gastado $</label><input type="number" id="gasto-importe" class="dark-input"></div>
                     </div>
                     <button class="btn-dark-action" onclick="window.registrarGasto()" style="background: var(--danger);">Registrar Salida de Dinero</button>
+                    
+                    <table class="dark-table" style="margin-top: 20px;">
+                        <thead><tr><th>Detalle del Gasto</th><th>Importe</th><th>Borrar</th></tr></thead>
+                        <tbody id="tabla-gastos"></tbody>
+                    </table>
                 </div>
             </div>
         </div>
@@ -276,12 +281,12 @@
 
     <div id="modal-stock" class="modal-overlay hidden">
         <div class="modal-content">
-            <h3 style="margin-top: 0; color: var(--success);">➕ Ingresar Mercadería</h3>
+            <h3 style="margin-top: 0; color: var(--success);">➕ Reponer Stock</h3>
             <p id="stock-nombre-prod" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 15px;"></p>
             <input type="hidden" id="stock-id-prod">
             
             <div class="form-group">
-                <label>¿A qué variante o tamaño le ingresa stock?</label>
+                <label>¿A qué variante o tamaño le repone stock?</label>
                 <select id="stock-select-var" class="select-variante" style="width: 100%;"></select>
             </div>
 
@@ -289,12 +294,12 @@
             <div class="form-group">
                 <label>Costo pagado por CADA UNIDAD en esta compra</label>
                 <input type="number" id="stock-nuevo-costo" placeholder="Ej: 500">
-                <small style="color:#6b7280; display:block; margin-top:5px;">Esto generará un Gasto automático de (Cantidad x Costo).</small>
+                <small style="color:#6b7280; display:block; margin-top:5px;">Esto generará un Gasto automático de (Cantidad x Costo) en Finanzas.</small>
             </div>
             
             <div class="modal-actions">
                 <button class="secondary" onclick="window.cerrarModalStock()">Cancelar</button>
-                <button class="success" onclick="window.guardarNuevoStock()">Confirmar Ingreso</button>
+                <button class="success" onclick="window.guardarNuevoStock()">Confirmar Reposición</button>
             </div>
         </div>
     </div>
@@ -315,15 +320,19 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
-        // --- ESTADOS ---
+        // --- ESTADOS Y FORMATEO ---
         let productos = []; let carrito = []; let terminoBusqueda = "";
         let ingresosGlobales = []; let gastosGlobales = []; let pedidosGlobales = [];
+
+        // Función vital para poner los puntos cada tres cifras
+        window.formatearNum = (num) => {
+            return new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
+        };
 
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
             
-            // Cerrar todos los paneles para que empiece limpio
             if(rol === 'dueno') {
                 document.getElementById('panel-inventario').classList.remove('hidden');
                 document.getElementById('panel-finanzas').classList.add('hidden');
@@ -413,7 +422,7 @@
                     Object.keys(variantesNuevas).forEach(vId => {
                         if (prodActual.variantes && prodActual.variantes[vId]) {
                             variantesNuevas[vId].stock = prodActual.variantes[vId].stock;
-                            variantesNuevas[vId].costo = prodActual.variantes[vId].costo; // Preservamos costo viejo
+                            variantesNuevas[vId].costo = prodActual.variantes[vId].costo;
                         }
                     });
                     await updateDoc(doc(db, "productos", id), { nombre, imagen, variantes: variantesNuevas });
@@ -421,21 +430,21 @@
                     await addDoc(collection(db, "productos"), { nombre, imagen, variantes: variantesNuevas });
                 }
                 window.cerrarModal();
-            } catch (e) { alert("Error al guardar."); console.log(e); }
+            } catch (e) { alert("Error al guardar."); }
         };
 
-        // --- NUEVA LÓGICA: INGRESO DE STOCK GENERA GASTO ---
+        // --- LÓGICA: REPONER STOCK Y GENERAR GASTO ---
         window.abrirModalStock = (id) => {
             const prod = productos.find(p => p.id === id);
             document.getElementById('stock-id-prod').value = prod.id;
             document.getElementById('stock-nombre-prod').textContent = `📦 ${prod.nombre}`;
             document.getElementById('stock-cantidad').value = 1;
-            document.getElementById('stock-nuevo-costo').value = ""; // Obligamos a que ponga el costo actual
+            document.getElementById('stock-nuevo-costo').value = ""; 
             
             const selectVar = document.getElementById('stock-select-var');
             selectVar.innerHTML = '';
             Object.entries(prod.variantes || {}).forEach(([vId, v]) => {
-                selectVar.innerHTML += `<option value="${vId}">${v.detalle} (Stock actual: ${v.stock})</option>`;
+                selectVar.innerHTML += `<option value="${vId}">${v.detalle} (Stock actual: ${window.formatearNum(v.stock)})</option>`;
             });
             document.getElementById('modal-stock').classList.remove('hidden');
         };
@@ -456,23 +465,22 @@
             const costoTotal = cant * costoUnitario;
 
             try {
-                // 1. Actualizamos el stock (NO actualizamos el costo unitario base del producto)
+                // 1. Actualizamos el stock
                 const updates = {};
                 updates[`variantes.${idVar}.stock`] = increment(cant);
                 await updateDoc(doc(db, "productos", idProd), updates);
                 
-                // 2. Registramos el Gasto en Finanzas automáticamente
+                // 2. Registramos el Gasto mostrando explícitamente cantidad y costo unitario formatados
                 if(costoTotal > 0) {
                     await addDoc(collection(db, "gastos"), {
                         fecha: new Date(),
                         titulo: "Reposición de Stock",
-                        descripcion: `${prod.nombre} (${nombreVariante}) - ${cant} un. a $${costoUnitario} c/u`,
+                        descripcion: `${prod.nombre} (${nombreVariante}) - Repuesto: ${window.formatearNum(cant)} un. a $${window.formatearNum(costoUnitario)} c/u`,
                         importe: costoTotal
                     });
                 }
                 window.cerrarModalStock();
-                alert(`Stock ingresado. Se registró un gasto automático de $${costoTotal}.`);
-            } catch (e) { alert("Error sumando stock."); console.log(e); }
+            } catch (e) { alert("Error al reponer stock."); }
         };
 
         // ==========================================
@@ -536,9 +544,11 @@
             gastosGlobales.forEach(g => { if((ahora - g.fecha.toDate())/(1000*60*60*24) <= diasLimite) totalGastos += g.importe; });
             
             const neta = totalIngresos - totalGastos;
-            document.getElementById('bal-ingresos').textContent = `$${totalIngresos.toFixed(2)}`;
-            document.getElementById('bal-gastos').textContent = `$${totalGastos.toFixed(2)}`;
-            document.getElementById('bal-neta').textContent = `${neta >= 0 ? '+' : ''}$${neta.toFixed(2)}`;
+            
+            // Aplicamos formato de separador de miles a los balances
+            document.getElementById('bal-ingresos').textContent = `$${window.formatearNum(totalIngresos)}`;
+            document.getElementById('bal-gastos').textContent = `$${window.formatearNum(totalGastos)}`;
+            document.getElementById('bal-neta').textContent = `${neta >= 0 ? '+' : '-'}$${window.formatearNum(Math.abs(neta))}`;
             document.getElementById('bal-neta').style.color = neta >= 0 ? 'var(--success)' : '#fca5a5';
         };
 
@@ -553,10 +563,12 @@
                 const isIng = t.tipo === 'ingreso';
                 const badge = isIng ? '<span style="background:#064e3b; color:#34d399; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Ingreso</span>' 
                                     : '<span style="background:#7f1d1d; color:#fca5a5; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Egreso</span>';
+                
+                // Aplicamos formato de miles a los montos de la tabla
                 tabla.innerHTML += `<tr>
                     <td style="color:#9ca3af;">${t.fecha.toLocaleString('es-ES', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td>
                     <td>${badge}</td><td>${t.detalle}</td>
-                    <td style="color: ${isIng?'var(--success)':'#fca5a5'}; font-weight: bold;">${isIng?'+':'-'}$${t.monto.toFixed(2)}</td>
+                    <td style="color: ${isIng?'var(--success)':'#fca5a5'}; font-weight: bold;">${isIng?'+':'-'}$${window.formatearNum(t.monto)}</td>
                 </tr>`;
             });
         };
@@ -575,11 +587,11 @@
 
             const crearCard = (p, esPendiente) => {
                 let itemsHTML = '';
-                p.items.forEach(i => itemsHTML += `<li>• ${i.nombre} (${i.detalle}) x${i.cantidad} - $${i.precio * i.cantidad}</li>`);
+                p.items.forEach(i => itemsHTML += `<li>• ${i.nombre} (${i.detalle}) x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
                 
                 const btnPago = p.estadoPago 
                     ? `<button disabled style="background:#064e3b; color:#34d399;">✅ Pagado</button>`
-                    : `<button class="success" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}')">💰 Cobrar $${p.total}</button>`;
+                    : `<button class="success" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}')">💰 Cobrar $${window.formatearNum(p.total)}</button>`;
                 
                 const btnEntrega = esPendiente 
                     ? `<button class="primary" onclick="window.marcarEntregado('${p.id}')">🚚 Marcar Entregado</button>`
@@ -589,7 +601,7 @@
                     <div class="pedido-card">
                         <div class="pedido-header">
                             <strong style="color: #60a5fa;">Pedido del ${p.fecha.toDate().toLocaleString('es-ES')}</strong>
-                            <span style="font-size:0.9rem; color:#9ca3af;">Monto: $${p.total}</span>
+                            <span style="font-size:0.9rem; color:#9ca3af;">Monto: $${window.formatearNum(p.total)}</span>
                         </div>
                         <p style="margin:5px 0;">📞 Teléfono: <strong>${p.telefono}</strong></p>
                         <p style="margin:5px 0 15px 0;">📍 Entrega: <strong>${p.metodoEntrega}</strong> ${p.direccion !== 'Retira en local' ? `(${p.direccion})` : ''}</p>
@@ -604,22 +616,20 @@
         };
 
         window.marcarPagado = async (idPedido, total, metodo) => {
-            if(!confirm(`¿Confirmar que cobraste $${total} por ${metodo}? Esto sumará a Finanzas.`)) return;
+            if(!confirm(`¿Confirmar cobro por $${window.formatearNum(total)}? Esto sumará el ingreso a Finanzas.`)) return;
             try {
-                // 1. Marcar como pagado
                 await updateDoc(doc(db, "pedidos", idPedido), { estadoPago: true });
-                // 2. Generar Ingreso en Finanzas
                 await addDoc(collection(db, "ingresos"), {
                     fecha: new Date(), tipo: 'pago_pedido', detalle: `Cobro Pedido Web (${metodo})`, 
                     efectivo: metodo === 'Efectivo' ? total : 0,
                     transferencia: metodo === 'Transferencia' ? total : 0
                 });
-            } catch(e) { console.error(e); }
+            } catch(e) {}
         };
 
         window.marcarEntregado = async (idPedido) => {
-            if(!confirm("¿Confirmar entrega al cliente? Se moverá al historial.")) return;
-            try { await updateDoc(doc(db, "pedidos", idPedido), { estadoEntrega: true }); } catch(e) { console.error(e); }
+            if(!confirm("¿Confirmar entrega al cliente? Se archivará en el historial.")) return;
+            try { await updateDoc(doc(db, "pedidos", idPedido), { estadoEntrega: true }); } catch(e) {}
         };
 
 
@@ -640,14 +650,23 @@
             }));
         });
 
-        onSnapshot(collection(db, "gastos"), (s) => { gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
-        onSnapshot(collection(db, "ingresos"), (s) => { ingresosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
-        
-        // Escucha nueva para los Pedidos
-        onSnapshot(collection(db, "pedidos"), (s) => {
-            pedidosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() }));
-            window.renderizarPedidos();
+        onSnapshot(collection(db, "gastos"), (s) => { 
+            gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); 
+            
+            // Actualizar tabla de gastos externa
+            const tablaG = document.getElementById('tabla-gastos'); tablaG.innerHTML = '';
+            gastosGlobales.forEach(g => {
+                tablaG.innerHTML += `<tr>
+                    <td><strong>${g.titulo}</strong><br><span style="color:#9ca3af; font-size:0.75rem;">${g.descripcion||''}</span></td>
+                    <td style="color:#fca5a5">-$${window.formatearNum(g.importe)}</td>
+                    <td><button class="btn-trash" onclick="window.borrarGasto('${g.id}')">🗑️</button></td>
+                </tr>`;
+            });
+            window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
         });
+
+        onSnapshot(collection(db, "ingresos"), (s) => { ingresosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
+        onSnapshot(collection(db, "pedidos"), (s) => { pedidosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.renderizarPedidos(); });
 
         // --- UI COMPRADOR (MANEJO DE VARIANTES Y CARRITO) ---
         window.cambiarVarianteUI = (idProducto, selectElem) => {
@@ -655,11 +674,11 @@
             const precio = selectedOption.getAttribute('data-precio');
             const stock = parseInt(selectedOption.getAttribute('data-stock'));
             
-            document.getElementById(`precio-display-${idProducto}`).textContent = `$${precio}`;
+            document.getElementById(`precio-display-${idProducto}`).textContent = `$${window.formatearNum(precio)}`;
             const btnAdd = document.getElementById(`btn-add-${idProducto}`);
             const inputCant = document.getElementById(`cant-${idProducto}`);
             
-            document.getElementById(`stock-disp-${idProducto}`).textContent = `Stock: ${stock} un.`;
+            document.getElementById(`stock-disp-${idProducto}`).textContent = `Stock: ${window.formatearNum(stock)} un.`;
             inputCant.max = stock;
             
             if(stock <= 0) { btnAdd.disabled = true; btnAdd.textContent = 'Agotado'; inputCant.disabled = true; } 
@@ -695,7 +714,7 @@
         window.vaciarCarrito = () => { carrito = []; actualizarBadge(); renderizarCarrito(); };
         function actualizarBadge() { const badge = document.getElementById('badge-carrito'); badge.textContent = carrito.length; badge.style.display = carrito.length > 0 ? 'block' : 'none'; }
 
-        // --- CHECKOUT WEB (CREA PEDIDO, NO INGRESO) ---
+        // --- CHECKOUT WEB ---
         window.finalizarCompra = async () => {
             if (carrito.length === 0) return;
             
@@ -714,7 +733,6 @@
                 const conteoPorProducto = {};
                 const itemsParaPedido = [];
                 
-                // Procesar carrito visualmente y para la Base de Datos
                 const conteoVisual = {};
                 carrito.forEach(item => { 
                     if(!conteoPorProducto[item.idProd]) conteoPorProducto[item.idProd] = {};
@@ -726,10 +744,8 @@
                     conteoVisual[uid].cantidad++;
                 });
 
-                // Array limpio para guardar en el "Pedido"
                 Object.values(conteoVisual).forEach(i => itemsParaPedido.push({nombre: i.nombre, detalle: i.detalle, precio: i.precio, cantidad: i.cantidad}));
 
-                // 1. Descontamos el stock
                 for (const [idProd, variables] of Object.entries(conteoPorProducto)) {
                     const docUpdates = {};
                     for (const [idVar, cantidadComprada] of Object.entries(variables)) {
@@ -738,28 +754,18 @@
                     await updateDoc(doc(db, "productos", idProd), docUpdates);
                 }
 
-                // 2. Creamos el documento en "pedidos"
                 await addDoc(collection(db, "pedidos"), {
-                    fecha: new Date(),
-                    telefono: tel,
-                    direccion: metodoEntrega === 'Envio' ? dir : 'Retira en local',
-                    metodoPago: metodoPago,
-                    metodoEntrega: metodoEntrega,
-                    estadoPago: false,
-                    estadoEntrega: false,
-                    total: totalVenta,
-                    items: itemsParaPedido
+                    fecha: new Date(), telefono: tel, direccion: metodoEntrega === 'Envio' ? dir : 'Retira en local',
+                    metodoPago: metodoPago, metodoEntrega: metodoEntrega, estadoPago: false, estadoEntrega: false,
+                    total: totalVenta, items: itemsParaPedido
                 });
 
-                // 3. Avisamos al cliente
                 alert("¡Pedido realizado con éxito!\n\nEl local se pondrá en contacto con usted a la brevedad al número ingresado para confirmar detalles.");
                 
-                // Reset form
-                document.getElementById('checkout-telefono').value = "";
-                document.getElementById('checkout-direccion').value = "";
+                document.getElementById('checkout-telefono').value = ""; document.getElementById('checkout-direccion').value = "";
                 window.vaciarCarrito(); window.cerrarCarrito();
 
-            } catch (e) { alert("Error al procesar el pedido."); console.log(e); } 
+            } catch (e) { alert("Error al procesar el pedido."); } 
             finally { document.getElementById('btn-comprar').textContent = "Confirmar Pedido"; document.getElementById('btn-comprar').disabled = carrito.length === 0; }
         };
 
@@ -778,14 +784,13 @@
                 const variantesEntries = Object.entries(prod.variantes || {});
                 if(variantesEntries.length === 0) return;
                 
-                const primerVarianteId = variantesEntries[0][0];
                 const primerVariante = variantesEntries[0][1];
                 let stockTotal = 0; let selectOptionsHTML = ''; let miniTableHTML = '<div style="font-size: 0.8rem; color: #6b7280;">';
                 
                 variantesEntries.forEach(([vId, v]) => {
                     stockTotal += v.stock;
                     selectOptionsHTML += `<option value="${vId}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`;
-                    miniTableHTML += `<div>• ${v.detalle}: <b style="color:${v.stock<5?'#ef4444':'#1f2937'}">${v.stock} un.</b> ($${v.precio})</div>`;
+                    miniTableHTML += `<div>• ${v.detalle}: <b style="color:${v.stock<5?'#ef4444':'#1f2937'}">${window.formatearNum(v.stock)} un.</b> ($${window.formatearNum(v.precio)})</div>`;
                 });
                 miniTableHTML += '</div>';
 
@@ -795,8 +800,8 @@
                         <img src="${imagenSrc}" class="card-img" onerror="this.src='${imgPlaceholder}'">
                         <h3 style="margin-top:0; margin-bottom:10px;">${prod.nombre}</h3>
                         <select id="sel-var-${prod.id}" class="select-variante" onchange="window.cambiarVarianteUI('${prod.id}', this)">${selectOptionsHTML}</select>
-                        <p id="precio-display-${prod.id}" style="font-size: 1.4rem; font-weight: bold; color: var(--primary); margin: 0 0 5px 0;">$${primerVariante.precio}</p>
-                        <p id="stock-disp-${prod.id}" style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock: ${primerVariante.stock} un.</p>
+                        <p id="precio-display-${prod.id}" style="font-size: 1.4rem; font-weight: bold; color: var(--primary); margin: 0 0 5px 0;">$${window.formatearNum(primerVariante.precio)}</p>
+                        <p id="stock-disp-${prod.id}" style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock: ${window.formatearNum(primerVariante.stock)} un.</p>
                         <div class="acciones-compra">
                             <input type="number" id="cant-${prod.id}" class="input-cantidad" value="1" min="1" max="${primerVariante.stock}" ${primerVariante.stock === 0 ? 'disabled' : ''}>
                             <button id="btn-add-${prod.id}" style="flex-grow: 1;" onclick="window.agregarAlCarrito('${prod.id}')" ${primerVariante.stock === 0 ? 'disabled' : ''}>
@@ -815,10 +820,10 @@
                             </div>
                         </td>
                         <td>${miniTableHTML}</td>
-                        <td style="font-size: 1.1rem; font-weight:bold; color: ${stockTotal===0?'#ef4444':'inherit'}">${stockTotal} un.</td>
+                        <td style="font-size: 1.1rem; font-weight:bold; color: ${stockTotal===0?'#ef4444':'inherit'}">${window.formatearNum(stockTotal)} un.</td>
                         <td>
                             <button class="secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="window.abrirModal('${prod.id}')">✏️ Editar Opciones</button>
-                            <button class="success" style="padding: 5px 10px; font-size: 0.85rem; margin-top: 5px;" onclick="window.abrirModalStock('${prod.id}')">➕ Sumar Stock</button>
+                            <button class="success" style="padding: 5px 10px; font-size: 0.85rem; margin-top: 5px;" onclick="window.abrirModalStock('${prod.id}')">➕ Reponer</button>
                         </td>
                     </tr>`;
             });
@@ -846,11 +851,11 @@
                     lista.innerHTML += `
                         <div class="carrito-item">
                             <div><strong>${item.nombre}</strong> <br> <span style="color: #6b7280; font-size:0.8rem;">(${item.detalle}) x${item.cantidad}</span></div>
-                            <div><strong>$${(item.precio * item.cantidad).toFixed(2)}</strong> <button onclick="window.quitarDelCarrito(${item.indexReal})" class="danger" style="padding: 2px 8px; margin-left: 10px; font-size: 0.8rem;">X</button></div>
+                            <div><strong>$${window.formatearNum(item.precio * item.cantidad)}</strong> <button onclick="window.quitarDelCarrito(${item.indexReal})" class="danger" style="padding: 2px 8px; margin-left: 10px; font-size: 0.8rem;">X</button></div>
                         </div>`;
                 });
             }
-            totalSpan.textContent = total.toFixed(2);
+            totalSpan.textContent = window.formatearNum(total);
         }
         actualizarBadge();
     </script>
