@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Sistema de Gestión y Ventas</title>
+    <title>Sistema de Gestión y Ventas con Firebase</title>
     <style>
         /* ===== ESTILOS GENERALES Y UI ===== */
         :root {
@@ -13,13 +13,15 @@
             --text-main: #1f2937;
             --border: #e5e7eb;
         }
-        body { font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); }
+        body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); }
         .hidden { display: none !important; }
         button { background-color: var(--primary); color: white; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; font-weight: 500; transition: opacity 0.2s; }
         button:hover { opacity: 0.9; }
+        button:disabled { background-color: #9ca3af; cursor: not-allowed; }
         button.secondary { background-color: #6b7280; }
+        button.danger { background-color: #ef4444; }
         
-        /* Navegación de prueba */
+        /* Navegación */
         nav.dev-tools { background: #111827; padding: 15px; border-radius: 8px; margin-bottom: 25px; color: white; display: flex; gap: 10px; align-items: center; }
         
         /* Contenedores y Grillas */
@@ -27,6 +29,11 @@
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 15px; }
         .card { border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; }
         
+        /* Carrito de Compras */
+        .carrito-container { background: #f8fafc; border: 2px dashed #cbd5e1; padding: 15px; border-radius: 8px; margin-top: 25px; }
+        .carrito-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid var(--border); }
+        .carrito-total { font-size: 1.2rem; font-weight: bold; text-align: right; margin-top: 15px; }
+
         /* Panel Financiero */
         .metric-card { padding: 20px; border-radius: 8px; border-left: 4px solid; }
         .metric-bruta { background: #eff6ff; border-left-color: #3b82f6; }
@@ -40,9 +47,9 @@
         th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
         th { background-color: #f9fafb; font-weight: 600; }
 
-        /* Ventana Modal UI/UX */
+        /* Modal */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); display: flex; justify-content: center; align-items: center; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 400px; }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
@@ -52,15 +59,31 @@
 <body>
 
     <nav class="dev-tools">
-        <span>👁️ <strong>Simulador de Vistas:</strong></span>
-        <button onclick="cambiarVista('comprador')">Ver como Comprador</button>
-        <button onclick="cambiarVista('dueno')">Ver como Administrador</button>
+        <span>👁️ <strong>Simulador:</strong></span>
+        <button onclick="window.cambiarVista('comprador')">Ver como Comprador</button>
+        <button onclick="window.cambiarVista('dueno')">Ver como Administrador</button>
+        <span id="estado-conexion" style="margin-left:auto; color:#4ade80;">Conectando a Firebase...</span>
     </nav>
 
     <div id="vista-comprador" class="container">
         <h2>🛍️ Tienda Online</h2>
         <div id="catalogo-productos" class="grid-cards">
+            <p>Cargando productos...</p>
+        </div>
+
+        <div class="carrito-container">
+            <h3>🛒 Tu Carrito</h3>
+            <div id="lista-carrito">
+                <p style="color: #6b7280; font-style: italic;">El carrito está vacío</p>
             </div>
+            <div class="carrito-total">
+                Total: $<span id="total-carrito">0.00</span>
+            </div>
+            <div style="text-align: right; margin-top: 15px;">
+                <button onclick="window.vaciarCarrito()" class="secondary">Vaciar</button>
+                <button onclick="window.finalizarCompra()" id="btn-comprar" disabled>Confirmar Compra</button>
+            </div>
+        </div>
     </div>
 
     <div id="vista-dueno" class="container hidden">
@@ -68,7 +91,7 @@
         
         <div class="grid-cards" style="margin-bottom: 30px;">
             <div class="metric-card metric-bruta">
-                <h3>Ganancia Bruta</h3>
+                <h3>Ventas Brutas</h3>
                 <p id="metric-bruta">$0.00</p>
             </div>
             <div class="metric-card metric-neta">
@@ -76,14 +99,14 @@
                 <p id="metric-neta">$0.00</p>
             </div>
             <div class="metric-card metric-stock">
-                <h3>Ventas de Stock</h3>
+                <h3>Artículos Vendidos</h3>
                 <p id="metric-ventas-stock">0 un.</p>
             </div>
         </div>
 
         <div style="display: flex; justify-content: space-between; align-items: center;">
             <h3 style="margin: 0;">Control de Inventario</h3>
-            <button onclick="abrirModal()">+ Nuevo Producto</button>
+            <button onclick="window.abrirModal()">+ Nuevo Producto</button>
         </div>
         
         <table>
@@ -93,7 +116,6 @@
                     <th>Costo</th>
                     <th>Precio Venta</th>
                     <th>Stock</th>
-                    <th>Acciones</th>
                 </tr>
             </thead>
             <tbody id="tabla-stock">
@@ -104,57 +126,82 @@
     <div id="modal-producto" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 style="margin-top: 0;">Agregar Nuevo Producto</h3>
-            <div class="form-group">
-                <label>Nombre del Producto</label>
-                <input type="text" id="prod-nombre" placeholder="Ej: Remera Lisa">
-            </div>
-            <div class="form-group">
-                <label>Costo (Para calcular Ganancia Neta)</label>
-                <input type="number" id="prod-costo" placeholder="0.00">
-            </div>
-            <div class="form-group">
-                <label>Precio de Venta (Público)</label>
-                <input type="number" id="prod-precio" placeholder="0.00">
-            </div>
-            <div class="form-group">
-                <label>Cantidad en Stock</label>
-                <input type="number" id="prod-stock" placeholder="0">
-            </div>
+            <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre"></div>
+            <div class="form-group"><label>Costo</label><input type="number" id="prod-costo"></div>
+            <div class="form-group"><label>Precio Venta</label><input type="number" id="prod-precio"></div>
+            <div class="form-group"><label>Stock Inicial</label><input type="number" id="prod-stock"></div>
             <div class="modal-actions">
-                <button class="secondary" onclick="cerrarModal()">Cancelar</button>
-                <button onclick="guardarProducto()">Guardar Producto</button>
+                <button class="secondary" onclick="window.cerrarModal()">Cancelar</button>
+                <button onclick="window.guardarProducto()">Guardar</button>
             </div>
         </div>
     </div>
 
-    <script>
-        // --- ESTADO DE LA APLICACIÓN (Simula la Base de Datos) ---
-        let productos = [
-            { id: 1, nombre: 'Producto Demo', costo: 500, precio: 1500, stock: 10 }
-        ];
-        
-        // --- NAVEGACIÓN ---
-        function cambiarVista(rol) {
+    <script type="module">
+        // 1. Importar librerías de Firebase usando CDN
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, increment } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // 2. Tu configuración de Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
+            authDomain: "pedidos-dba18.firebaseapp.com",
+            projectId: "pedidos-dba18",
+            storageBucket: "pedidos-dba18.firebasestorage.app",
+            messagingSenderId: "361618837437",
+            appId: "1:361618837437:web:ec464cb07617c5bdb5ccd4"
+        };
+
+        // 3. Inicializar Firebase y Firestore
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // Variables de estado
+        let productos = [];
+        let carrito = [];
+
+        // --- NAVEGACIÓN Y UI (Expuestos a window para que funcionen con los onclick del HTML) ---
+        window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
-        }
+        };
 
-        // --- CONTROL DEL MODAL ---
-        function abrirModal() {
-            document.getElementById('modal-producto').classList.remove('hidden');
-        }
-
-        function cerrarModal() {
+        window.abrirModal = () => document.getElementById('modal-producto').classList.remove('hidden');
+        window.cerrarModal = () => {
             document.getElementById('modal-producto').classList.add('hidden');
-            // Limpiar inputs
             document.getElementById('prod-nombre').value = '';
             document.getElementById('prod-costo').value = '';
             document.getElementById('prod-precio').value = '';
             document.getElementById('prod-stock').value = '';
-        }
+        };
 
-        // --- LÓGICA DE NEGOCIO ---
-        function guardarProducto() {
+        // --- FIREBASE: ESCUCHAR PRODUCTOS EN TIEMPO REAL ---
+        onSnapshot(collection(db, "productos"), (snapshot) => {
+            productos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            renderizarCatalogoYStock();
+            document.getElementById('estado-conexion').textContent = "🟢 Conectado";
+        }, (error) => {
+            console.error("Error al conectar con Firestore:", error);
+            document.getElementById('estado-conexion').textContent = "🔴 Error de conexión";
+            document.getElementById('estado-conexion').style.color = "#ef4444";
+        });
+
+        // --- FIREBASE: ESCUCHAR VENTAS PARA EL DASHBOARD ---
+        onSnapshot(collection(db, "ventas"), (snapshot) => {
+            let bruta = 0; let neta = 0; let cant = 0;
+            snapshot.forEach(doc => {
+                const venta = doc.data();
+                bruta += venta.totalVenta || 0;
+                neta += venta.gananciaNeta || 0;
+                cant += venta.cantidadArticulos || 0;
+            });
+            document.getElementById('metric-bruta').textContent = `$${bruta.toFixed(2)}`;
+            document.getElementById('metric-neta').textContent = `$${neta.toFixed(2)}`;
+            document.getElementById('metric-ventas-stock').textContent = `${cant} un.`;
+        });
+
+        // --- FIREBASE: GUARDAR NUEVO PRODUCTO ---
+        window.guardarProducto = async () => {
             const nombre = document.getElementById('prod-nombre').value;
             const costo = parseFloat(document.getElementById('prod-costo').value) || 0;
             const precio = parseFloat(document.getElementById('prod-precio').value) || 0;
@@ -162,38 +209,116 @@
 
             if (!nombre) return alert("El nombre es obligatorio");
 
-            const nuevoProducto = {
-                id: Date.now(), // ID temporal único
-                nombre, costo, precio, stock
-            };
+            try {
+                // Guardamos en la colección "productos" de Firestore
+                await addDoc(collection(db, "productos"), {
+                    nombre, costo, precio, stock
+                });
+                window.cerrarModal();
+            } catch (e) {
+                console.error("Error al guardar:", e);
+                alert("Hubo un error al guardar el producto.");
+            }
+        };
 
-            productos.push(nuevoProducto); // Guardamos en el array (luego será Firebase)
-            cerrarModal();
-            renderizarUI(); // Actualizamos las vistas
-        }
+        // --- LÓGICA DEL CARRITO DE COMPRAS ---
+        window.agregarAlCarrito = (idProducto) => {
+            const producto = productos.find(p => p.id === idProducto);
+            
+            // Verificamos si ya hay suficientes en el carrito respecto al stock real
+            const enCarrito = carrito.filter(item => item.id === idProducto).length;
+            if (enCarrito >= producto.stock) {
+                return alert("No hay más stock disponible de este producto.");
+            }
 
-        // --- RENDERIZADO DE INTERFAZ ---
-        function renderizarUI() {
+            carrito.push(producto);
+            renderizarCarrito();
+        };
+
+        window.quitarDelCarrito = (index) => {
+            carrito.splice(index, 1);
+            renderizarCarrito();
+        };
+
+        window.vaciarCarrito = () => {
+            carrito = [];
+            renderizarCarrito();
+        };
+
+        window.finalizarCompra = async () => {
+            if (carrito.length === 0) return;
+
+            document.getElementById('btn-comprar').disabled = true;
+            document.getElementById('btn-comprar').textContent = "Procesando...";
+
+            try {
+                let totalVenta = 0;
+                let costoTotal = 0;
+
+                // 1. Descontar el stock en Firebase por cada producto
+                // Agrupamos los ids para no descontar 1 por 1 si compran 3 del mismo
+                const conteoProductos = {};
+                carrito.forEach(p => {
+                    conteoProductos[p.id] = (conteoProductos[p.id] || 0) + 1;
+                    totalVenta += p.precio;
+                    costoTotal += p.costo;
+                });
+
+                for (const [id, cantidad] of Object.entries(conteoProductos)) {
+                    const productoRef = doc(db, "productos", id);
+                    await updateDoc(productoRef, {
+                        // "increment" resta la cantidad de forma segura en la base de datos
+                        stock: increment(-cantidad) 
+                    });
+                }
+
+                // 2. Registrar la venta en Firebase para las métricas financieras
+                await addDoc(collection(db, "ventas"), {
+                    fecha: new Date(),
+                    totalVenta: totalVenta,
+                    gananciaNeta: totalVenta - costoTotal,
+                    cantidadArticulos: carrito.length,
+                    items: carrito.map(p => ({ id: p.id, nombre: p.nombre, precio: p.precio }))
+                });
+
+                alert("¡Compra realizada con éxito!");
+                window.vaciarCarrito();
+
+            } catch (e) {
+                console.error("Error en la compra:", e);
+                alert("Ocurrió un error al procesar la compra.");
+            } finally {
+                document.getElementById('btn-comprar').textContent = "Confirmar Compra";
+                document.getElementById('btn-comprar').disabled = carrito.length === 0;
+            }
+        };
+
+        // --- RENDERIZADO VISUAL ---
+        function renderizarCatalogoYStock() {
             const catalogo = document.getElementById('catalogo-productos');
             const tabla = document.getElementById('tabla-stock');
             
             catalogo.innerHTML = '';
             tabla.innerHTML = '';
 
+            if(productos.length === 0) {
+                catalogo.innerHTML = "<p>No hay productos registrados.</p>";
+            }
+
             productos.forEach(prod => {
-                // 1. Pintar en Vista Comprador
+                // Catálogo del cliente
                 catalogo.innerHTML += `
                     <div class="card">
                         <h3 style="margin-top:0;">${prod.nombre}</h3>
                         <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary);">$${prod.precio}</p>
-                        <p style="font-size: 0.8rem; color: #6b7280;">Stock disponible: ${prod.stock}</p>
-                        <button onclick="simularVenta(${prod.id})" ${prod.stock === 0 ? 'disabled' : ''}>
-                            ${prod.stock === 0 ? 'Sin Stock' : 'Comprar (Simular)'}
+                        <p style="font-size: 0.8rem; color: #6b7280;">Stock: ${prod.stock}</p>
+                        <button onclick="window.agregarAlCarrito('${prod.id}')" ${prod.stock === 0 ? 'disabled' : ''}>
+                            ${prod.stock === 0 ? 'Agotado' : 'Agregar al Carrito'}
                         </button>
                     </div>
                 `;
 
-                // 2. Pintar en Tabla del Dueño
+                // Tabla del dueño
                 tabla.innerHTML += `
                     <tr>
                         <td><strong>${prod.nombre}</strong></td>
@@ -204,46 +329,39 @@
                                 ${prod.stock} un.
                             </span>
                         </td>
-                        <td><button class="secondary" style="padding: 4px 8px; font-size: 0.8rem;">Editar</button></td>
                     </tr>
                 `;
             });
         }
 
-        // --- SIMULACIÓN DE VENTAS Y MÉTRICAS ---
-        // Variables para las métricas
-        let totalVentasBrutas = 0;
-        let totalGananciaNeta = 0;
-        let totalArticulosVendidos = 0;
+        function renderizarCarrito() {
+            const lista = document.getElementById('lista-carrito');
+            const totalSpan = document.getElementById('total-carrito');
+            const btnComprar = document.getElementById('btn-comprar');
 
-        function simularVenta(idProducto) {
-            const index = productos.findIndex(p => p.id === idProducto);
-            if (index !== -1 && productos[index].stock > 0) {
-                // Descontar stock
-                productos[index].stock -= 1;
-                
-                // Calcular finanzas
-                const precioVenta = productos[index].precio;
-                const costo = productos[index].costo;
-                
-                totalVentasBrutas += precioVenta;
-                totalGananciaNeta += (precioVenta - costo);
-                totalArticulosVendidos += 1;
+            lista.innerHTML = '';
+            let total = 0;
 
-                // Actualizar UI
-                actualizarMetricas();
-                renderizarUI();
+            if (carrito.length === 0) {
+                lista.innerHTML = '<p style="color: #6b7280; font-style: italic;">El carrito está vacío</p>';
+                btnComprar.disabled = true;
+            } else {
+                btnComprar.disabled = false;
+                carrito.forEach((item, index) => {
+                    total += item.precio;
+                    lista.innerHTML += `
+                        <div class="carrito-item">
+                            <span>${item.nombre}</span>
+                            <div>
+                                <strong>$${item.precio}</strong>
+                                <button onclick="window.quitarDelCarrito(${index})" class="danger" style="padding: 2px 6px; margin-left: 10px; font-size: 0.8rem;">X</button>
+                            </div>
+                        </div>
+                    `;
+                });
             }
+            totalSpan.textContent = total.toFixed(2);
         }
-
-        function actualizarMetricas() {
-            document.getElementById('metric-bruta').textContent = `$${totalVentasBrutas.toFixed(2)}`;
-            document.getElementById('metric-neta').textContent = `$${totalGananciaNeta.toFixed(2)}`;
-            document.getElementById('metric-ventas-stock').textContent = `${totalArticulosVendidos} un.`;
-        }
-
-        // Inicializar la app al cargar
-        renderizarUI();
     </script>
 </body>
 </html>
