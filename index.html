@@ -31,13 +31,14 @@
         
         /* Tienda */
         .header-tienda { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid var(--border); padding-bottom: 15px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
-        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 20px; margin-top: 20px; }
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; margin-top: 20px; }
         .card { border: 1px solid var(--border); padding: 20px; border-radius: 8px; text-align: center; display: flex; flex-direction: column; }
         .card-img { width: 100%; height: 180px; object-fit: cover; border-radius: 6px; margin-bottom: 15px; background-color: #f3f4f6; }
         .btn-carrito-nav { position: relative; background: white; color: var(--text-main); border: 2px solid var(--border); padding: 8px 20px; font-size: 1.1rem; border-radius: 8px; }
         .badge { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 0.8rem; font-weight: bold; }
         .acciones-compra { display: flex; gap: 8px; margin-top: auto; }
         .input-cantidad { width: 60px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: center; }
+        .select-variante { width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 6px; border: 1px solid var(--border); background: #f8fafc; font-weight: 500; }
 
         /* Modal Carrito */
         .carrito-item { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); align-items: center; }
@@ -51,37 +52,35 @@
         th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
         th { background-color: #f9fafb; font-weight: 600; }
 
-        /* ===== MÓDULO FINANZAS (ESTILO OSCURO) ===== */
+        /* MÓDULO FINANZAS (ESTILO OSCURO) */
         .finanzas-container { background-color: var(--dark-bg); padding: 20px; border-radius: 12px; color: #f9fafb; }
         .modulo-oscuro { background-color: var(--dark-card); border: 1px solid var(--dark-border); border-radius: 8px; margin-bottom: 15px; overflow: hidden; }
         .modulo-header { background-color: #1f2937; padding: 12px 20px; font-weight: bold; display: flex; justify-content: space-between; align-items: center; cursor: pointer; user-select: none; }
-        .modulo-header:hover { background-color: #374151; }
         .modulo-body { padding: 20px; border-top: 1px solid var(--dark-border); }
-        
         .dark-input-group { display: flex; gap: 10px; margin-bottom: 15px; align-items: flex-end; flex-wrap: wrap; }
         .dark-input-group > div { flex: 1; min-width: 150px; }
         .dark-input-group label { display: block; font-size: 0.8rem; color: #9ca3af; margin-bottom: 5px; font-weight: bold; }
         .dark-input { width: 100%; background: #374151; border: 1px solid #4b5563; color: white; padding: 8px; border-radius: 4px; box-sizing: border-box; }
-        .dark-input:focus { outline: none; border-color: #60a5fa; }
-        
         .dark-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
-        .dark-table th { background-color: transparent; border-bottom: 2px solid var(--dark-border); color: #9ca3af; padding: 8px; }
+        .dark-table th { border-bottom: 2px solid var(--dark-border); color: #9ca3af; padding: 8px; }
         .dark-table td { border-bottom: 1px solid var(--dark-border); padding: 10px 8px; }
         .btn-dark-action { background: #4b5563; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; width: 100%; font-weight: bold;}
-        .btn-dark-action:hover { background: #6b7280; }
         .btn-trash { background: transparent; color: #ef4444; border: 1px solid #ef4444; padding: 4px 8px; border-radius: 4px; cursor: pointer; }
-        .btn-trash:hover { background: #ef4444; color: white; }
-        
-        /* Cajas de Balance (Widgets) */
         .widget-balance { flex: 1; background: #1f2937; padding: 20px; border-radius: 8px; text-align: center; border-left: 4px solid; min-width: 150px;}
 
         /* Modal Base */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
-        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 450px; max-height: 90vh; overflow-y: auto; color: var(--text-main); }
+        .modal-content { background: white; padding: 30px; border-radius: 12px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; color: var(--text-main); }
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
+        
+        /* Variantes UI Admin */
+        .variant-row { display: flex; gap: 8px; align-items: center; margin-bottom: 10px; background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px solid var(--border); }
+        .variant-row input { padding: 6px; font-size: 0.85rem; border: 1px solid var(--border); border-radius: 4px; width: 100%; }
+        .variant-row input:disabled { background: #e5e7eb; color: #6b7280; }
+        .mini-label { font-size: 0.7rem; color: #6b7280; margin-bottom: 2px; display: block; }
     </style>
 </head>
 <body>
@@ -130,7 +129,7 @@
         <h2 style="margin-top: 0; margin-bottom: 25px;">👑 Panel de Administración</h2>
         
         <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-            <button class="outline" onclick="window.togglePanel('panel-inventario')">📦 Inventario</button>
+            <button class="outline" onclick="window.togglePanel('panel-inventario')">📦 Inventario y Productos</button>
             <button class="outline" onclick="window.togglePanel('panel-finanzas')">💰 Finanzas y Caja</button>
         </div>
 
@@ -138,16 +137,13 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border);">
                 <h3 style="margin: 0;">📦 Control de Inventario</h3>
                 <div style="display: flex; gap: 15px; align-items: center;">
-                    <div class="search-container">
-                        <span>🔍</span>
-                        <input type="text" class="input-busqueda" placeholder="Buscar en inventario..." onkeyup="window.buscarProductos(this.value)">
-                    </div>
+                    <div class="search-container"><span>🔍</span><input type="text" class="input-busqueda" placeholder="Buscar..." onkeyup="window.buscarProductos(this.value)"></div>
                     <button onclick="window.abrirModal()">+ Nuevo Producto</button>
                 </div>
             </div>
             <div style="overflow-x: auto;">
                 <table>
-                    <thead><tr><th>Producto</th><th>Costo</th><th>Precio Venta</th><th>Stock</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Producto</th><th>Variantes (Tamaño/Tipo)</th><th>Stock Total</th><th>Acciones</th></tr></thead>
                     <tbody id="tabla-stock"></tbody>
                 </table>
             </div>
@@ -156,68 +152,41 @@
         <div id="panel-finanzas" class="finanzas-container hidden">
             
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-balances')">
-                    <span>📊 Balance de Ganancias (Automático)</span> <span>▼</span>
-                </div>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-balances')"><span>📊 Balance Automático</span> <span>▼</span></div>
                 <div id="body-balances" class="modulo-body">
                     <div class="dark-input-group" style="max-width: 300px;">
                         <div>
                             <label>Periodo a analizar:</label>
                             <select id="filtro-periodo" class="dark-input" onchange="window.calcularBalanceEnVivo()" style="font-weight: bold;">
-                                <option value="hoy">Hoy (Últimas 24hs)</option>
-                                <option value="semana">Última Semana</option>
-                                <option value="mes">Último Mes</option>
-                                <option value="siempre">Histórico Completo</option>
+                                <option value="hoy">Hoy (Últimas 24hs)</option><option value="semana">Última Semana</option><option value="mes">Último Mes</option><option value="siempre">Histórico Completo</option>
                             </select>
                         </div>
                     </div>
-                    
                     <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                        <div class="widget-balance" style="border-color: var(--success);">
-                            <h4 style="margin: 0 0 5px 0; color: #9ca3af; text-transform: uppercase; font-size: 0.8rem;">Ingresos Totales</h4>
-                            <p id="bal-ingresos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--success);">$0.00</p>
-                        </div>
-                        <div class="widget-balance" style="border-color: var(--danger);">
-                            <h4 style="margin: 0 0 5px 0; color: #9ca3af; text-transform: uppercase; font-size: 0.8rem;">Gastos Totales</h4>
-                            <p id="bal-gastos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--danger);">$0.00</p>
-                        </div>
-                        <div class="widget-balance" style="border-color: #3b82f6; background-color: #1e3a8a;">
-                            <h4 style="margin: 0 0 5px 0; color: #93c5fd; text-transform: uppercase; font-size: 0.8rem;">Ganancia Neta</h4>
-                            <p id="bal-neta" style="margin: 0; font-size: 2.2rem; font-weight: bold; color: white;">$0.00</p>
-                        </div>
+                        <div class="widget-balance" style="border-color: var(--success);"><h4 style="margin: 0 0 5px 0; color: #9ca3af; font-size: 0.8rem;">Ingresos Totales</h4><p id="bal-ingresos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--success);">$0.00</p></div>
+                        <div class="widget-balance" style="border-color: var(--danger);"><h4 style="margin: 0 0 5px 0; color: #9ca3af; font-size: 0.8rem;">Gastos Totales</h4><p id="bal-gastos" style="margin: 0; font-size: 1.8rem; font-weight: bold; color: var(--danger);">$0.00</p></div>
+                        <div class="widget-balance" style="border-color: #3b82f6; background-color: #1e3a8a;"><h4 style="margin: 0 0 5px 0; color: #93c5fd; font-size: 0.8rem;">Ganancia Neta</h4><p id="bal-neta" style="margin: 0; font-size: 2.2rem; font-weight: bold; color: white;">$0.00</p></div>
                     </div>
                 </div>
             </div>
 
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-transacciones')">
-                    <span>🔄 Historial de Transacciones (Libro Diario)</span> <span>▼</span>
-                </div>
-                <div id="body-transacciones" class="modulo-body">
-                    <table class="dark-table">
-                        <thead><tr><th>Fecha y Hora</th><th>Tipo</th><th>Detalle / Origen</th><th>Monto</th></tr></thead>
-                        <tbody id="tabla-transacciones"></tbody>
-                    </table>
-                </div>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-transacciones')"><span>🔄 Historial de Transacciones (Libro Diario)</span> <span>▼</span></div>
+                <div id="body-transacciones" class="modulo-body"><table class="dark-table"><thead><tr><th>Fecha y Hora</th><th>Tipo</th><th>Detalle / Origen</th><th>Monto</th></tr></thead><tbody id="tabla-transacciones"></tbody></table></div>
             </div>
 
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')">
-                    <span>📈 Registrar Ingresos y Ventas</span> <span>▼</span>
-                </div>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>📈 Registrar Ingresos y Ventas</span> <span>▼</span></div>
                 <div id="body-ingresos" class="modulo-body hidden">
-                    <p style="font-size: 0.8rem; color: #9ca3af; margin-top: 0;">Carga ventas rápidas o ingresos de dinero libre.</p>
-                    
                     <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #1f2937;">
                         <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px; color:#60a5fa;">▶ Venta Rápida (Descuenta Stock):</label>
                         <div class="dark-input-group">
-                            <div style="flex: 2;"><select id="venta-rapida-prod" class="dark-input"><option value="">Selecciona producto para vender...</option></select></div>
+                            <div style="flex: 2;"><select id="venta-rapida-prod" class="dark-input"><option value="">Selecciona variante para vender...</option></select></div>
                             <div><input type="number" id="venta-rapida-efectivo" class="dark-input" placeholder="Efectivo $"></div>
                             <div><input type="number" id="venta-rapida-transf" class="dark-input" placeholder="Transf. $"></div>
                         </div>
                         <button class="btn-dark-action" onclick="window.registrarVentaRapida()">Confirmar Venta Rápida</button>
                     </div>
-
                     <div style="border: 1px solid #4b5563; padding: 15px; border-radius: 6px; margin-bottom: 15px; background: #1f2937;">
                         <label style="display:block; font-size:0.85rem; font-weight:bold; margin-bottom:10px; color:#60a5fa;">▶ Ingreso Manual Libre:</label>
                         <div class="dark-input-group">
@@ -227,33 +196,19 @@
                         </div>
                         <button class="btn-dark-action" onclick="window.registrarIngresoManual()">Registrar Ingreso Manual</button>
                     </div>
-
-                    <table class="dark-table">
-                        <thead><tr><th>Detalle del Ingreso</th><th>Efectivo</th><th>Transf.</th><th>Borrar</th></tr></thead>
-                        <tbody id="tabla-ingresos"></tbody>
-                    </table>
                 </div>
             </div>
 
             <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')">
-                    <span>💸 Registrar Gastos Externos</span> <span>▼</span>
-                </div>
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')"><span>💸 Registrar Gastos Externos</span> <span>▼</span></div>
                 <div id="body-gastos" class="modulo-body hidden">
                     <div class="dark-input-group">
-                        <div><label>Título (Ej: Luz, Alquiler)</label><input type="text" id="gasto-titulo" class="dark-input"></div>
+                        <div><label>Título (Ej: Luz)</label><input type="text" id="gasto-titulo" class="dark-input"></div>
                         <div><label>Importe Gastado $</label><input type="number" id="gasto-importe" class="dark-input"></div>
-                        <div><label>Descripción corta (Opcional)</label><input type="text" id="gasto-desc" class="dark-input"></div>
                     </div>
                     <button class="btn-dark-action" onclick="window.registrarGasto()" style="background: var(--danger);">Registrar Salida de Dinero</button>
-                    
-                    <table class="dark-table">
-                        <thead><tr><th>Detalle del Gasto</th><th>Importe</th><th>Borrar</th></tr></thead>
-                        <tbody id="tabla-gastos"></tbody>
-                    </table>
                 </div>
             </div>
-
         </div>
     </div>
 
@@ -261,18 +216,21 @@
         <div class="modal-content">
             <h3 id="modal-titulo" style="margin-top: 0;">Agregar Nuevo Producto</h3>
             <input type="hidden" id="prod-id">
-            <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre"></div>
+            <div class="form-group"><label>Nombre del Producto Base (Ej: Coca Cola)</label><input type="text" id="prod-nombre"></div>
             <div class="form-group"><label>URL Imagen (Solo links directos .jpg .png)</label><input type="text" id="prod-imagen" placeholder="https://ejemplo.com/foto.jpg"></div>
-            <div class="form-group"><label>Precio de Venta</label><input type="number" id="prod-precio"></div>
             
-            <div id="caja-stock-costo" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1; margin-bottom: 15px;">
-                <div class="form-group"><label>Costo Inicial</label><input type="number" id="prod-costo"></div>
-                <div class="form-group" style="margin-bottom: 0;"><label>Stock Inicial</label><input type="number" id="prod-stock"></div>
+            <hr style="border: 0; border-top: 1px solid var(--border); margin: 20px 0;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <label style="font-weight: bold; margin:0;">Opciones y Tamaños (Variantes)</label>
+                <button type="button" class="success" style="padding: 4px 10px; font-size: 0.8rem;" onclick="window.agregarFilaVariante()">+ Añadir Opción</button>
             </div>
+            
+            <div id="contenedor-variantes">
+                </div>
 
-            <div class="modal-actions">
+            <div class="modal-actions" style="margin-top: 30px;">
                 <button class="secondary" onclick="window.cerrarModal()">Cancelar</button>
-                <button onclick="window.guardarProducto()">Guardar</button>
+                <button onclick="window.guardarProducto()">Guardar Producto Completo</button>
             </div>
         </div>
     </div>
@@ -280,10 +238,17 @@
     <div id="modal-stock" class="modal-overlay hidden">
         <div class="modal-content">
             <h3 style="margin-top: 0; color: var(--success);">➕ Ingresar Mercadería</h3>
-            <p id="stock-nombre-prod" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;"></p>
-            <input type="hidden" id="stock-id">
+            <p id="stock-nombre-prod" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 15px;"></p>
+            <input type="hidden" id="stock-id-prod">
+            
+            <div class="form-group">
+                <label>¿A qué variante o tamaño le ingresa stock?</label>
+                <select id="stock-select-var" class="select-variante" style="width: 100%;" onchange="window.cambioVarianteStock(this)"></select>
+            </div>
+
             <div class="form-group"><label>Cantidad de unidades a sumar</label><input type="number" id="stock-cantidad" min="1" value="1"></div>
-            <div class="form-group"><label>Nuevo Costo Unitario</label><input type="number" id="stock-nuevo-costo"></div>
+            <div class="form-group"><label>Nuevo Costo Unitario de esta versión</label><input type="number" id="stock-nuevo-costo"></div>
+            
             <div class="modal-actions">
                 <button class="secondary" onclick="window.cerrarModalStock()">Cancelar</button>
                 <button class="success" onclick="window.guardarNuevoStock()">Confirmar Ingreso</button>
@@ -311,122 +276,204 @@
         let productos = []; let carrito = []; let terminoBusqueda = "";
         let ingresosGlobales = []; let gastosGlobales = [];
 
-        // --- UI BÁSICA ---
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
         };
-
         window.togglePanel = (id) => document.getElementById(id).classList.toggle('hidden');
         window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
+        window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); renderizarCatalogoYStock(); };
 
-        window.buscarProductos = (texto) => {
-            terminoBusqueda = texto.toLowerCase();
-            document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto);
-            renderizarCatalogoYStock();
+        // --- LÓGICA DE VARIANTES (MODAL ADMIN) ---
+        window.agregarFilaVariante = (idVar = '', detalle = '', costo = '', precio = '', stock = '', bloqueado = false) => {
+            const container = document.getElementById('contenedor-variantes');
+            const vId = idVar || 'var_' + Date.now() + Math.floor(Math.random() * 1000);
+            
+            const div = document.createElement('div');
+            div.className = 'variant-row';
+            div.id = `row-${vId}`;
+            div.innerHTML = `
+                <input type="hidden" class="v-id" value="${vId}">
+                <div style="flex:2"><span class="mini-label">Tamaño/Tipo</span><input type="text" class="v-detalle" placeholder="Ej: 1L Zero" value="${detalle}"></div>
+                <div><span class="mini-label">Costo $</span><input type="number" class="v-costo" placeholder="0" value="${costo}" ${bloqueado ? 'disabled' : ''}></div>
+                <div><span class="mini-label">Precio $</span><input type="number" class="v-precio" placeholder="0" value="${precio}"></div>
+                <div><span class="mini-label">Stock</span><input type="number" class="v-stock" placeholder="0" value="${stock}" ${bloqueado ? 'disabled' : ''}></div>
+                <button type="button" class="btn-trash" style="margin-top: 15px;" onclick="this.parentElement.remove()">X</button>
+            `;
+            container.appendChild(div);
         };
 
-        // --- MODALES INVENTARIO ---
         window.abrirModal = (idProducto = null) => {
             const modal = document.getElementById('modal-producto');
-            const titulo = document.getElementById('modal-titulo');
-            const cajaStockCosto = document.getElementById('caja-stock-costo');
+            const container = document.getElementById('contenedor-variantes');
+            container.innerHTML = ''; // Limpiar filas anteriores
             
             if (idProducto) {
                 const prod = productos.find(p => p.id === idProducto);
-                titulo.textContent = "Editar Producto";
+                document.getElementById('modal-titulo').textContent = "Editar Producto";
                 document.getElementById('prod-id').value = prod.id;
                 document.getElementById('prod-nombre').value = prod.nombre;
                 document.getElementById('prod-imagen').value = prod.imagen || "";
-                document.getElementById('prod-precio').value = prod.precio;
-                cajaStockCosto.classList.add('hidden');
+                
+                // Mapear variantes existentes. OJO: Bloqueamos costo/stock de las que ya existen.
+                const variantes = prod.variantes || {};
+                Object.entries(variantes).forEach(([vId, v]) => {
+                    window.agregarFilaVariante(vId, v.detalle, v.costo, v.precio, v.stock, true);
+                });
             } else {
-                titulo.textContent = "Agregar Nuevo Producto";
-                document.getElementById('prod-id').value = ""; document.getElementById('prod-nombre').value = "";
-                document.getElementById('prod-imagen').value = ""; document.getElementById('prod-precio').value = "";
-                document.getElementById('prod-costo').value = ""; document.getElementById('prod-stock').value = "";
-                cajaStockCosto.classList.remove('hidden');
+                document.getElementById('modal-titulo').textContent = "Agregar Nuevo Producto";
+                document.getElementById('prod-id').value = ""; document.getElementById('prod-nombre').value = ""; document.getElementById('prod-imagen').value = "";
+                // Fila por defecto
+                window.agregarFilaVariante('', 'Normal / Única', '', '', '', false);
             }
             modal.classList.remove('hidden');
         };
         window.cerrarModal = () => document.getElementById('modal-producto').classList.add('hidden');
-        
-        window.abrirModalStock = (id) => {
-            const prod = productos.find(p => p.id === id);
-            document.getElementById('stock-id').value = prod.id;
-            document.getElementById('stock-nombre-prod').textContent = `📦 ${prod.nombre}`;
-            document.getElementById('stock-cantidad').value = 1;
-            document.getElementById('stock-nuevo-costo').value = prod.costo; 
-            document.getElementById('modal-stock').classList.remove('hidden');
-        };
-        window.cerrarModalStock = () => document.getElementById('modal-stock').classList.add('hidden');
 
-        // --- GUARDAR INVENTARIO ---
         window.guardarProducto = async () => {
             const id = document.getElementById('prod-id').value;
             const nombre = document.getElementById('prod-nombre').value;
             const imagen = document.getElementById('prod-imagen').value;
-            const precio = parseFloat(document.getElementById('prod-precio').value) || 0;
-
             if (!nombre) return alert("Nombre obligatorio.");
+
+            // Recopilar variantes del formulario
+            const variantesNuevas = {};
+            const filas = document.querySelectorAll('.variant-row');
+            if (filas.length === 0) return alert("Debes agregar al menos una variante u opción.");
+
+            filas.forEach(fila => {
+                const vId = fila.querySelector('.v-id').value;
+                const detalle = fila.querySelector('.v-detalle').value || 'Variante';
+                const precio = parseFloat(fila.querySelector('.v-precio').value) || 0;
+                
+                // Solo leemos costo y stock si el campo NO está deshabilitado
+                const inputCosto = fila.querySelector('.v-costo');
+                const inputStock = fila.querySelector('.v-stock');
+                
+                // Estructura base
+                variantesNuevas[vId] = { detalle, precio };
+                
+                // Si es una variante nueva (inputs habilitados), guardamos stock y costo inicial
+                if (!inputCosto.disabled) {
+                    variantesNuevas[vId].costo = parseFloat(inputCosto.value) || 0;
+                    variantesNuevas[vId].stock = parseInt(inputStock.value) || 0;
+                }
+            });
+
             try {
                 if (id) {
-                    await updateDoc(doc(db, "productos", id), { nombre, imagen, precio });
+                    // MODO EDICIÓN: Firestore no reemplaza el objeto, lo fusiona.
+                    // Para actualizar dinámicamente sin pisar el stock existente, construimos un objeto dot-notation
+                    const updates = { nombre, imagen };
+                    
+                    // Aseguramos que los precios y nombres de las variantes se actualicen.
+                    // NOTA: En un caso real, si eliminas una variante, requeriría lógica extra. 
+                    // Aquí actualizaremos las propiedades enviadas.
+                    updates['variantes'] = variantesNuevas; // Pisa la lista de variantes. 
+                    
+                    // ATENCIÓN: Al pisar 'variantes' se pierde el stock real en BD.
+                    // Solución segura: Mantenemos el stock viejo leyendo el producto actual.
+                    const prodActual = productos.find(p => p.id === id);
+                    Object.keys(variantesNuevas).forEach(vId => {
+                        if (prodActual.variantes && prodActual.variantes[vId]) {
+                            variantesNuevas[vId].stock = prodActual.variantes[vId].stock;
+                            variantesNuevas[vId].costo = prodActual.variantes[vId].costo;
+                        }
+                    });
+                    
+                    await updateDoc(doc(db, "productos", id), updates);
                 } else {
-                    const costo = parseFloat(document.getElementById('prod-costo').value) || 0;
-                    const stock = parseInt(document.getElementById('prod-stock').value) || 0;
-                    await addDoc(collection(db, "productos"), { nombre, imagen, costo, precio, stock });
+                    // MODO CREACIÓN
+                    await addDoc(collection(db, "productos"), { nombre, imagen, variantes: variantesNuevas });
                 }
                 window.cerrarModal();
-            } catch (e) { alert("Error al guardar."); }
+            } catch (e) { alert("Error al guardar."); console.log(e); }
         };
+
+        // --- INGRESO DE STOCK A UNA VARIANTE ---
+        window.abrirModalStock = (id) => {
+            const prod = productos.find(p => p.id === id);
+            document.getElementById('stock-id-prod').value = prod.id;
+            document.getElementById('stock-nombre-prod').textContent = `📦 ${prod.nombre}`;
+            document.getElementById('stock-cantidad').value = 1;
+            
+            const selectVar = document.getElementById('stock-select-var');
+            selectVar.innerHTML = '';
+            
+            // Llenar select con las variantes
+            const variantes = prod.variantes || {};
+            let primerVarianteCosto = 0;
+            
+            Object.entries(variantes).forEach(([vId, v], index) => {
+                if(index === 0) primerVarianteCosto = v.costo;
+                selectVar.innerHTML += `<option value="${vId}" data-costo="${v.costo}">${v.detalle} (Stock actual: ${v.stock})</option>`;
+            });
+            
+            document.getElementById('stock-nuevo-costo').value = primerVarianteCosto; 
+            document.getElementById('modal-stock').classList.remove('hidden');
+        };
+        
+        window.cambioVarianteStock = (selectElement) => {
+            const selectedOption = selectElement.options[selectElement.selectedIndex];
+            document.getElementById('stock-nuevo-costo').value = selectedOption.getAttribute('data-costo');
+        };
+
+        window.cerrarModalStock = () => document.getElementById('modal-stock').classList.add('hidden');
 
         window.guardarNuevoStock = async () => {
-            const id = document.getElementById('stock-id').value;
+            const idProd = document.getElementById('stock-id-prod').value;
+            const idVar = document.getElementById('stock-select-var').value;
             const cant = parseInt(document.getElementById('stock-cantidad').value) || 0;
             const costo = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0;
-            if (cant <= 0) return alert("Cantidad inválida.");
+            if (cant <= 0 || !idVar) return alert("Cantidad inválida o variante no seleccionada.");
+            
             try {
-                await updateDoc(doc(db, "productos", id), { stock: increment(cant), costo: costo });
+                const updates = {};
+                // Magia de Firestore: Actualizamos un campo específico de un objeto sin tocar el resto
+                updates[`variantes.${idVar}.stock`] = increment(cant);
+                updates[`variantes.${idVar}.costo`] = costo;
+                
+                await updateDoc(doc(db, "productos", idProd), updates);
                 window.cerrarModalStock();
-            } catch (e) { alert("Error sumando stock."); }
+            } catch (e) { alert("Error sumando stock."); console.log(e); }
         };
 
-        // ==========================================
-        // SISTEMA FINANCIERO AUTOMÁTICO
-        // ==========================================
-
+        // --- SISTEMA FINANCIERO AUTOMÁTICO ---
         window.registrarGasto = async () => {
             const titulo = document.getElementById('gasto-titulo').value;
             const importe = parseFloat(document.getElementById('gasto-importe').value) || 0;
-            const desc = document.getElementById('gasto-desc').value;
             if (!titulo || importe <= 0) return alert("Título e importe obligatorios.");
             try {
-                await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo, importe, descripcion: desc });
-                document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; document.getElementById('gasto-desc').value = "";
+                await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo, importe });
+                document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = "";
             } catch (e) { alert("Error al registrar gasto."); }
         };
+        window.borrarGasto = async (id) => { if(confirm("¿Eliminar este gasto?")) await deleteDoc(doc(db, "gastos", id)); };
 
-        window.borrarGasto = async (id) => {
-            if(confirm("¿Eliminar este gasto permanentemente?")) await deleteDoc(doc(db, "gastos", id));
-        };
-
+        // --- VENTA RÁPIDA ADAPTADA A VARIANTES ---
         window.registrarVentaRapida = async () => {
-            const idProd = document.getElementById('venta-rapida-prod').value;
+            const selectVar = document.getElementById('venta-rapida-prod');
+            const selectedOption = selectVar.options[selectVar.selectedIndex];
+            if(!selectedOption.value) return alert("Selecciona un producto.");
+            
+            const idProd = selectedOption.getAttribute('data-idprod');
+            const idVar = selectedOption.value; // El value es el ID de la variante
+            const nombreCompleto = selectedOption.text.split('(')[0].trim(); // Solo para el historial
+            
             const efvo = parseFloat(document.getElementById('venta-rapida-efectivo').value) || 0;
             const transf = parseFloat(document.getElementById('venta-rapida-transf').value) || 0;
-            if (!idProd || (efvo === 0 && transf === 0)) return alert("Selecciona producto y un monto.");
-            
-            const prod = productos.find(p => p.id === idProd);
-            if(prod.stock < 1) return alert("Sin stock.");
+            if (efvo === 0 && transf === 0) return alert("Ingresa un monto de pago.");
 
             try {
-                await updateDoc(doc(db, "productos", idProd), { stock: increment(-1) });
+                const updates = {};
+                updates[`variantes.${idVar}.stock`] = increment(-1);
+                await updateDoc(doc(db, "productos", idProd), updates);
+                
                 await addDoc(collection(db, "ingresos"), {
-                    fecha: new Date(), tipo: 'venta_rapida', detalle: `Venta Rápida: ${prod.nombre}`, efectivo: efvo, transferencia: transf
+                    fecha: new Date(), tipo: 'venta_rapida', detalle: `Vta Local: ${nombreCompleto}`, efectivo: efvo, transferencia: transf
                 });
                 document.getElementById('venta-rapida-efectivo').value = ""; document.getElementById('venta-rapida-transf').value = "";
-            } catch (e) { alert("Error en venta rápida."); }
+            } catch (e) { alert("Error en venta rápida."); console.log(e); }
         };
 
         window.registrarIngresoManual = async () => {
@@ -434,144 +481,119 @@
             const efvo = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0;
             const transf = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0;
             if (!detalle || (efvo === 0 && transf === 0)) return alert("Detalle y monto obligatorios.");
-            try {
-                await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'manual', detalle, efectivo: efvo, transferencia: transf });
-                document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = "";
-            } catch (e) { alert("Error al registrar."); }
+            try { await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'manual', detalle, efectivo: efvo, transferencia: transf }); } catch (e) {}
         };
+        window.borrarIngreso = async (id) => { if(confirm("¿Eliminar este ingreso? (No devuelve stock)")) await deleteDoc(doc(db, "ingresos", id)); };
 
-        window.borrarIngreso = async (id) => {
-            if(confirm("¿Eliminar este ingreso? (No devuelve el stock)")) await deleteDoc(doc(db, "ingresos", id));
-        };
-
-        // --- CÁLCULO DE BALANCE EN VIVO ---
+        // --- BALANCE Y TRANSACCIONES ---
         window.calcularBalanceEnVivo = () => {
             const periodo = document.getElementById('filtro-periodo').value;
             const ahora = new Date();
             let diasLimite = periodo === 'hoy' ? 1 : periodo === 'semana' ? 7 : periodo === 'mes' ? 30 : 99999;
+            let totalIngresos = 0; let totalGastos = 0;
 
-            let totalIngresos = 0;
-            ingresosGlobales.forEach(ing => {
-                const diff = (ahora - ing.fecha.toDate()) / (1000 * 60 * 60 * 24);
-                if(diff <= diasLimite) totalIngresos += (ing.efectivo + ing.transferencia);
-            });
-
-            let totalGastos = 0;
-            gastosGlobales.forEach(gas => {
-                const diff = (ahora - gas.fecha.toDate()) / (1000 * 60 * 60 * 24);
-                if(diff <= diasLimite) totalGastos += gas.importe;
-            });
-
+            ingresosGlobales.forEach(i => { if((ahora - i.fecha.toDate())/(1000*60*60*24) <= diasLimite) totalIngresos += (i.efectivo + i.transferencia); });
+            gastosGlobales.forEach(g => { if((ahora - g.fecha.toDate())/(1000*60*60*24) <= diasLimite) totalGastos += g.importe; });
+            
             const neta = totalIngresos - totalGastos;
-
             document.getElementById('bal-ingresos').textContent = `$${totalIngresos.toFixed(2)}`;
             document.getElementById('bal-gastos').textContent = `$${totalGastos.toFixed(2)}`;
-            
-            const balNetaEl = document.getElementById('bal-neta');
-            balNetaEl.textContent = `${neta >= 0 ? '+' : ''}$${neta.toFixed(2)}`;
-            balNetaEl.style.color = neta >= 0 ? 'var(--success)' : '#fca5a5'; // Verde o Rojo claro
+            document.getElementById('bal-neta').textContent = `${neta >= 0 ? '+' : ''}$${neta.toFixed(2)}`;
+            document.getElementById('bal-neta').style.color = neta >= 0 ? 'var(--success)' : '#fca5a5';
         };
 
-        // --- HISTORIAL DE TRANSACCIONES ---
         window.renderizarTransacciones = () => {
-            let transacciones = [];
-            
-            // Unir Ingresos
-            ingresosGlobales.forEach(i => {
-                transacciones.push({
-                    id: i.id, fecha: i.fecha.toDate(), tipo: 'ingreso',
-                    detalle: i.detalle, monto: i.efectivo + i.transferencia
-                });
-            });
+            let trans = [];
+            ingresosGlobales.forEach(i => trans.push({ id: i.id, fecha: i.fecha.toDate(), tipo: 'ingreso', detalle: i.detalle, monto: i.efectivo + i.transferencia }));
+            gastosGlobales.forEach(g => trans.push({ id: g.id, fecha: g.fecha.toDate(), tipo: 'gasto', detalle: g.titulo, monto: g.importe }));
+            trans.sort((a, b) => b.fecha - a.fecha);
 
-            // Unir Gastos
-            gastosGlobales.forEach(g => {
-                transacciones.push({
-                    id: g.id, fecha: g.fecha.toDate(), tipo: 'gasto',
-                    detalle: g.titulo + (g.descripcion ? ` - ${g.descripcion}` : ''), monto: g.importe
-                });
-            });
-
-            // Ordenar por fecha (más reciente primero)
-            transacciones.sort((a, b) => b.fecha - a.fecha);
-
-            const tabla = document.getElementById('tabla-transacciones');
-            tabla.innerHTML = '';
-            
-            if (transacciones.length === 0) {
-                tabla.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#9ca3af; padding: 20px;">No hay transacciones registradas.</td></tr>';
-                return;
-            }
-
-            transacciones.forEach(t => {
-                const fechaStr = t.fecha.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute:'2-digit' });
-                const isIngreso = t.tipo === 'ingreso';
-                const badge = isIngreso ? '<span style="background: #064e3b; color: #34d399; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">Ingreso</span>' 
-                                        : '<span style="background: #7f1d1d; color: #fca5a5; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem;">Egreso</span>';
-                const montoStr = isIngreso ? `+$${t.monto.toFixed(2)}` : `-$${t.monto.toFixed(2)}`;
-                const colorMonto = isIngreso ? 'var(--success)' : '#fca5a5';
-
-                tabla.innerHTML += `
-                    <tr>
-                        <td style="color:#9ca3af;">${fechaStr}</td>
-                        <td>${badge}</td>
-                        <td>${t.detalle}</td>
-                        <td style="color: ${colorMonto}; font-weight: bold;">${montoStr}</td>
-                    </tr>`;
+            const tabla = document.getElementById('tabla-transacciones'); tabla.innerHTML = '';
+            trans.forEach(t => {
+                const isIng = t.tipo === 'ingreso';
+                const badge = isIng ? '<span style="background:#064e3b; color:#34d399; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Ingreso</span>' 
+                                    : '<span style="background:#7f1d1d; color:#fca5a5; padding:2px 6px; border-radius:4px; font-size:0.75rem;">Egreso</span>';
+                tabla.innerHTML += `<tr>
+                    <td style="color:#9ca3af;">${t.fecha.toLocaleString('es-ES', {day:'2-digit', month:'2-digit', hour:'2-digit', minute:'2-digit'})}</td>
+                    <td>${badge}</td><td>${t.detalle}</td>
+                    <td style="color: ${isIng?'var(--success)':'#fca5a5'}; font-weight: bold;">${isIng?'+':'-'}$${t.monto.toFixed(2)}</td>
+                </tr>`;
             });
         };
 
         // --- ESCUCHAS FIREBASE ---
         onSnapshot(collection(db, "productos"), (snapshot) => {
-            productos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+            productos = snapshot.docs.map(doc => {
+                const data = doc.data();
+                // Compatibilidad con bases de datos viejas (si existía un producto sin variantes)
+                if (!data.variantes) {
+                    data.variantes = { 'legado': { detalle: 'Normal', precio: data.precio || 0, costo: data.costo || 0, stock: data.stock || 0 } };
+                }
+                return { id: doc.id, ...data };
+            });
             renderizarCatalogoYStock();
             document.getElementById('estado-conexion').textContent = "🟢 Conectado";
             
-            // Actualizar select de venta rápida
+            // Actualizar select de Venta Rápida con Variantes
             const selectVenta = document.getElementById('venta-rapida-prod');
-            selectVenta.innerHTML = '<option value="">Selecciona producto para vender...</option>';
-            productos.forEach(p => { if(p.stock > 0) selectVenta.innerHTML += `<option value="${p.id}">${p.nombre} (Stock: ${p.stock})</option>`; });
-        });
-
-        onSnapshot(collection(db, "gastos"), (snapshot) => {
-            gastosGlobales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => b.fecha - a.fecha);
-            const tabla = document.getElementById('tabla-gastos'); tabla.innerHTML = '';
-            gastosGlobales.forEach(g => {
-                tabla.innerHTML += `<tr>
-                    <td><strong>${g.titulo}</strong><br><span style="color:#9ca3af; font-size:0.75rem;">${g.descripcion||''}</span></td>
-                    <td style="color:#fca5a5">-$${g.importe.toFixed(2)}</td>
-                    <td><button class="btn-trash" onclick="window.borrarGasto('${g.id}')">🗑️</button></td>
-                </tr>`;
+            selectVenta.innerHTML = '<option value="">Selecciona variante para vender...</option>';
+            productos.forEach(p => { 
+                Object.entries(p.variantes).forEach(([vId, v]) => {
+                    if(v.stock > 0) selectVenta.innerHTML += `<option value="${vId}" data-idprod="${p.id}">${p.nombre} - ${v.detalle} (Stock: ${v.stock})</option>`;
+                });
             });
-            window.calcularBalanceEnVivo();
-            window.renderizarTransacciones();
         });
 
-        onSnapshot(collection(db, "ingresos"), (snapshot) => {
-            ingresosGlobales = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => b.fecha - a.fecha);
-            const tabla = document.getElementById('tabla-ingresos'); tabla.innerHTML = '';
-            ingresosGlobales.forEach(i => {
-                tabla.innerHTML += `<tr>
-                    <td>${i.detalle}</td><td style="color:var(--success)">$${i.efectivo.toFixed(2)}</td><td style="color:#60a5fa">$${i.transferencia.toFixed(2)}</td>
-                    <td><button class="btn-trash" onclick="window.borrarIngreso('${i.id}')">🗑️</button></td>
-                </tr>`;
-            });
-            window.calcularBalanceEnVivo();
-            window.renderizarTransacciones();
-        });
+        onSnapshot(collection(db, "gastos"), (s) => { gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
+        onSnapshot(collection(db, "ingresos"), (s) => { ingresosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); });
 
-        // --- LÓGICA CARRITO COMPRADOR ---
+        // --- UI COMPRADOR (MANEJO DE VARIANTES) ---
+        window.cambiarVarianteUI = (idProducto, selectElem) => {
+            const selectedOption = selectElem.options[selectElem.selectedIndex];
+            const precio = selectedOption.getAttribute('data-precio');
+            const stock = parseInt(selectedOption.getAttribute('data-stock'));
+            
+            document.getElementById(`precio-display-${idProducto}`).textContent = `$${precio}`;
+            
+            const btnAdd = document.getElementById(`btn-add-${idProducto}`);
+            const inputCant = document.getElementById(`cant-${idProducto}`);
+            const stockDisp = document.getElementById(`stock-disp-${idProducto}`);
+            
+            stockDisp.textContent = `Stock: ${stock} un.`;
+            inputCant.max = stock;
+            
+            if(stock <= 0) {
+                btnAdd.disabled = true; btnAdd.textContent = 'Agotado'; inputCant.disabled = true;
+            } else {
+                btnAdd.disabled = false; btnAdd.textContent = 'Agregar'; inputCant.disabled = false;
+            }
+        };
+
         window.abrirCarrito = () => document.getElementById('modal-carrito').classList.remove('hidden');
         window.cerrarCarrito = () => document.getElementById('modal-carrito').classList.add('hidden');
 
         window.agregarAlCarrito = (idProducto) => {
             const producto = productos.find(p => p.id === idProducto);
+            const selectElem = document.getElementById(`sel-var-${idProducto}`);
+            const idVariante = selectElem.value;
+            const varianteData = producto.variantes[idVariante];
+            
             const inputCantidad = document.getElementById(`cant-${idProducto}`);
             const cantidadDeseada = parseInt(inputCantidad.value) || 1;
-            const enCarrito = carrito.filter(item => item.id === idProducto).length;
-            if (enCarrito + cantidadDeseada > producto.stock) return alert(`Solo quedan ${producto.stock} uds.`);
             
-            for(let i=0; i<cantidadDeseada; i++) carrito.push(producto);
+            // Contar cuántos de ESTA VARIANTE ya hay en el carrito
+            const enCarrito = carrito.filter(item => item.idProd === idProducto && item.idVar === idVariante).length;
+            
+            if (enCarrito + cantidadDeseada > varianteData.stock) return alert(`Solo quedan ${varianteData.stock} uds.`);
+            
+            // Agregamos al carrito usando una estructura más robusta
+            for(let i=0; i<cantidadDeseada; i++) {
+                carrito.push({ 
+                    idProd: producto.id, idVar: idVariante, 
+                    nombre: producto.nombre, detalle: varianteData.detalle, 
+                    precio: varianteData.precio 
+                });
+            }
             
             actualizarBadge(); renderizarCarrito();
             const btn = document.getElementById(`btn-add-${idProducto}`);
@@ -580,25 +602,35 @@
             inputCantidad.value = 1;
             setTimeout(() => { btn.textContent = textoOriginal; btn.style.backgroundColor = ""; }, 1000);
         };
+        
         window.quitarDelCarrito = (index) => { carrito.splice(index, 1); actualizarBadge(); renderizarCarrito(); };
         window.vaciarCarrito = () => { carrito = []; actualizarBadge(); renderizarCarrito(); };
+        function actualizarBadge() { const badge = document.getElementById('badge-carrito'); badge.textContent = carrito.length; badge.style.display = carrito.length > 0 ? 'block' : 'none'; }
 
-        function actualizarBadge() {
-            const badge = document.getElementById('badge-carrito'); badge.textContent = carrito.length;
-            badge.style.display = carrito.length > 0 ? 'block' : 'none';
-        }
-
+        // --- CHECKOUT (DESCUENTO DE STOCK POR VARIANTE) ---
         window.finalizarCompra = async () => {
             if (carrito.length === 0) return;
             const metodoPago = document.getElementById('metodo-pago').value;
             document.getElementById('btn-comprar').disabled = true; document.getElementById('btn-comprar').textContent = "Procesando...";
 
             try {
-                let totalVenta = 0; const conteoProductos = {};
-                carrito.forEach(p => { conteoProductos[p.id] = (conteoProductos[p.id] || 0) + 1; totalVenta += p.precio; });
+                let totalVenta = 0; 
+                // Agrupamos el descuento por Producto y por Variante
+                const conteoPorProducto = {}; // { 'prodId': { 'varId': 2 } }
+                
+                carrito.forEach(item => { 
+                    if(!conteoPorProducto[item.idProd]) conteoPorProducto[item.idProd] = {};
+                    conteoPorProducto[item.idProd][item.idVar] = (conteoPorProducto[item.idProd][item.idVar] || 0) + 1;
+                    totalVenta += item.precio; 
+                });
 
-                for (const [id, cantidad] of Object.entries(conteoProductos)) {
-                    await updateDoc(doc(db, "productos", id), { stock: increment(-cantidad) });
+                // Actualizamos Firebase. Una petición (updateDoc) por cada Producto padre.
+                for (const [idProd, variables] of Object.entries(conteoPorProducto)) {
+                    const docUpdates = {};
+                    for (const [idVar, cantidadComprada] of Object.entries(variables)) {
+                        docUpdates[`variantes.${idVar}.stock`] = increment(-cantidadComprada);
+                    }
+                    await updateDoc(doc(db, "productos", idProd), docUpdates);
                 }
 
                 await addDoc(collection(db, "ingresos"), {
@@ -608,7 +640,7 @@
                 });
 
                 alert("¡Compra realizada!"); window.vaciarCarrito(); window.cerrarCarrito();
-            } catch (e) { alert("Error al procesar compra."); } 
+            } catch (e) { alert("Error al procesar compra."); console.log(e); } 
             finally { document.getElementById('btn-comprar').textContent = "Confirmar Compra"; document.getElementById('btn-comprar').disabled = carrito.length === 0; }
         };
 
@@ -618,25 +650,47 @@
             catalogo.innerHTML = ''; tabla.innerHTML = '';
             const filtrados = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
 
-            if(filtrados.length === 0) {
-                catalogo.innerHTML = `<p>No hay productos.</p>`; tabla.innerHTML = `<tr><td colspan="5">No hay resultados.</td></tr>`; return;
-            }
+            if(filtrados.length === 0) { catalogo.innerHTML = `<p>No hay productos.</p>`; tabla.innerHTML = `<tr><td colspan="4">No hay resultados.</td></tr>`; return; }
 
             filtrados.forEach(prod => {
-                const imgPlaceholder = 'https://via.placeholder.com/300x200?text=Error+Link+Imagen';
+                const imgPlaceholder = 'https://via.placeholder.com/300x200?text=Error+Imagen';
                 const imagenSrc = prod.imagen ? prod.imagen : 'https://via.placeholder.com/300x200?text=Sin+Imagen';
+                
+                // Procesar variables para renderizado
+                const variantesEntries = Object.entries(prod.variantes || {});
+                if(variantesEntries.length === 0) return; // Saltamos si está roto
+                
+                const primerVarianteId = variantesEntries[0][0];
+                const primerVariante = variantesEntries[0][1];
+                let stockTotal = 0;
+                
+                let selectOptionsHTML = '';
+                let miniTableHTML = '<div style="font-size: 0.8rem; color: #6b7280;">';
+                
+                variantesEntries.forEach(([vId, v]) => {
+                    stockTotal += v.stock;
+                    selectOptionsHTML += `<option value="${vId}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`;
+                    miniTableHTML += `<div>• ${v.detalle}: <b style="color:${v.stock<5?'#ef4444':'#1f2937'}">${v.stock} un.</b> ($${v.precio})</div>`;
+                });
+                miniTableHTML += '</div>';
 
                 // Vista Comprador
                 catalogo.innerHTML += `
                     <div class="card">
                         <img src="${imagenSrc}" class="card-img" onerror="this.src='${imgPlaceholder}'">
-                        <h3 style="margin-top:0;">${prod.nombre}</h3>
-                        <p style="font-size: 1.2rem; font-weight: bold; color: var(--primary); margin: 5px 0;">$${prod.precio}</p>
-                        <p style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock: ${prod.stock}</p>
+                        <h3 style="margin-top:0; margin-bottom:10px;">${prod.nombre}</h3>
+                        
+                        <select id="sel-var-${prod.id}" class="select-variante" onchange="window.cambiarVarianteUI('${prod.id}', this)">
+                            ${selectOptionsHTML}
+                        </select>
+
+                        <p id="precio-display-${prod.id}" style="font-size: 1.4rem; font-weight: bold; color: var(--primary); margin: 0 0 5px 0;">$${primerVariante.precio}</p>
+                        <p id="stock-disp-${prod.id}" style="font-size: 0.8rem; color: #6b7280; margin-bottom: 15px;">Stock: ${primerVariante.stock} un.</p>
+                        
                         <div class="acciones-compra">
-                            <input type="number" id="cant-${prod.id}" class="input-cantidad" value="1" min="1" max="${prod.stock}" ${prod.stock === 0 ? 'disabled' : ''}>
-                            <button id="btn-add-${prod.id}" style="flex-grow: 1;" onclick="window.agregarAlCarrito('${prod.id}')" ${prod.stock === 0 ? 'disabled' : ''}>
-                                ${prod.stock === 0 ? 'Agotado' : 'Agregar'}
+                            <input type="number" id="cant-${prod.id}" class="input-cantidad" value="1" min="1" max="${primerVariante.stock}" ${primerVariante.stock === 0 ? 'disabled' : ''}>
+                            <button id="btn-add-${prod.id}" style="flex-grow: 1;" onclick="window.agregarAlCarrito('${prod.id}')" ${primerVariante.stock === 0 ? 'disabled' : ''}>
+                                ${primerVariante.stock === 0 ? 'Agotado' : 'Agregar'}
                             </button>
                         </div>
                     </div>`;
@@ -650,11 +704,11 @@
                                 <strong>${prod.nombre}</strong>
                             </div>
                         </td>
-                        <td>$${prod.costo}</td><td>$${prod.precio}</td>
-                        <td><span style="color: ${prod.stock < 5 ? '#ef4444' : 'inherit'}; font-weight: ${prod.stock < 5 ? 'bold' : 'normal'}">${prod.stock} un.</span></td>
+                        <td>${miniTableHTML}</td>
+                        <td style="font-size: 1.1rem; font-weight:bold; color: ${stockTotal===0?'#ef4444':'inherit'}">${stockTotal} un.</td>
                         <td>
-                            <button class="secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="window.abrirModal('${prod.id}')">✏️ Editar</button>
-                            <button class="success" style="padding: 5px 10px; font-size: 0.85rem; margin-left: 5px;" onclick="window.abrirModalStock('${prod.id}')">➕ Stock</button>
+                            <button class="secondary" style="padding: 5px 10px; font-size: 0.85rem;" onclick="window.abrirModal('${prod.id}')">✏️ Editar Opciones</button>
+                            <button class="success" style="padding: 5px 10px; font-size: 0.85rem; margin-top: 5px;" onclick="window.abrirModalStock('${prod.id}')">➕ Sumar Stock</button>
                         </td>
                     </tr>`;
             });
@@ -671,15 +725,18 @@
                 btnComprar.disabled = true; btnVaciar.style.display = 'none'; checkoutForm.style.display = 'none';
             } else {
                 btnComprar.disabled = false; btnVaciar.style.display = 'inline-block'; checkoutForm.style.display = 'block';
-                const conteoVisual = {};
-                carrito.forEach(p => { if(!conteoVisual[p.id]) conteoVisual[p.id] = { ...p, cantidad: 0 }; conteoVisual[p.id].cantidad++; total += p.precio; });
+                const conteoVisual = {}; // Agrupar para visualizar
+                carrito.forEach((p, idx) => { 
+                    const uid = p.idProd + '_' + p.idVar; // Agrupador único
+                    if(!conteoVisual[uid]) conteoVisual[uid] = { ...p, cantidad: 0, indexReal: idx }; 
+                    conteoVisual[uid].cantidad++; total += p.precio; 
+                });
 
                 Object.values(conteoVisual).forEach(item => {
-                    const indexReal = carrito.findIndex(c => c.id === item.id);
                     lista.innerHTML += `
                         <div class="carrito-item">
-                            <div><strong>${item.nombre}</strong> <span style="color: #6b7280;">x${item.cantidad}</span></div>
-                            <div><strong>$${(item.precio * item.cantidad).toFixed(2)}</strong> <button onclick="window.quitarDelCarrito(${indexReal})" class="danger" style="padding: 2px 8px; margin-left: 10px; font-size: 0.8rem;">X</button></div>
+                            <div><strong>${item.nombre}</strong> <br> <span style="color: #6b7280; font-size:0.8rem;">(${item.detalle}) x${item.cantidad}</span></div>
+                            <div><strong>$${(item.precio * item.cantidad).toFixed(2)}</strong> <button onclick="window.quitarDelCarrito(${item.indexReal})" class="danger" style="padding: 2px 8px; margin-left: 10px; font-size: 0.8rem;">X</button></div>
                         </div>`;
                 });
             }
