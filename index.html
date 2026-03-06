@@ -82,7 +82,6 @@
         .form-group { margin-bottom: 15px; }
         .form-group label { display: block; margin-bottom: 5px; font-weight: 500; font-size: 0.9rem; }
         .form-group input { width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; box-sizing: border-box; }
-        .form-group input:disabled { background-color: #f3f4f6; color: #9ca3af; cursor: not-allowed; }
         .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 25px; }
     </style>
 </head>
@@ -192,11 +191,12 @@
             <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre"></div>
             <div class="form-group"><label>URL Imagen</label><input type="text" id="prod-imagen"></div>
             <div class="form-group"><label>Precio de Venta</label><input type="number" id="prod-precio"></div>
+            
             <div id="caja-stock-costo" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1; margin-bottom: 15px;">
-                <p style="margin: 0 0 10px 0; font-size: 0.8rem; color: #6b7280;" id="nota-stock-bloqueado">Datos de ingreso inicial.</p>
                 <div class="form-group"><label>Costo Inicial</label><input type="number" id="prod-costo"></div>
                 <div class="form-group" style="margin-bottom: 0;"><label>Stock Inicial</label><input type="number" id="prod-stock"></div>
             </div>
+
             <div class="modal-actions">
                 <button class="secondary" onclick="window.cerrarModal()">Cancelar</button>
                 <button onclick="window.guardarProducto()">Guardar</button>
@@ -275,32 +275,30 @@
         window.abrirModal = (idProducto = null) => {
             const modal = document.getElementById('modal-producto');
             const titulo = document.getElementById('modal-titulo');
+            const cajaStockCosto = document.getElementById('caja-stock-costo');
             const inputStock = document.getElementById('prod-stock');
             const inputCosto = document.getElementById('prod-costo');
-            const notaStock = document.getElementById('nota-stock-bloqueado');
             
             if (idProducto) {
+                // MODO EDICIÓN
                 const prod = productos.find(p => p.id === idProducto);
                 titulo.textContent = "Editar Producto";
                 document.getElementById('prod-id').value = prod.id;
                 document.getElementById('prod-nombre').value = prod.nombre;
                 document.getElementById('prod-imagen').value = prod.imagen || "";
                 document.getElementById('prod-precio').value = prod.precio;
-                inputCosto.value = prod.costo;
-                inputStock.value = prod.stock;
                 
-                inputCosto.disabled = true; inputStock.disabled = true;
-                notaStock.textContent = "🔒 Stock y Costo bloqueados en edición.";
-                notaStock.style.color = "#ef4444"; 
+                // Ocultamos la caja de stock y costo por completo
+                cajaStockCosto.classList.add('hidden');
             } else {
+                // MODO CREACIÓN
                 titulo.textContent = "Agregar Nuevo Producto";
                 document.getElementById('prod-id').value = ""; document.getElementById('prod-nombre').value = "";
                 document.getElementById('prod-imagen').value = ""; document.getElementById('prod-precio').value = "";
                 inputCosto.value = ""; inputStock.value = "";
                 
-                inputCosto.disabled = false; inputStock.disabled = false;
-                notaStock.textContent = "Datos de ingreso inicial.";
-                notaStock.style.color = "#6b7280";
+                // Mostramos la caja de stock y costo
+                cajaStockCosto.classList.remove('hidden');
             }
             modal.classList.remove('hidden');
         };
@@ -365,18 +363,10 @@
             if (!detalle || monto <= 0) return alert("Ingresa un detalle y un monto mayor a cero.");
 
             try {
-                // Guardamos el gasto en una nueva colección llamada "gastos"
-                await addDoc(collection(db, "gastos"), {
-                    fecha: new Date(),
-                    detalle: detalle,
-                    monto: monto
-                });
+                await addDoc(collection(db, "gastos"), { fecha: new Date(), detalle: detalle, monto: monto });
                 window.cerrarModalGasto();
                 alert("Gasto registrado correctamente.");
-            } catch (e) {
-                console.error(e);
-                alert("Error al registrar el gasto.");
-            }
+            } catch (e) { alert("Error al registrar el gasto."); }
         };
 
         // --- FIREBASE: ESCUCHAS Y MOTOR FINANCIERO ---
@@ -386,7 +376,6 @@
             document.getElementById('estado-conexion').textContent = "🟢 Conectado";
         });
 
-        // Escuchamos Ventas y Gastos al mismo tiempo para procesar el Libro Diario
         onSnapshot(collection(db, "ventas"), (snapshot) => {
             ventasData = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'venta', ...doc.data() }));
             procesarMotorFinanciero();
@@ -399,21 +388,17 @@
 
         function procesarMotorFinanciero() {
             const ahora = new Date();
-            let totalVentasLocales = 0; // Acumulador histórico
-            let totalGastosExternos = 0; // Acumulador histórico
+            let totalVentasLocales = 0; let totalGastosExternos = 0;
             let bal1d = 0, bal7d = 0, bal30d = 0;
 
-            // Unimos ventas y gastos en un solo array (Libro Diario)
             let movimientos = [...ventasData, ...gastosData];
             
-            // Los ordenamos por fecha (del más nuevo al más viejo)
             movimientos.sort((a, b) => {
                 const dateA = a.fecha ? a.fecha.toDate() : new Date(0);
                 const dateB = b.fecha ? b.fecha.toDate() : new Date(0);
                 return dateB - dateA;
             });
 
-            // Vaciamos la tabla de movimientos para volver a pintarla
             const tablaMovimientos = document.getElementById('tabla-movimientos');
             tablaMovimientos.innerHTML = '';
 
@@ -421,54 +406,32 @@
                 tablaMovimientos.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay movimientos registrados.</td></tr>';
             }
 
-            // Analizamos cada movimiento uno por uno
             movimientos.forEach(mov => {
                 const fechaObj = mov.fecha ? mov.fecha.toDate() : new Date();
-                const diffDias = (ahora - fechaObj) / (1000 * 60 * 60 * 24); // Diferencia en días
-                
-                // Determinar el flujo de dinero (positivo o negativo)
+                const diffDias = (ahora - fechaObj) / (1000 * 60 * 60 * 24);
                 const valorDinero = mov.tipo === 'venta' ? mov.totalVenta : -mov.monto;
 
-                // Sumar a los balances según el período de tiempo
                 if(diffDias <= 1) bal1d += valorDinero;
                 if(diffDias <= 7) bal7d += valorDinero;
                 if(diffDias <= 30) bal30d += valorDinero;
 
-                // Sumar a los totales históricos y armar fila visual
                 let filaHTML = '';
                 const fechaFormateada = fechaObj.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute:'2-digit' });
 
                 if (mov.tipo === 'venta') {
                     totalVentasLocales += mov.totalVenta;
-                    // Para el detalle mostramos la cantidad de artículos o el pago
-                    filaHTML = `
-                        <tr>
-                            <td style="font-size: 0.85rem;">${fechaFormateada}</td>
-                            <td><span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem;">Ingreso</span></td>
-                            <td>Venta Local (${mov.cantidadArticulos} arts. - ${mov.metodoPago})</td>
-                            <td class="td-ingreso">+$${mov.totalVenta.toFixed(2)}</td>
-                        </tr>
-                    `;
+                    filaHTML = `<tr><td style="font-size: 0.85rem;">${fechaFormateada}</td><td><span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem;">Ingreso</span></td><td>Venta Local (${mov.cantidadArticulos} arts. - ${mov.metodoPago})</td><td class="td-ingreso">+$${mov.totalVenta.toFixed(2)}</td></tr>`;
                 } else if (mov.tipo === 'gasto') {
                     totalGastosExternos += mov.monto;
-                    filaHTML = `
-                        <tr>
-                            <td style="font-size: 0.85rem;">${fechaFormateada}</td>
-                            <td><span style="background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem;">Egreso</span></td>
-                            <td>${mov.detalle}</td>
-                            <td class="td-egreso">-$${mov.monto.toFixed(2)}</td>
-                        </tr>
-                    `;
+                    filaHTML = `<tr><td style="font-size: 0.85rem;">${fechaFormateada}</td><td><span style="background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem;">Egreso</span></td><td>${mov.detalle}</td><td class="td-egreso">-$${mov.monto.toFixed(2)}</td></tr>`;
                 }
                 
                 tablaMovimientos.innerHTML += filaHTML;
             });
 
-            // Actualizar Tarjetas Visuales
             document.getElementById('metric-ventas-totales').textContent = `$${totalVentasLocales.toFixed(2)}`;
             document.getElementById('metric-gastos-totales').textContent = `$${totalGastosExternos.toFixed(2)}`;
             
-            // Función auxiliar para pintar rojo/verde el balance
             const pintarBalance = (id, valor) => {
                 const el = document.getElementById(id);
                 el.textContent = `${valor >= 0 ? '+' : ''}$${valor.toFixed(2)}`;
