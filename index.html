@@ -13,6 +13,7 @@
             --text-main: #1f2937;
             --border: #e5e7eb;
             --success: #10b981;
+            --danger: #ef4444;
         }
         body { font-family: 'Segoe UI', Roboto, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); }
         .hidden { display: none !important; }
@@ -21,14 +22,15 @@
         button:disabled { background-color: #9ca3af; cursor: not-allowed; }
         button.secondary { background-color: #6b7280; }
         button.success { background-color: var(--success); }
-        button.danger { background-color: #ef4444; }
+        button.danger { background-color: var(--danger); }
+        button.outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); }
+        button.outline:hover { background-color: #f9fafb; }
         
         /* Navegación de Desarrollo */
         nav.dev-tools { background: #111827; padding: 15px; border-radius: 8px; margin-bottom: 25px; color: white; display: flex; gap: 10px; align-items: center; }
         
         /* Contenedores y Buscador */
         .container { background: var(--card-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); }
-        
         .search-container { display: flex; align-items: center; background: white; border: 1px solid var(--border); border-radius: 20px; padding: 5px 15px; width: 100%; max-width: 300px; }
         .search-container input { border: none; outline: none; padding: 5px; width: 100%; background: transparent; font-size: 0.95rem; }
         
@@ -43,8 +45,6 @@
         .btn-carrito-nav { position: relative; background: white; color: var(--text-main); border: 2px solid var(--border); padding: 8px 20px; font-size: 1.1rem; border-radius: 8px; }
         .btn-carrito-nav:hover { background: #f9fafb; }
         .badge { position: absolute; top: -8px; right: -8px; background: #ef4444; color: white; border-radius: 50%; padding: 2px 8px; font-size: 0.8rem; font-weight: bold; }
-
-        /* Controles de Cantidad en la Tarjeta */
         .acciones-compra { display: flex; gap: 8px; margin-top: auto; }
         .input-cantidad { width: 60px; padding: 8px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-size: 1rem; }
 
@@ -54,19 +54,27 @@
         .checkout-options { background: #f8fafc; padding: 15px; border-radius: 8px; margin-bottom: 20px; border: 1px solid var(--border); }
         .checkout-options select { width: 100%; padding: 8px; margin-top: 5px; margin-bottom: 15px; border-radius: 6px; border: 1px solid var(--border); }
 
+        /* Paneles Administrador */
+        .panel-seccion { border: 1px solid var(--border); padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+        .header-panel { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        
         /* Panel Financiero */
-        .panel-finanzas-container { background: #f8fafc; padding: 20px; border-radius: 8px; margin-bottom: 25px; border: 1px solid var(--border); }
-        .metric-card { padding: 20px; border-radius: 8px; border-left: 4px solid; background: white; }
-        .metric-bruta { border-left-color: #3b82f6; }
-        .metric-neta { border-left-color: #22c55e; }
-        .metric-stock { border-left-color: #ef4444; }
-        .metric-card h3 { margin: 0 0 10px 0; font-size: 0.9rem; color: #4b5563; text-transform: uppercase; }
-        .metric-card p { margin: 0; font-size: 1.8rem; font-weight: bold; }
+        .grid-finanzas { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 15px; margin-bottom: 20px; }
+        .metric-card { padding: 15px; border-radius: 8px; border-left: 4px solid; background: #f8fafc; }
+        .metric-card h3 { margin: 0 0 5px 0; font-size: 0.85rem; color: #4b5563; text-transform: uppercase; }
+        .metric-card p { margin: 0; font-size: 1.5rem; font-weight: bold; }
+        .text-verde { color: var(--success); }
+        .text-rojo { color: var(--danger); }
+        .border-azul { border-left-color: #3b82f6; }
+        .border-rojo { border-left-color: #ef4444; }
+        .border-gris { border-left-color: #6b7280; }
 
         /* Tablas */
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid var(--border); }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.95rem; }
+        th, td { padding: 10px; text-align: left; border-bottom: 1px solid var(--border); }
         th { background-color: #f9fafb; font-weight: 600; }
+        .td-ingreso { color: var(--success); font-weight: bold; }
+        .td-egreso { color: var(--danger); font-weight: bold; }
 
         /* Modal Base */
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.6); display: flex; justify-content: center; align-items: center; z-index: 1000; }
@@ -90,21 +98,15 @@
     <div id="vista-comprador" class="container">
         <div class="header-tienda">
             <h2>🛍️ Mi Tienda</h2>
-            
             <div class="search-container">
                 <span>🔍</span>
                 <input type="text" class="input-busqueda" placeholder="Buscar producto..." onkeyup="window.buscarProductos(this.value)">
             </div>
-
             <button onclick="window.abrirCarrito()" class="btn-carrito-nav">
-                🛒 Mi Carrito
-                <span id="badge-carrito" class="badge" style="display: none;">0</span>
+                🛒 Mi Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span>
             </button>
         </div>
-
-        <div id="catalogo-productos" class="grid-cards">
-            <p>Cargando productos...</p>
-        </div>
+        <div id="catalogo-productos" class="grid-cards"><p>Cargando productos...</p></div>
     </div>
 
     <div id="modal-carrito" class="modal-overlay hidden">
@@ -127,43 +129,60 @@
     </div>
 
     <div id="vista-dueno" class="container hidden">
+        <h2 style="margin-top: 0; margin-bottom: 25px;">👑 Panel de Administración</h2>
         
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; border-bottom: 2px solid var(--border); padding-bottom: 15px; flex-wrap: wrap; gap: 15px;">
-            <h2 style="margin: 0;">📦 Control de Inventario</h2>
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
+            <button class="outline" onclick="window.togglePanel('panel-inventario')">📦 Mostrar/Ocultar Inventario</button>
+            <button class="outline" onclick="window.togglePanel('panel-finanzas')">💰 Mostrar/Ocultar Finanzas</button>
+        </div>
+
+        <div id="panel-inventario" class="panel-seccion hidden">
+            <div class="header-panel">
+                <h3 style="margin: 0;">📦 Control de Inventario</h3>
+                <div style="display: flex; gap: 15px; align-items: center;">
+                    <div class="search-container">
+                        <span>🔍</span>
+                        <input type="text" class="input-busqueda" placeholder="Buscar en inventario..." onkeyup="window.buscarProductos(this.value)">
+                    </div>
+                    <button onclick="window.abrirModal()">+ Nuevo Producto</button>
+                </div>
+            </div>
+            <div style="overflow-x: auto;">
+                <table>
+                    <thead>
+                        <tr><th>Producto</th><th>Costo</th><th>Precio Venta</th><th>Stock</th><th>Acciones</th></tr>
+                    </thead>
+                    <tbody id="tabla-stock"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <div id="panel-finanzas" class="panel-seccion hidden">
+            <div class="header-panel">
+                <h3 style="margin: 0;">💰 Módulo Financiero</h3>
+                <button class="danger" onclick="window.abrirModalGasto()">➖ Registrar Gasto Externo</button>
+            </div>
             
-            <div class="search-container">
-                <span>🔍</span>
-                <input type="text" class="input-busqueda" placeholder="Buscar en inventario..." onkeyup="window.buscarProductos(this.value)">
+            <div class="grid-finanzas">
+                <div class="metric-card border-azul"><h3>Venta en Local (Total)</h3><p id="metric-ventas-totales" class="text-verde">$0.00</p></div>
+                <div class="metric-card border-rojo"><h3>Gasto Externo (Total)</h3><p id="metric-gastos-totales" class="text-rojo">$0.00</p></div>
+                <div class="metric-card border-gris"><h3>Balance (Últimas 24hs)</h3><p id="metric-bal-1d">$0.00</p></div>
+                <div class="metric-card border-gris"><h3>Balance (Última Sem)</h3><p id="metric-bal-7d">$0.00</p></div>
+                <div class="metric-card border-gris"><h3>Balance (Último Mes)</h3><p id="metric-bal-30d">$0.00</p></div>
             </div>
 
-            <div>
-                <button onclick="window.toggleFinanzas()" class="secondary" style="margin-right: 10px;">💰 Ver Finanzas</button>
-                <button onclick="window.abrirModal()">+ Nuevo Producto</button>
+            <h4 style="margin-bottom: 5px; color: #374151;">📋 Todos los Movimientos</h4>
+            <div style="overflow-x: auto; max-height: 400px; border: 1px solid var(--border); border-radius: 8px;">
+                <table style="margin-top: 0;">
+                    <thead style="position: sticky; top: 0; z-index: 10;">
+                        <tr><th>Fecha y Hora</th><th>Tipo</th><th>Detalle / Origen</th><th>Monto</th></tr>
+                    </thead>
+                    <tbody id="tabla-movimientos">
+                        <tr><td colspan="4" style="text-align: center;">Cargando movimientos...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
-
-        <div id="panel-finanzas" class="panel-finanzas-container hidden">
-            <h3 style="margin-top: 0; color: #374151;">Dashboard Financiero</h3>
-            <div class="grid-cards">
-                <div class="metric-card metric-bruta"><h3>Ventas Brutas</h3><p id="metric-bruta">$0.00</p></div>
-                <div class="metric-card metric-neta"><h3>Ganancia Neta</h3><p id="metric-neta">$0.00</p></div>
-                <div class="metric-card metric-stock"><h3>Artículos Vendidos</h3><p id="metric-ventas-stock">0 un.</p></div>
-            </div>
-        </div>
-        
-        <table>
-            <thead>
-                <tr>
-                    <th>Producto</th>
-                    <th>Costo</th>
-                    <th>Precio Venta</th>
-                    <th>Stock</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tabla-stock">
-                </tbody>
-        </table>
     </div>
 
     <div id="modal-producto" class="modal-overlay hidden">
@@ -171,15 +190,13 @@
             <h3 id="modal-titulo" style="margin-top: 0;">Agregar Nuevo Producto</h3>
             <input type="hidden" id="prod-id">
             <div class="form-group"><label>Nombre</label><input type="text" id="prod-nombre"></div>
-            <div class="form-group"><label>URL de la Imagen (Opcional)</label><input type="text" id="prod-imagen" placeholder="https://ejemplo.com/foto.jpg"></div>
-            <div class="form-group"><label>Precio de Venta (Público)</label><input type="number" id="prod-precio"></div>
-            
+            <div class="form-group"><label>URL Imagen</label><input type="text" id="prod-imagen"></div>
+            <div class="form-group"><label>Precio de Venta</label><input type="number" id="prod-precio"></div>
             <div id="caja-stock-costo" style="background: #f8fafc; padding: 10px; border-radius: 6px; border: 1px dashed #cbd5e1; margin-bottom: 15px;">
                 <p style="margin: 0 0 10px 0; font-size: 0.8rem; color: #6b7280;" id="nota-stock-bloqueado">Datos de ingreso inicial.</p>
-                <div class="form-group" style="margin-bottom: 10px;"><label>Costo Inicial</label><input type="number" id="prod-costo"></div>
+                <div class="form-group"><label>Costo Inicial</label><input type="number" id="prod-costo"></div>
                 <div class="form-group" style="margin-bottom: 0;"><label>Stock Inicial</label><input type="number" id="prod-stock"></div>
             </div>
-
             <div class="modal-actions">
                 <button class="secondary" onclick="window.cerrarModal()">Cancelar</button>
                 <button onclick="window.guardarProducto()">Guardar</button>
@@ -191,21 +208,25 @@
         <div class="modal-content">
             <h3 style="margin-top: 0; color: var(--success);">➕ Ingresar Mercadería</h3>
             <p id="stock-nombre-prod" style="font-weight: bold; font-size: 1.1rem; margin-bottom: 20px; border-bottom: 1px solid #e5e7eb; padding-bottom: 10px;"></p>
-            
             <input type="hidden" id="stock-id">
-            
-            <div class="form-group">
-                <label>Cantidad de unidades a sumar</label>
-                <input type="number" id="stock-cantidad" min="1" value="1">
-            </div>
-            <div class="form-group">
-                <label>Nuevo Costo Unitario (Se actualizará para futuras ventas)</label>
-                <input type="number" id="stock-nuevo-costo">
-            </div>
-            
+            <div class="form-group"><label>Cantidad a sumar</label><input type="number" id="stock-cantidad" min="1" value="1"></div>
+            <div class="form-group"><label>Nuevo Costo Unitario</label><input type="number" id="stock-nuevo-costo"></div>
             <div class="modal-actions">
                 <button class="secondary" onclick="window.cerrarModalStock()">Cancelar</button>
                 <button class="success" onclick="window.guardarNuevoStock()">Confirmar Ingreso</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-gasto" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3 style="margin-top: 0; color: var(--danger);">➖ Registrar Gasto Externo</h3>
+            <p style="font-size: 0.9rem; color: #6b7280; margin-bottom: 15px;">Ej: Pago de luz, artículos de limpieza, flete.</p>
+            <div class="form-group"><label>Detalle o Motivo</label><input type="text" id="gasto-detalle" placeholder="Ej: Pago servicio de internet"></div>
+            <div class="form-group"><label>Monto a descontar ($)</label><input type="number" id="gasto-monto"></div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.cerrarModalGasto()">Cancelar</button>
+                <button class="danger" onclick="window.guardarGasto()">Registrar Gasto</button>
             </div>
         </div>
     </div>
@@ -226,33 +247,31 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
 
+        // --- VARIABLES DE ESTADO ---
         let productos = [];
         let carrito = [];
-        let terminoBusqueda = ""; // Variable para guardar lo que escribe el usuario
+        let ventasData = [];
+        let gastosData = [];
+        let terminoBusqueda = "";
 
+        // --- NAVEGACIÓN Y PANELES ---
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
         };
 
-        window.toggleFinanzas = () => {
-            const panel = document.getElementById('panel-finanzas');
+        window.togglePanel = (idPanel) => {
+            const panel = document.getElementById(idPanel);
             panel.classList.toggle('hidden');
         };
 
-        // --- SISTEMA DE BÚSQUEDA ---
         window.buscarProductos = (texto) => {
             terminoBusqueda = texto.toLowerCase();
-            
-            // Sincronizar el texto en ambas lupas para que se vea igual si cambias de vista
-            document.querySelectorAll('.input-busqueda').forEach(input => {
-                input.value = texto;
-            });
-            
-            renderizarCatalogoYStock(); // Volvemos a pintar la pantalla con el filtro aplicado
+            document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto);
+            renderizarCatalogoYStock();
         };
 
-        // --- MODAL PRODUCTO (Bloqueo de stock incluido) ---
+        // --- MODALES (INVENTARIO) ---
         window.abrirModal = (idProducto = null) => {
             const modal = document.getElementById('modal-producto');
             const titulo = document.getElementById('modal-titulo');
@@ -261,129 +280,207 @@
             const notaStock = document.getElementById('nota-stock-bloqueado');
             
             if (idProducto) {
-                // MODO EDICIÓN
                 const prod = productos.find(p => p.id === idProducto);
                 titulo.textContent = "Editar Producto";
                 document.getElementById('prod-id').value = prod.id;
                 document.getElementById('prod-nombre').value = prod.nombre;
                 document.getElementById('prod-imagen').value = prod.imagen || "";
                 document.getElementById('prod-precio').value = prod.precio;
-                
                 inputCosto.value = prod.costo;
                 inputStock.value = prod.stock;
                 
-                // BLOQUEAR EDICIÓN DE STOCK Y COSTO
-                inputCosto.disabled = true;
-                inputStock.disabled = true;
-                notaStock.textContent = "🔒 Stock y Costo bloqueados. Usa el botón '+ Agregar Stock' en la tabla para ingresar nueva mercadería.";
-                notaStock.style.color = "#ef4444"; // Texto rojo para que se note
-                
+                inputCosto.disabled = true; inputStock.disabled = true;
+                notaStock.textContent = "🔒 Stock y Costo bloqueados en edición.";
+                notaStock.style.color = "#ef4444"; 
             } else {
-                // MODO CREACIÓN
                 titulo.textContent = "Agregar Nuevo Producto";
-                document.getElementById('prod-id').value = "";
-                document.getElementById('prod-nombre').value = "";
-                document.getElementById('prod-imagen').value = "";
-                document.getElementById('prod-precio').value = "";
+                document.getElementById('prod-id').value = ""; document.getElementById('prod-nombre').value = "";
+                document.getElementById('prod-imagen').value = ""; document.getElementById('prod-precio').value = "";
+                inputCosto.value = ""; inputStock.value = "";
                 
-                inputCosto.value = "";
-                inputStock.value = "";
-                
-                // DESBLOQUEAR
-                inputCosto.disabled = false;
-                inputStock.disabled = false;
+                inputCosto.disabled = false; inputStock.disabled = false;
                 notaStock.textContent = "Datos de ingreso inicial.";
                 notaStock.style.color = "#6b7280";
             }
             modal.classList.remove('hidden');
         };
-
         window.cerrarModal = () => document.getElementById('modal-producto').classList.add('hidden');
         
-        // --- MODAL INGRESAR STOCK ---
         window.abrirModalStock = (idProducto) => {
             const prod = productos.find(p => p.id === idProducto);
             document.getElementById('stock-id').value = prod.id;
             document.getElementById('stock-nombre-prod').textContent = `📦 ${prod.nombre}`;
-            document.getElementById('stock-cantidad').value = 1; // Reseteamos a 1
-            document.getElementById('stock-nuevo-costo').value = prod.costo; // Sugerimos el costo actual
-            
+            document.getElementById('stock-cantidad').value = 1;
+            document.getElementById('stock-nuevo-costo').value = prod.costo; 
             document.getElementById('modal-stock').classList.remove('hidden');
         };
-
         window.cerrarModalStock = () => document.getElementById('modal-stock').classList.add('hidden');
 
-        window.guardarNuevoStock = async () => {
-            const id = document.getElementById('stock-id').value;
-            const cantidadASumar = parseInt(document.getElementById('stock-cantidad').value) || 0;
-            const nuevoCosto = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0;
-
-            if (cantidadASumar <= 0) return alert("Debes ingresar una cantidad válida.");
-
-            try {
-                // Actualizamos el producto en Firebase: Sumamos el stock y pisamos el costo viejo
-                await updateDoc(doc(db, "productos", id), { 
-                    stock: increment(cantidadASumar),
-                    costo: nuevoCosto
-                });
-                alert("¡Mercadería ingresada correctamente!");
-                window.cerrarModalStock();
-            } catch (e) {
-                console.error("Error sumando stock:", e);
-                alert("Hubo un error al actualizar el inventario.");
-            }
+        // --- MODALES (FINANZAS) ---
+        window.abrirModalGasto = () => {
+            document.getElementById('gasto-detalle').value = "";
+            document.getElementById('gasto-monto').value = "";
+            document.getElementById('modal-gasto').classList.remove('hidden');
         };
+        window.cerrarModalGasto = () => document.getElementById('modal-gasto').classList.add('hidden');
 
-        // --- FIREBASE: GUARDAR/EDITAR PRODUCTO BASE ---
+        // --- FIREBASE: ESCRITURA ---
         window.guardarProducto = async () => {
             const id = document.getElementById('prod-id').value;
             const nombre = document.getElementById('prod-nombre').value;
             const imagen = document.getElementById('prod-imagen').value;
             const precio = parseFloat(document.getElementById('prod-precio').value) || 0;
-            
-            // Solo leemos costo y stock si NO están deshabilitados (es decir, al crear)
             const inputCosto = document.getElementById('prod-costo');
             const inputStock = document.getElementById('prod-stock');
 
             if (!nombre) return alert("El nombre es obligatorio");
-
             try {
                 if (id) {
-                    // Si estamos editando, NO mandamos costo ni stock a Firebase
                     await updateDoc(doc(db, "productos", id), { nombre, imagen, precio });
                 } else {
-                    // Si es nuevo, mandamos todo
                     const costo = parseFloat(inputCosto.value) || 0;
                     const stock = parseInt(inputStock.value) || 0;
                     await addDoc(collection(db, "productos"), { nombre, imagen, costo, precio, stock });
                 }
                 window.cerrarModal();
+            } catch (e) { alert("Error al guardar el producto."); }
+        };
+
+        window.guardarNuevoStock = async () => {
+            const id = document.getElementById('stock-id').value;
+            const cantidadASumar = parseInt(document.getElementById('stock-cantidad').value) || 0;
+            const nuevoCosto = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0;
+            if (cantidadASumar <= 0) return alert("Ingresa una cantidad válida.");
+
+            try {
+                await updateDoc(doc(db, "productos", id), { stock: increment(cantidadASumar), costo: nuevoCosto });
+                alert("Mercadería ingresada."); window.cerrarModalStock();
+            } catch (e) { alert("Error sumando stock."); }
+        };
+
+        window.guardarGasto = async () => {
+            const detalle = document.getElementById('gasto-detalle').value;
+            const monto = parseFloat(document.getElementById('gasto-monto').value) || 0;
+            
+            if (!detalle || monto <= 0) return alert("Ingresa un detalle y un monto mayor a cero.");
+
+            try {
+                // Guardamos el gasto en una nueva colección llamada "gastos"
+                await addDoc(collection(db, "gastos"), {
+                    fecha: new Date(),
+                    detalle: detalle,
+                    monto: monto
+                });
+                window.cerrarModalGasto();
+                alert("Gasto registrado correctamente.");
             } catch (e) {
-                alert("Hubo un error al guardar el producto.");
+                console.error(e);
+                alert("Error al registrar el gasto.");
             }
         };
 
-        // --- FIREBASE: ESCUCHAS ---
+        // --- FIREBASE: ESCUCHAS Y MOTOR FINANCIERO ---
         onSnapshot(collection(db, "productos"), (snapshot) => {
             productos = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
             renderizarCatalogoYStock();
             document.getElementById('estado-conexion').textContent = "🟢 Conectado";
         });
 
+        // Escuchamos Ventas y Gastos al mismo tiempo para procesar el Libro Diario
         onSnapshot(collection(db, "ventas"), (snapshot) => {
-            let bruta = 0; let neta = 0; let cant = 0;
-            snapshot.forEach(doc => {
-                const venta = doc.data();
-                bruta += venta.totalVenta || 0;
-                neta += venta.gananciaNeta || 0;
-                cant += venta.cantidadArticulos || 0;
-            });
-            document.getElementById('metric-bruta').textContent = `$${bruta.toFixed(2)}`;
-            document.getElementById('metric-neta').textContent = `$${neta.toFixed(2)}`;
-            document.getElementById('metric-ventas-stock').textContent = `${cant} un.`;
+            ventasData = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'venta', ...doc.data() }));
+            procesarMotorFinanciero();
         });
 
-        // --- LÓGICA DEL CARRITO ---
+        onSnapshot(collection(db, "gastos"), (snapshot) => {
+            gastosData = snapshot.docs.map(doc => ({ id: doc.id, tipo: 'gasto', ...doc.data() }));
+            procesarMotorFinanciero();
+        });
+
+        function procesarMotorFinanciero() {
+            const ahora = new Date();
+            let totalVentasLocales = 0; // Acumulador histórico
+            let totalGastosExternos = 0; // Acumulador histórico
+            let bal1d = 0, bal7d = 0, bal30d = 0;
+
+            // Unimos ventas y gastos en un solo array (Libro Diario)
+            let movimientos = [...ventasData, ...gastosData];
+            
+            // Los ordenamos por fecha (del más nuevo al más viejo)
+            movimientos.sort((a, b) => {
+                const dateA = a.fecha ? a.fecha.toDate() : new Date(0);
+                const dateB = b.fecha ? b.fecha.toDate() : new Date(0);
+                return dateB - dateA;
+            });
+
+            // Vaciamos la tabla de movimientos para volver a pintarla
+            const tablaMovimientos = document.getElementById('tabla-movimientos');
+            tablaMovimientos.innerHTML = '';
+
+            if (movimientos.length === 0) {
+                tablaMovimientos.innerHTML = '<tr><td colspan="4" style="text-align: center;">No hay movimientos registrados.</td></tr>';
+            }
+
+            // Analizamos cada movimiento uno por uno
+            movimientos.forEach(mov => {
+                const fechaObj = mov.fecha ? mov.fecha.toDate() : new Date();
+                const diffDias = (ahora - fechaObj) / (1000 * 60 * 60 * 24); // Diferencia en días
+                
+                // Determinar el flujo de dinero (positivo o negativo)
+                const valorDinero = mov.tipo === 'venta' ? mov.totalVenta : -mov.monto;
+
+                // Sumar a los balances según el período de tiempo
+                if(diffDias <= 1) bal1d += valorDinero;
+                if(diffDias <= 7) bal7d += valorDinero;
+                if(diffDias <= 30) bal30d += valorDinero;
+
+                // Sumar a los totales históricos y armar fila visual
+                let filaHTML = '';
+                const fechaFormateada = fechaObj.toLocaleString('es-ES', { day: '2-digit', month: '2-digit', year: '2-digit', hour: '2-digit', minute:'2-digit' });
+
+                if (mov.tipo === 'venta') {
+                    totalVentasLocales += mov.totalVenta;
+                    // Para el detalle mostramos la cantidad de artículos o el pago
+                    filaHTML = `
+                        <tr>
+                            <td style="font-size: 0.85rem;">${fechaFormateada}</td>
+                            <td><span style="background: #dcfce7; color: #166534; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem;">Ingreso</span></td>
+                            <td>Venta Local (${mov.cantidadArticulos} arts. - ${mov.metodoPago})</td>
+                            <td class="td-ingreso">+$${mov.totalVenta.toFixed(2)}</td>
+                        </tr>
+                    `;
+                } else if (mov.tipo === 'gasto') {
+                    totalGastosExternos += mov.monto;
+                    filaHTML = `
+                        <tr>
+                            <td style="font-size: 0.85rem;">${fechaFormateada}</td>
+                            <td><span style="background: #fee2e2; color: #991b1b; padding: 3px 8px; border-radius: 12px; font-size: 0.8rem;">Egreso</span></td>
+                            <td>${mov.detalle}</td>
+                            <td class="td-egreso">-$${mov.monto.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+                
+                tablaMovimientos.innerHTML += filaHTML;
+            });
+
+            // Actualizar Tarjetas Visuales
+            document.getElementById('metric-ventas-totales').textContent = `$${totalVentasLocales.toFixed(2)}`;
+            document.getElementById('metric-gastos-totales').textContent = `$${totalGastosExternos.toFixed(2)}`;
+            
+            // Función auxiliar para pintar rojo/verde el balance
+            const pintarBalance = (id, valor) => {
+                const el = document.getElementById(id);
+                el.textContent = `${valor >= 0 ? '+' : ''}$${valor.toFixed(2)}`;
+                el.className = valor >= 0 ? 'text-verde' : 'text-rojo';
+            };
+
+            pintarBalance('metric-bal-1d', bal1d);
+            pintarBalance('metric-bal-7d', bal7d);
+            pintarBalance('metric-bal-30d', bal30d);
+        }
+
+        // --- LÓGICA DEL CARRITO (COMPRADOR) ---
         window.abrirCarrito = () => document.getElementById('modal-carrito').classList.remove('hidden');
         window.cerrarCarrito = () => document.getElementById('modal-carrito').classList.add('hidden');
 
@@ -399,13 +496,11 @@
             
             for(let i = 0; i < cantidadDeseada; i++) carrito.push(producto);
             
-            actualizarBadge();
-            renderizarCarrito();
+            actualizarBadge(); renderizarCarrito();
             
             const btn = document.getElementById(`btn-add-${idProducto}`);
             const textoOriginal = btn.textContent;
-            btn.textContent = `¡Agregado!`;
-            btn.style.backgroundColor = "var(--success)"; 
+            btn.textContent = `¡Agregado!`; btn.style.backgroundColor = "var(--success)"; 
             inputCantidad.value = 1;
 
             setTimeout(() => { btn.textContent = textoOriginal; btn.style.backgroundColor = ""; }, 1000);
@@ -461,13 +556,8 @@
             const catalogo = document.getElementById('catalogo-productos');
             const tabla = document.getElementById('tabla-stock');
             
-            catalogo.innerHTML = '';
-            tabla.innerHTML = '';
-
-            // APLICAR EL FILTRO DE BÚSQUEDA ANTES DE DIBUJAR
-            const productosFiltrados = productos.filter(prod => 
-                prod.nombre.toLowerCase().includes(terminoBusqueda)
-            );
+            catalogo.innerHTML = ''; tabla.innerHTML = '';
+            const productosFiltrados = productos.filter(prod => prod.nombre.toLowerCase().includes(terminoBusqueda));
 
             if(productosFiltrados.length === 0) {
                 catalogo.innerHTML = `<p>No se encontraron productos${terminoBusqueda ? ' para "' + terminoBusqueda + '"' : ''}.</p>`;
@@ -494,7 +584,7 @@
                     </div>
                 `;
 
-                // Tabla del dueño (NUEVO BOTÓN DE AGREGAR STOCK)
+                // Tabla del dueño
                 tabla.innerHTML += `
                     <tr>
                         <td>
@@ -526,8 +616,7 @@
             const btnVaciar = document.getElementById('btn-vaciar');
             const checkoutForm = document.getElementById('checkout-form');
 
-            lista.innerHTML = '';
-            let total = 0;
+            lista.innerHTML = ''; let total = 0;
 
             if (carrito.length === 0) {
                 lista.innerHTML = '<p style="color: #6b7280; font-style: italic; text-align: center; padding: 20px 0;">Tu carrito está vacío</p>';
