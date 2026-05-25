@@ -186,10 +186,10 @@
 <body>
 
     <nav class="dev-tools">
-        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Simulador</span>
+        <span style="font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted);">Simulador Local</span>
         <button onclick="window.cambiarVista('comprador')" class="secondary">Vista Tienda</button>
         <button onclick="window.cambiarVista('dueno')" class="secondary">Vista Administración</button>
-        <span id="estado-conexion" style="margin-left:auto; color: var(--text-muted); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">Conectando...</span>
+        <span id="estado-conexion" style="margin-left:auto; color: var(--accent); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 1px;">MODO LOCAL DEVEL</span>
     </nav>
 
     <div id="vista-comprador" class="container">
@@ -545,35 +545,86 @@
         </div>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, onSnapshot, doc, updateDoc, increment, deleteDoc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
-            authDomain: "pedidos-dba18.firebaseapp.com",
-            projectId: "pedidos-dba18",
-            storageBucket: "pedidos-dba18.firebasestorage.app",
-            messagingSenderId: "361618837437",
-            appId: "1:361618837437:web:ec464cb07617c5bdb5ccd4"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
-
-        let productos = []; let carrito = []; let terminoBusqueda = "";
-        let ingresosGlobales = []; let gastosGlobales = []; let pedidosGlobales = [];
-        let configTienda = { telefono: '', horaApertura: '09:00', horaCierre: '18:00', diasApertura: {}, envioDisponible: false, envioPrecio: 0 };
+    <script>
+        // --- ESTADO LOCAL EN MEMORIA (Reemplazo de Firebase) ---
+        let productos = [
+            { id: 'demo1', nombre: 'Producto de Prueba', imagen: '', variantes: { 'var_1': { detalle: 'Única', precio: 1500, costo: 800, stock: 10 } } }
+        ]; 
+        let carrito = []; 
+        let terminoBusqueda = "";
+        let ingresosGlobales = []; 
+        let gastosGlobales = []; 
+        let pedidosGlobales = [];
+        let configTienda = { telefono: '', horaApertura: '09:00', horaCierre: '18:00', diasApertura: { 'check-lu':true, 'check-ma':true, 'check-mi':true, 'check-ju':true, 'check-vi':true }, envioDisponible: false, envioPrecio: 0 };
         let ultimoIdPedidoCorto = "";
 
         // Chart instance
         let metricasChart = null;
-
         // Mostrador state
         let carritoMostrador = [];
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+        const genIdDB = () => Math.random().toString(36).substring(2, 10); // Generador de IDs genéricos
+
+        // --- TRIGGERS DE ACTUALIZACIÓN VISUAL ---
+        window.triggerConfiguracion = () => {
+            document.getElementById('conf-tel').value = configTienda.telefono || '';
+            document.getElementById('conf-apertura').value = configTienda.horaApertura || '09:00';
+            document.getElementById('conf-cierre').value = configTienda.horaCierre || '18:00';
+            document.getElementById('conf-envio-disp').value = configTienda.envioDisponible ? 'si' : 'no';
+            document.getElementById('conf-envio-precio').value = configTienda.envioPrecio || 0;
+
+            if(configTienda.diasApertura) {
+                ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => {
+                    document.getElementById(id).checked = configTienda.diasApertura[id] || false;
+                });
+            }
+
+            const info = document.getElementById('info-local-comprador');
+            let html = '';
+            let diasAbiertos = []; const strDias = { 'check-lu':'Lu', 'check-ma':'Ma', 'check-mi':'Mi', 'check-ju':'Ju', 'check-vi':'Vi', 'check-sa':'Sá', 'check-do':'Do' };
+            if(configTienda.diasApertura) Object.entries(configTienda.diasApertura).forEach(([id, c]) => { if(c) diasAbiertos.push(strDias[id]); });
+            
+            if(diasAbiertos.length > 0) {
+                const txtDias = diasAbiertos.length === 7 ? "LUN A DOM" : diasAbiertos.join(' - ');
+                const txtEstado = window.estaElLocalAbierto() ? '<span style="color:var(--text-main);">ABIERTO AHORA</span>' : '<span style="color:var(--text-dark);">CERRADO AHORA</span>';
+                html += `${txtDias} | ${configTienda.horaApertura} a ${configTienda.horaCierre} hs. | ${txtEstado}`;
+            }
+            
+            if(configTienda.envioDisponible) html += `<br><span style="font-size:0.75rem; color:var(--text-dark);">TARIFA ENVÍO $${window.formatearNum(configTienda.envioPrecio)}</span>`;
+            
+            if(html) { info.innerHTML = html; info.style.display = 'block'; } else { info.style.display = 'none'; }
+            window.renderizarCarrito();
+        };
+
+        window.triggerProductos = () => {
+            renderizarCatalogoYStock(); 
+            const sel = document.getElementById('mostrador-prod'); sel.innerHTML = '<option value="">Seleccionar...</option>';
+            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { 
+                if(v.stock>0) sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}" data-precio="${v.precio}" data-detalle="${v.detalle}" data-stock="${v.stock}">${p.nombre} - ${v.detalle}</option>`; 
+            }));
+        };
+
+        window.triggerGastos = () => {
+            gastosGlobales.sort((a,b) => b.fecha - a.fecha); 
+            const t = document.getElementById('tabla-gastos'); t.innerHTML = ''; 
+            gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem;">${g.titulo}</span></td><td style="color:var(--text-muted);">$${window.formatearNum(g.importe)}</td><td><button class="danger" onclick="window.borrarGasto('${g.id}')">X</button></td></tr>`; }); 
+            window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
+            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
+        };
+
+        window.triggerIngresos = () => {
+            ingresosGlobales.sort((a,b) => b.fecha - a.fecha); 
+            window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
+            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
+        };
+
+        window.triggerPedidos = () => {
+            window.renderizarPedidos(); 
+            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
+        };
+
 
         // --- LÓGICA DE HORARIOS ---
         window.estaElLocalAbierto = () => {
@@ -614,49 +665,17 @@
         window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); renderizarCatalogoYStock(); };
 
         // --- CONFIGURACIÓN ---
-        onSnapshot(doc(db, "config", "tienda"), (docSnap) => {
-            if(docSnap.exists()) {
-                configTienda = docSnap.data();
-                document.getElementById('conf-tel').value = configTienda.telefono || '';
-                document.getElementById('conf-apertura').value = configTienda.horaApertura || '09:00';
-                document.getElementById('conf-cierre').value = configTienda.horaCierre || '18:00';
-                document.getElementById('conf-envio-disp').value = configTienda.envioDisponible ? 'si' : 'no';
-                document.getElementById('conf-envio-precio').value = configTienda.envioPrecio || 0;
-
-                if(configTienda.diasApertura) {
-                    ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => {
-                        document.getElementById(id).checked = configTienda.diasApertura[id] || false;
-                    });
-                }
-
-                const info = document.getElementById('info-local-comprador');
-                let html = '';
-                let diasAbiertos = []; const strDias = { 'check-lu':'Lu', 'check-ma':'Ma', 'check-mi':'Mi', 'check-ju':'Ju', 'check-vi':'Vi', 'check-sa':'Sá', 'check-do':'Do' };
-                if(configTienda.diasApertura) Object.entries(configTienda.diasApertura).forEach(([id, c]) => { if(c) diasAbiertos.push(strDias[id]); });
-                
-                if(diasAbiertos.length > 0) {
-                    const txtDias = diasAbiertos.length === 7 ? "LUN A DOM" : diasAbiertos.join(' - ');
-                    const txtEstado = window.estaElLocalAbierto() ? '<span style="color:var(--text-main);">ABIERTO AHORA</span>' : '<span style="color:var(--text-dark);">CERRADO AHORA</span>';
-                    html += `${txtDias} | ${configTienda.horaApertura} a ${configTienda.horaCierre} hs. | ${txtEstado}`;
-                }
-                
-                if(configTienda.envioDisponible) html += `<br><span style="font-size:0.75rem; color:var(--text-dark);">TARIFA ENVÍO $${window.formatearNum(configTienda.envioPrecio)}</span>`;
-                
-                if(html) { info.innerHTML = html; info.style.display = 'block'; } else { info.style.display = 'none'; }
-                window.renderizarCarrito();
-            }
-        });
-
-        window.guardarConfiguracion = async () => {
+        window.guardarConfiguracion = () => {
             const telefono = document.getElementById('conf-tel').value.replace(/[^0-9]/g, '');
             const diasApertura = {};
             ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => diasApertura[id] = document.getElementById(id).checked);
-            try {
-                await setDoc(doc(db, "config", "tienda"), { 
-                    telefono, horaApertura: document.getElementById('conf-apertura').value, horaCierre: document.getElementById('conf-cierre').value, diasApertura,
-                    envioDisponible: document.getElementById('conf-envio-disp').value === 'si', envioPrecio: parseFloat(document.getElementById('conf-envio-precio').value) || 0 
-                });
-            } catch(e) {}
+            
+            configTienda = { 
+                telefono, horaApertura: document.getElementById('conf-apertura').value, horaCierre: document.getElementById('conf-cierre').value, diasApertura,
+                envioDisponible: document.getElementById('conf-envio-disp').value === 'si', envioPrecio: parseFloat(document.getElementById('conf-envio-precio').value) || 0 
+            };
+            window.triggerConfiguracion();
+            alert("Configuración guardada (Localmente)");
         };
 
         window.toggleDireccion = () => {
@@ -696,7 +715,7 @@
         };
         window.cerrarModal = () => document.getElementById('modal-producto').classList.add('hidden');
 
-        window.guardarProducto = async () => {
+        window.guardarProducto = () => {
             const id = document.getElementById('prod-id').value; const nombre = document.getElementById('prod-nombre').value; const imagen = document.getElementById('prod-imagen').value;
             if (!nombre) return;
             const vars = {}; document.querySelectorAll('.variant-row').forEach(f => {
@@ -708,8 +727,11 @@
             if (id) {
                 const pAct = productos.find(p => p.id === id);
                 Object.keys(vars).forEach(vId => { if (pAct.variantes && pAct.variantes[vId]) { vars[vId].stock = pAct.variantes[vId].stock; vars[vId].costo = pAct.variantes[vId].costo; } });
-                await updateDoc(doc(db, "productos", id), { nombre, imagen, variantes: vars });
-            } else { await addDoc(collection(db, "productos"), { nombre, imagen, variantes: vars }); }
+                pAct.nombre = nombre; pAct.imagen = imagen; pAct.variantes = vars;
+            } else { 
+                productos.push({ id: genIdDB(), nombre, imagen, variantes: vars });
+            }
+            window.triggerProductos();
             window.cerrarModal();
         };
 
@@ -722,26 +744,36 @@
         };
         window.cerrarModalStock = () => document.getElementById('modal-stock').classList.add('hidden');
 
-        window.guardarNuevoStock = async () => {
+        window.guardarNuevoStock = () => {
             const id = document.getElementById('stock-id-prod').value; const vId = document.getElementById('stock-select-var').value;
             const cant = parseInt(document.getElementById('stock-cantidad').value) || 0; const costoU = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0;
             if (cant <= 0 || !vId) return;
             const p = productos.find(x => x.id === id); const cTot = cant * costoU;
-            try {
-                const u = {}; u[`variantes.${vId}.stock`] = increment(cant); await updateDoc(doc(db, "productos", id), u);
-                if(cTot > 0) await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: cTot });
-                window.cerrarModalStock();
-            } catch (e) {}
+            
+            p.variantes[vId].stock += cant;
+            
+            if(cTot > 0) {
+                gastosGlobales.push({ id: genIdDB(), fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: cTot });
+                window.triggerGastos();
+            }
+            window.triggerProductos();
+            window.cerrarModalStock();
         };
 
         // --- FINANZAS Y MOSTRADOR ---
-        window.registrarGasto = async () => {
+        window.registrarGasto = () => {
             const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0;
-            if (t && i > 0) { await addDoc(collection(db, "gastos"), { fecha: new Date(), titulo: t, importe: i }); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; }
+            if (t && i > 0) { 
+                gastosGlobales.push({ id: genIdDB(), fecha: new Date(), titulo: t, importe: i }); 
+                document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; 
+                window.triggerGastos();
+            }
         };
-        window.borrarGasto = async (id) => { await deleteDoc(doc(db, "gastos", id)); };
+        window.borrarGasto = (id) => { 
+            gastosGlobales = gastosGlobales.filter(g => g.id !== id);
+            window.triggerGastos();
+        };
 
-        // NUEVA LOGICA: CARRITO PARA VENTA MOSTRADOR
         window.agregarItemMostrador = () => {
             const sel = document.getElementById('mostrador-prod');
             const cant = parseInt(document.getElementById('mostrador-cant').value) || 1;
@@ -798,7 +830,7 @@
             document.getElementById('total-mostrador').textContent = window.formatearNum(total);
         };
 
-        window.registrarVentaMostrador = async () => {
+        window.registrarVentaMostrador = () => {
             if(carritoMostrador.length === 0) { alert("El carrito de mostrador está vacío."); return; }
             const efe = parseFloat(document.getElementById('mostrador-efectivo').value) || 0; 
             const trans = parseFloat(document.getElementById('mostrador-transf').value) || 0;
@@ -810,44 +842,48 @@
             
             if (abonado === 0 && total > 0) { alert("Ingresa el monto de pago (Efectivo o Transferencia)."); return; }
             
-            try {
-                // Restar stock de la DB
-                for(const item of carritoMostrador) {
-                    const u = {}; u[`variantes.${item.idVar}.stock`] = increment(-item.cantidad);
-                    await updateDoc(doc(db, "productos", item.idProd), u);
+            // Restar stock
+            for(const item of carritoMostrador) {
+                const prod = productos.find(x => x.id === item.idProd);
+                if(prod && prod.variantes[item.idVar]) {
+                    prod.variantes[item.idVar].stock -= item.cantidad;
                 }
-                
-                // Registrar el ingreso (Venta Física)
-                await addDoc(collection(db, "ingresos"), { 
-                    fecha: new Date(), 
-                    tipo: 'venta_mostrador', 
-                    detalle: `Venta Mostrador (${countItems} items)`, 
-                    efectivo: efe, 
-                    transferencia: trans,
-                    itemsCount: countItems
-                });
-                
-                // Limpiar todo
-                carritoMostrador = [];
-                window.renderizarCarritoMostrador();
-                document.getElementById('mostrador-efectivo').value = '';
-                document.getElementById('mostrador-transf').value = '';
-                alert("Venta registrada y stock descontado.");
-            } catch (e) {
-                alert("Hubo un error al registrar la venta.");
             }
+            
+            // Registrar ingreso
+            ingresosGlobales.push({ 
+                id: genIdDB(),
+                fecha: new Date(), 
+                tipo: 'venta_mostrador', 
+                detalle: `Venta Mostrador (${countItems} items)`, 
+                efectivo: efe, 
+                transferencia: trans,
+                itemsCount: countItems
+            });
+            
+            // Limpiar todo
+            carritoMostrador = [];
+            window.renderizarCarritoMostrador();
+            document.getElementById('mostrador-efectivo').value = '';
+            document.getElementById('mostrador-transf').value = '';
+            window.triggerProductos(); window.triggerIngresos();
+            alert("Venta registrada y stock descontado.");
         };
 
-        window.registrarIngresoManual = async () => {
+        window.registrarIngresoManual = () => {
             const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0;
-            if (d && (e>0 || t>0)) { await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t }); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = "";}
+            if (d && (e>0 || t>0)) { 
+                ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t }); 
+                document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = "";
+                window.triggerIngresos();
+            }
         };
 
         window.calcularBalanceEnVivo = () => {
             const p = document.getElementById('filtro-periodo').value; const hoy = new Date(); let dias = p==='hoy'?1:p==='semana'?7:p==='mes'?30:99999;
             let tIng = 0; let tGas = 0;
-            ingresosGlobales.forEach(i => { if((hoy - i.fecha.toDate())/86400000 <= dias) tIng += (i.efectivo + i.transferencia); });
-            gastosGlobales.forEach(g => { if((hoy - g.fecha.toDate())/86400000 <= dias) tGas += g.importe; });
+            ingresosGlobales.forEach(i => { if((hoy - i.fecha)/86400000 <= dias) tIng += (i.efectivo + i.transferencia); });
+            gastosGlobales.forEach(g => { if((hoy - g.fecha)/86400000 <= dias) tGas += g.importe; });
             const net = tIng - tGas;
             document.getElementById('bal-ingresos').textContent = `$${window.formatearNum(tIng)}`; document.getElementById('bal-gastos').textContent = `$${window.formatearNum(tGas)}`;
             document.getElementById('bal-neta').textContent = `${net>=0?'':'-'}$${window.formatearNum(Math.abs(net))}`; document.getElementById('bal-neta').style.color = net>=0?'var(--accent)':'var(--text-muted)';
@@ -855,8 +891,8 @@
 
         window.renderizarTransacciones = () => {
             let tr = [];
-            ingresosGlobales.forEach(i => tr.push({ id: i.id, f: i.fecha.toDate(), t: 'Ingreso', d: i.detalle, m: i.efectivo + i.transferencia }));
-            gastosGlobales.forEach(g => tr.push({ id: g.id, f: g.fecha.toDate(), t: 'Egreso', d: g.titulo+(g.descripcion?` - ${g.descripcion}`:''), m: g.importe }));
+            ingresosGlobales.forEach(i => tr.push({ id: i.id, f: i.fecha, t: 'Ingreso', d: i.detalle, m: i.efectivo + i.transferencia }));
+            gastosGlobales.forEach(g => tr.push({ id: g.id, f: g.fecha, t: 'Egreso', d: g.titulo+(g.descripcion?` - ${g.descripcion}`:''), m: g.importe }));
             tr.sort((a,b) => b.f - a.f);
             const tb = document.getElementById('tabla-transacciones'); tb.innerHTML = '';
             tr.forEach(x => {
@@ -870,8 +906,8 @@
         // --- PEDIDOS ---
         window.renderizarPedidos = () => {
             const lP = document.getElementById('lista-pedidos-pendientes'); const lH = document.getElementById('lista-pedidos-historial'); lP.innerHTML=''; lH.innerHTML='';
-            const pend = pedidosGlobales.filter(p => !p.estadoEntrega).sort((a,b) => b.fecha.toDate() - a.fecha.toDate());
-            const entr = pedidosGlobales.filter(p => p.estadoEntrega).sort((a,b) => b.fecha.toDate() - a.fecha.toDate());
+            const pend = pedidosGlobales.filter(p => !p.estadoEntrega).sort((a,b) => b.fecha - a.fecha);
+            const entr = pedidosGlobales.filter(p => p.estadoEntrega).sort((a,b) => b.fecha - a.fecha);
             
             const card = (p, isP) => {
                 let it = ''; p.items.forEach(i => it += `<li>${i.nombre} - ${i.detalle} x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
@@ -881,7 +917,7 @@
                 const bP = p.estadoPago ? `<span style="color:var(--text-dark); font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">Registrar Pago</button>`;
                 const bE = isP ? `<button onclick="window.marcarEntregado('${p.id}', '${p.telefono}')">Entregado</button>` : `<span style="color:var(--text-dark); font-size:0.8rem;">FINALIZADO</span>`;
                 
-                return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha.toDate().toLocaleString()}</span></div><span style="font-size:1.1rem; color:var(--text-main);">$${window.formatearNum(p.total)}</span></div>
+                return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha.toLocaleString()}</span></div><span style="font-size:1.1rem; color:var(--text-main);">$${window.formatearNum(p.total)}</span></div>
                 <p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:var(--text-main);">${p.nombreCliente} ${p.apellidoCliente}</span></p>
                 <p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${p.telefono.replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--text-main); text-decoration:none;">${p.telefono}</a></p>
                 <p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main);">${p.metodoEntrega}</span> ${p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p>
@@ -890,51 +926,56 @@
             pend.forEach(p => lP.innerHTML += card(p, true)); entr.forEach(p => lH.innerHTML += card(p, false));
         };
         
-        window.marcarPagado = async (id, t, m, c) => { await updateDoc(doc(db, "pedidos", id), { estadoPago: true }); await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m==='Transferencia'?t:0 }); };
+        window.marcarPagado = (id, t, m, c) => { 
+            const p = pedidosGlobales.find(x => x.id === id);
+            if(p) {
+                p.estadoPago = true;
+                ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m==='Transferencia'?t:0 }); 
+                window.triggerPedidos(); window.triggerIngresos();
+            }
+        };
         
-        window.marcarEntregado = async (id, telefono) => {
-            try {
-                const docRef = doc(db, "pedidos", id); const snap = await getDoc(docRef); const p = snap.data();
+        window.marcarEntregado = (id, telefono) => {
+            const p = pedidosGlobales.find(x => x.id === id);
+            if(p) {
                 if(!p.estadoPago) {
-                    await addDoc(collection(db, "ingresos"), { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 });
-                    await updateDoc(docRef, { estadoPago: true });
+                    ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 });
+                    p.estadoPago = true;
+                    window.triggerIngresos();
                 }
-                await updateDoc(docRef, { estadoEntrega: true });
+                p.estadoEntrega = true;
+                window.triggerPedidos();
 
                 if (telefono) {
                     let numLimpio = telefono.replace(/[^0-9]/g, '');
                     let msg = "su pedido a sido entregado, muchas gracias por comprar con nosotros lo esperamos para su siguiente compra";
                     window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
                 }
-            } catch(e) {}
+            }
         };
 
-        window.cancelarPedido = async (id, telefono) => {
+        window.cancelarPedido = (id, telefono) => {
             if(!confirm("¿Cancelar este pedido y reponer el stock?")) return;
             const p = pedidosGlobales.find(x => x.id === id);
             if(!p) return;
 
-            try {
-                // Reponer stock a los productos originarios
-                for (const item of p.items) {
-                    if(item.idProd && item.idVar) {
-                        const u = {}; 
-                        u[`variantes.${item.idVar}.stock`] = increment(item.cantidad);
-                        await updateDoc(doc(db, "productos", item.idProd), u);
+            // Reponer stock
+            for (const item of p.items) {
+                if(item.idProd && item.idVar) {
+                    const prod = productos.find(x => x.id === item.idProd);
+                    if(prod && prod.variantes[item.idVar]) {
+                        prod.variantes[item.idVar].stock += item.cantidad;
                     }
                 }
-                
-                // Eliminar el pedido de la base de datos
-                await deleteDoc(doc(db, "pedidos", id));
-                
-                // Enviar mensaje por WhatsApp notificando la cancelación
-                if (telefono) {
-                    let numLimpio = telefono.replace(/[^0-9]/g, '');
-                    let msg = "lo sentimos, no pudimos procesar su pedido";
-                    window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
-                }
-            } catch(e) {
-                alert("Hubo un error al cancelar el pedido.");
+            }
+            
+            pedidosGlobales = pedidosGlobales.filter(x => x.id !== id);
+            window.triggerProductos(); window.triggerPedidos();
+            
+            if (telefono) {
+                let numLimpio = telefono.replace(/[^0-9]/g, '');
+                let msg = "lo sentimos, no pudimos procesar su pedido";
+                window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent(msg)}`, '_blank');
             }
         };
 
@@ -948,7 +989,6 @@
             document.getElementById('modal-metricas').classList.add('hidden');
         }
 
-        // Función para agrupar fechas dinámicamente
         function obtenerCestasPeriodo(periodo) {
             let cestas = [];
             let hoy = new Date();
@@ -960,7 +1000,6 @@
                     cestas.push({ label: `${d.getDate()}/${d.getMonth()+1}`, start: d.getTime(), end: d.getTime() + 86400000 });
                 }
             } else if(periodo === '1m') {
-                // 4 Semanas
                 for(let i=3; i>=0; i--) {
                     let end = new Date(hoy); end.setDate(end.getDate() - (i*7));
                     let start = new Date(end); start.setDate(start.getDate() - 6);
@@ -986,7 +1025,6 @@
             let datosBarras = cestas.map(() => 0);
             let datosLinea = cestas.map(() => 0);
 
-            // Ayudante para sumar a la canasta correcta
             const addToBucket = (time, valueBar, valueLine) => {
                 for(let i=0; i<cestas.length; i++) {
                     if(time >= cestas[i].start && time < cestas[i].end) {
@@ -997,10 +1035,9 @@
                 }
             };
 
-            // 1. RECORRER PEDIDOS WEB
             pedidosGlobales.forEach(p => {
                 if(!p.fecha) return;
-                let time = p.fecha.toDate().getTime();
+                let time = p.fecha.getTime();
                 let cobrado = p.estadoPago === true;
                 let monto = p.total || 0;
                 let cantItems = p.items ? p.items.reduce((s, it) => s + (it.cantidad || 1), 0) : 0;
@@ -1017,15 +1054,13 @@
                 if ((categoria === 'neto' || categoria === 'bruto') && cobrado) addToBucket(time, monto, 1);
             });
 
-            // 2. RECORRER INGRESOS EXTRA Y MOSTRADOR
             ingresosGlobales.forEach(ing => {
                 if(!ing.fecha) return;
-                let time = ing.fecha.toDate().getTime();
+                let time = ing.fecha.getTime();
                 let monto = (ing.efectivo || 0) + (ing.transferencia || 0);
-                let isMostrador = ing.tipo === 'venta_mostrador' || ing.tipo === 'venta'; // Retrocompatibilidad con la version anterior
+                let isMostrador = ing.tipo === 'venta_mostrador' || ing.tipo === 'venta'; 
                 let cantItems = ing.itemsCount || 1;
 
-                // Solo sumar a las métricas si NO ES un pago de pedido web para evitar duplicados
                 let isAutoPagoWeb = (ing.tipo === 'pago' || ing.tipo === 'pago_auto');
 
                 if (!isAutoPagoWeb) {
@@ -1039,11 +1074,10 @@
                 }
             });
 
-            // 3. RECORRER GASTOS
             if (categoria === 'gastos' || categoria === 'neto') {
                 gastosGlobales.forEach(g => {
                     if(!g.fecha) return;
-                    let time = g.fecha.toDate().getTime();
+                    let time = g.fecha.getTime();
                     let monto = g.importe || 0;
                     
                     if (categoria === 'gastos') addToBucket(time, monto, 1);
@@ -1051,7 +1085,6 @@
                 });
             }
 
-            // Textos dinámicos
             let isMoney = ['efectivo', 'transferencia', 'ventas_web', 'ventas_fisicas', 'neto', 'bruto', 'gastos'].includes(categoria);
             let labelBar = isMoney ? "Monto Total ($)" : "Cantidad Total";
             let labelLine = isMoney ? "Operaciones Generadas" : "Ventas";
@@ -1066,90 +1099,24 @@
                 data: {
                     labels: etiquetas,
                     datasets: [
-                        {
-                            label: labelBar,
-                            data: datosBarras,
-                            backgroundColor: categoria === 'gastos' ? '#ef4444' : '#5d4037', // Rojo si son gastos, marron primario el resto
-                            borderRadius: 4,
-                            order: 2
-                        },
-                        {
-                            label: labelLine,
-                            data: datosLinea,
-                            type: 'line',
-                            borderColor: '#8d6e63', // Acento marron
-                            backgroundColor: 'rgba(141, 110, 99, 0.1)',
-                            borderWidth: 3,
-                            fill: true,
-                            tension: 0.3,
-                            order: 1
-                        }
+                        { label: labelBar, data: datosBarras, backgroundColor: categoria === 'gastos' ? '#ef4444' : '#5d4037', borderRadius: 4, order: 2 },
+                        { label: labelLine, data: datosLinea, type: 'line', borderColor: '#8d6e63', backgroundColor: 'rgba(141, 110, 99, 0.1)', borderWidth: 3, fill: true, tension: 0.3, order: 1 }
                     ]
                 },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    color: '#e0e0e0',
+                    responsive: true, maintainAspectRatio: false, color: '#e0e0e0',
                     plugins: {
                         legend: { labels: { color: '#e0e0e0', font: { family: "'Helvetica Neue', sans-serif" } } },
-                        tooltip: { 
-                            mode: 'index', 
-                            intersect: false,
-                            callbacks: {
-                                label: function(context) {
-                                    let label = context.dataset.label || '';
-                                    let value = context.parsed.y;
-                                    if (label) { label += ': '; }
-                                    if (isMoney && context.datasetIndex === 0) {
-                                        label += '$' + value.toLocaleString('es-AR');
-                                    } else {
-                                        label += value;
-                                    }
-                                    return label;
-                                }
-                            }
-                        }
+                        tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; let value = context.parsed.y; if (label) { label += ': '; } if (isMoney && context.datasetIndex === 0) { label += '$' + value.toLocaleString('es-AR'); } else { label += value; } return label; } } }
                     },
                     scales: {
-                        y: {
-                            beginAtZero: true,
-                            grid: { color: '#333333' }, // Color bordes oscuro
-                            ticks: { 
-                                color: '#9e9e9e',
-                                callback: function(value) {
-                                    return isMoney ? '$' + value.toLocaleString('es-AR') : value;
-                                }
-                            }
-                        },
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#9e9e9e' }
-                        }
+                        y: { beginAtZero: true, grid: { color: '#333333' }, ticks: { color: '#9e9e9e', callback: function(value) { return isMoney ? '$' + value.toLocaleString('es-AR') : value; } } },
+                        x: { grid: { display: false }, ticks: { color: '#9e9e9e' } }
                     }
                 }
             });
         }
 
-
-        // --- LISTENERS ---
-        onSnapshot(collection(db, "productos"), (s) => {
-            productos = s.docs.map(d => { const x=d.data(); if(!x.variantes) x.variantes={'legado':{detalle:'Unica',precio:x.precio||0,costo:x.costo||0,stock:x.stock||0}}; return {id:d.id,...x}; });
-            renderizarCatalogoYStock(); document.getElementById('estado-conexion').textContent = "SISTEMA ONLINE";
-            const sel = document.getElementById('mostrador-prod'); sel.innerHTML = '<option value="">Seleccionar...</option>';
-            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { if(v.stock>0) sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}" data-precio="${v.precio}" data-detalle="${v.detalle}" data-stock="${v.stock}">${p.nombre} - ${v.detalle}</option>`; }));
-        });
-        onSnapshot(collection(db, "gastos"), (s) => { 
-            gastosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); const t = document.getElementById('tabla-gastos'); t.innerHTML = ''; gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem;">${g.titulo}</span></td><td style="color:var(--text-muted);">$${window.formatearNum(g.importe)}</td><td><button class="danger" onclick="window.borrarGasto('${g.id}')">X</button></td></tr>`; }); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
-            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
-        });
-        onSnapshot(collection(db, "ingresos"), (s) => { 
-            ingresosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })).sort((a,b) => b.fecha - a.fecha); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); 
-            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
-        });
-        onSnapshot(collection(db, "pedidos"), (s) => { 
-            pedidosGlobales = s.docs.map(d => ({ id: d.id, ...d.data() })); window.renderizarPedidos(); 
-            if(document.getElementById('modal-metricas') && !document.getElementById('modal-metricas').classList.contains('hidden')) window.actualizarGraficos();
-        });
 
         // --- CARRITO COMPRADOR ---
         window.cambiarVarianteUI = (id, sel) => {
@@ -1173,7 +1140,7 @@
         window.vaciarCarrito = () => { carrito = []; actualizarBadge(); renderizarCarrito(); };
         function actualizarBadge() { const b = document.getElementById('badge-carrito'); b.textContent = carrito.length; b.style.display = carrito.length > 0 ? 'block' : 'none'; }
 
-        window.finalizarCompra = async () => {
+        window.finalizarCompra = () => {
             if (carrito.length === 0) return;
             const n = document.getElementById('checkout-nombre').value; const a = document.getElementById('checkout-apellido').value; const t = document.getElementById('checkout-telefono').value;
             if (!n || !a || !t) return;
@@ -1187,28 +1154,30 @@
                 let tot = 0; const cP = {}; const iM = []; const cV = {};
                 carrito.forEach(i => { if(!cP[i.idProd]) cP[i.idProd]={}; cP[i.idProd][i.idVar]=(cP[i.idProd][i.idVar]||0)+1; tot+=i.precio; const u=i.idProd+'_'+i.idVar; if(!cV[u]) cV[u]={...i,c:0}; cV[u].c++; });
                 
-                // GUARDAR EL ID DE PRODUCTO Y VARIANTE EN EL PEDIDO (NECESARIO PARA CANCELAR Y REPONER)
-                Object.values(cV).forEach(i => iM.push({
-                    idProd: i.idProd, 
-                    idVar: i.idVar, 
-                    nombre:i.nombre, 
-                    detalle:i.detalle, 
-                    precio:i.precio, 
-                    cantidad:i.c
-                }));
-                
+                Object.values(cV).forEach(i => iM.push({ idProd: i.idProd, idVar: i.idVar, nombre:i.nombre, detalle:i.detalle, precio:i.precio, cantidad:i.c }));
                 let cEnv = (mE==='Envio'&&configTienda.envioDisponible) ? configTienda.envioPrecio : 0;
                 
                 // RESERVA: Descontar stock inmediatamente
-                for (const [iP, vs] of Object.entries(cP)) { const u={}; for(const [iV,c] of Object.entries(vs)) u[`variantes.${iV}.stock`]=increment(-c); await updateDoc(doc(db, "productos", iP), u); }
+                for (const [iP, vs] of Object.entries(cP)) { 
+                    const p = productos.find(x => x.id === iP);
+                    if(p) {
+                        for(const [iV,c] of Object.entries(vs)) {
+                            if(p.variantes[iV]) p.variantes[iV].stock -= c;
+                        }
+                    }
+                }
                 const idC = generarIdCorto();
                 
-                await addDoc(collection(db, "pedidos"), { idCorto: idC, fecha: new Date(), nombreCliente: n, apellidoCliente: a, telefono: t, direccion: mE==='Envio'?d:'Retiro en local', metodoPago: document.getElementById('metodo-pago').value, metodoEntrega: mE, estadoPago: false, estadoEntrega: false, total: tot+cEnv, costoEnvio: cEnv, items: iM });
+                pedidosGlobales.push({ id: genIdDB(), idCorto: idC, fecha: new Date(), nombreCliente: n, apellidoCliente: a, telefono: t, direccion: mE==='Envio'?d:'Retiro en local', metodoPago: document.getElementById('metodo-pago').value, metodoEntrega: mE, estadoPago: false, estadoEntrega: false, total: tot+cEnv, costoEnvio: cEnv, items: iM });
                 
+                window.triggerProductos(); window.triggerPedidos();
+
                 ultimoIdPedidoCorto = idC; document.getElementById('exito-id').textContent = `#${idC}`;
                 document.getElementById('carrito-vista-lista').classList.add('hidden'); document.getElementById('carrito-vista-exito').classList.remove('hidden');
                 document.getElementById('checkout-nombre').value = ""; document.getElementById('checkout-apellido').value = ""; document.getElementById('checkout-telefono').value = ""; document.getElementById('checkout-direccion').value = "";
-            } catch (e) {} finally { document.getElementById('btn-comprar').disabled = false; }
+            } catch (e) {
+                console.error(e);
+            } finally { document.getElementById('btn-comprar').disabled = false; }
         };
         window.enviarWhatsapp = () => { if(!configTienda.telefono) return; window.open(`https://wa.me/${configTienda.telefono.replace(/[^0-9]/g, '')}?text=${encodeURIComponent(`Orden generada en la plataforma.\nCódigo: *#${ultimoIdPedidoCorto}*.`)}`, '_blank'); };
 
@@ -1228,7 +1197,6 @@
                     sT += v.stock; sO += `<option value="${id}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`; 
                     mT += `<div style="margin-bottom:3px;">${v.detalle} - <span style="color:var(--text-main);">${window.formatearNum(v.stock)}</span></div>`; 
                     
-                    // Comprobar Alertas
                     if(v.stock === 0) { hAgot += `<li><span>${p.nombre} - ${v.detalle}</span><span style="color:var(--primary);">0</span></li>`; countA++; }
                     else if(v.stock < 6) { hPoco += `<li><span>${p.nombre} - ${v.detalle}</span><span>${v.stock}</span></li>`; countA++; }
                 }); mT += '</div>';
@@ -1242,7 +1210,6 @@
                     <td><button class="secondary" style="margin-right:5px;" onclick="window.abrirModal('${p.id}')">Configurar</button><button class="outline" onclick="window.abrirModalStock('${p.id}')">Reponer</button></td></tr>`;
             });
 
-            // Pintar panel de alertas
             const contAlertas = document.getElementById('modulo-alertas');
             if(countA > 0) {
                 contAlertas.style.display = 'block';
@@ -1267,7 +1234,15 @@
             } ts.textContent = window.formatearNum(t);
         };
         
-        window.renderizarCarritoMostrador();
+        // --- INICIALIZACIÓN ---
+        window.onload = () => {
+            window.triggerConfiguracion();
+            window.triggerProductos();
+            window.triggerGastos();
+            window.triggerIngresos();
+            window.triggerPedidos();
+            window.renderizarCarritoMostrador();
+        };
     </script>
 </body>
 </html>
