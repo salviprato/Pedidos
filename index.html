@@ -8,20 +8,17 @@
     <style>
         /* ===== ESTILOS ELEGANTES (MARRONES Y GRISES OSCUROS) ===== */
         :root {
-            /* Marrones */
             --primary: #5d4037; 
             --primary-hover: #4e342e;
             --accent: #8d6e63;
             --accent-light: #bcaaa4;
             
-            /* Grises Oscuros */
             --bg-color: #121212;
             --card-bg: #1e1e1e;
             --card-hover: #242424;
             --border: #333333;
             --border-light: #424242;
             
-            /* Textos */
             --text-main: #e0e0e0;
             --text-muted: #9e9e9e;
             --text-dark: #757575;
@@ -50,7 +47,7 @@
             font-size: 0.75rem;
             text-transform: uppercase;
             letter-spacing: 1px;
-            transition: background-color 0.3s, color 0.3s, border-color 0.3s, transform 0.3s; 
+            transition: all 0.3s; 
         }
         button:hover { background-color: var(--primary-hover); }
         button:disabled { background-color: var(--border); color: var(--text-dark); cursor: not-allowed; }
@@ -61,27 +58,37 @@
         button.danger { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); }
         button.danger:hover { color: #ef4444; border-color: #ef4444; }
         
+        /* Botón de Retroceso con Flecha */
+        .btn-back {
+            background: transparent; border: none; color: var(--text-muted); 
+            display: inline-flex; align-items: center; gap: 8px; padding: 0; 
+            font-size: 0.85rem; cursor: pointer; margin-bottom: 25px; transition: color 0.3s, transform 0.3s;
+        }
+        .btn-back:hover { color: var(--text-main); background: transparent; transform: translateX(-4px); }
+        .btn-back svg { width: 18px; height: 18px; fill: currentColor; }
+
+        /* Categorías UI */
+        .filtros-scroll {
+            display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; 
+            padding-bottom: 10px; scrollbar-width: none;
+        }
+        .filtros-scroll::-webkit-scrollbar { display: none; }
+        
+        .btn-categoria {
+            background-color: var(--card-bg); /* Fondo oscuro igual al recuadro superior */
+            border: 1px solid var(--border); 
+            color: var(--text-muted); padding: 8px 18px; border-radius: 4px; 
+            font-size: 0.8rem; cursor: pointer; white-space: nowrap; 
+            text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;
+        }
+        .btn-categoria:hover { border-color: var(--border-light); color: var(--text-main); }
+        .btn-categoria.active { background-color: var(--primary); color: #fff; border-color: var(--primary); }
+
         /* Botón WhatsApp Flotante */
         .btn-flotante-wsp {
-            position: fixed;
-            bottom: 30px;
-            right: 30px;
-            background-color: var(--primary);
-            color: #fff;
-            width: 60px;
-            height: 60px;
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            z-index: 999;
-            padding: 0;
+            position: fixed; bottom: 30px; right: 30px; background-color: var(--primary); color: #fff; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 999; padding: 0;
         }
-        .btn-flotante-wsp:hover {
-            transform: scale(1.1);
-            background-color: var(--primary-hover);
-        }
+        .btn-flotante-wsp:hover { transform: scale(1.1); background-color: var(--primary-hover); }
         
         /* Navegación */
         nav.dev-tools { background: var(--card-bg); padding: 15px 20px; border-bottom: 1px solid var(--border); margin-bottom: 30px; display: flex; gap: 15px; align-items: center; flex-wrap: wrap; }
@@ -91,14 +98,7 @@
         .panel-oscuro-container { background-color: var(--card-bg); padding: 30px; border: 1px solid var(--border); margin-bottom: 20px; }
         
         input, select { 
-            width: 100%; 
-            background: var(--bg-color); 
-            border: 1px solid var(--border-light); 
-            color: var(--text-main); 
-            padding: 10px; 
-            border-radius: 2px; 
-            box-sizing: border-box; 
-            font-family: inherit;
+            width: 100%; background: var(--bg-color); border: 1px solid var(--border-light); color: var(--text-main); padding: 10px; border-radius: 2px; box-sizing: border-box; font-family: inherit;
         }
         input:focus, select:focus { outline: none; border-color: var(--accent); }
         input::placeholder { color: var(--text-dark); }
@@ -107,10 +107,10 @@
         .search-container input { border: none; padding: 8px; }
         
         /* Tienda UI */
-        .header-tienda { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;}
+        .header-tienda { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;}
         .header-tienda h2 { margin: 0; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--accent); }
         
-        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-top: 20px; }
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-top: 10px; }
         .card { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; text-align: center; display: flex; flex-direction: column; transition: border-color 0.3s; }
         .card:hover { border-color: var(--border-light); }
         .card-img { width: 100%; height: 220px; object-fit: cover; margin-bottom: 20px; background-color: var(--bg-color); filter: grayscale(30%); }
@@ -128,7 +128,7 @@
         .modal-content { background: var(--card-bg); padding: 40px; width: 100%; max-width: 500px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); }
         .modal-content h3 { font-weight: 400; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border); padding-bottom: 15px; margin-top: 0; color: var(--accent); }
         
-        #modal-metricas .modal-content { max-width: 800px; } /* Ajuste de ancho para el gráfico */
+        #modal-metricas .modal-content { max-width: 800px; } 
 
         .form-group { margin-bottom: 20px; }
         .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; }
@@ -203,6 +203,9 @@
             </div>
             <button onclick="window.abrirCarrito()" class="btn-carrito-nav">Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span></button>
         </div>
+        
+        <div id="contenedor-categorias" class="filtros-scroll"></div>
+
         <div id="catalogo-productos" class="grid-cards"><p style="color: var(--text-muted);">Cargando catálogo...</p></div>
     </div>
 
@@ -316,6 +319,11 @@
     </div>
 
     <div id="vista-dueno" class="container hidden">
+        <button class="btn-back" onclick="window.cambiarVista('comprador')">
+            <svg viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20v-2z"/></svg> 
+            Volver a la Tienda
+        </button>
+
         <h2 style="margin-top: 0; margin-bottom: 30px; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--accent);">Administración</h2>
         
         <div style="display: flex; gap: 15px; margin-bottom: 30px; flex-wrap: wrap; border-bottom: 1px solid var(--border); padding-bottom: 20px;">
@@ -354,7 +362,7 @@
             </div>
             <div style="overflow-x: auto;">
                 <table>
-                    <thead><tr><th>Producto</th><th>Variantes</th><th>Stock Total</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Producto</th><th>Categoría</th><th>Variantes</th><th>Stock Total</th><th>Acciones</th></tr></thead>
                     <tbody id="tabla-stock"></tbody>
                 </table>
             </div>
@@ -507,7 +515,17 @@
         <div class="modal-content">
             <h3 id="modal-titulo">Ficha de Producto</h3>
             <input type="hidden" id="prod-id">
+            
             <div class="form-group"><label>Denominación Base</label><input type="text" id="prod-nombre"></div>
+            
+            <div class="form-group">
+                <label>Categoría</label>
+                <div style="display: flex; gap: 10px;">
+                    <select id="prod-categoria"></select>
+                    <button type="button" class="secondary" onclick="window.crearCategoriaModal()">+ Nueva</button>
+                </div>
+            </div>
+
             <div class="form-group"><label>URL Imagen</label><input type="text" id="prod-imagen"></div>
             
             <hr>
@@ -546,9 +564,14 @@
     </div>
 
     <script>
-        // --- ESTADO LOCAL EN MEMORIA (Reemplazo de Firebase) ---
+        // --- ESTADO LOCAL EN MEMORIA ---
+        
+        // NUEVA LOGICA DE CATEGORIAS
+        let categoriasGlobales = ['General', 'Bebidas', 'Snacks'];
+        let categoriaActiva = ''; // Vacio significa "Todos"
+
         let productos = [
-            { id: 'demo1', nombre: 'Producto de Prueba', imagen: '', variantes: { 'var_1': { detalle: 'Única', precio: 1500, costo: 800, stock: 10 } } }
+            { id: 'demo1', nombre: 'Producto de Prueba', imagen: '', categoria: 'General', variantes: { 'var_1': { detalle: 'Única', precio: 1500, costo: 800, stock: 10 } } }
         ]; 
         let carrito = []; 
         let terminoBusqueda = "";
@@ -560,12 +583,11 @@
 
         // Chart instance
         let metricasChart = null;
-        // Mostrador state
         let carritoMostrador = [];
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
-        const genIdDB = () => Math.random().toString(36).substring(2, 10); // Generador de IDs genéricos
+        const genIdDB = () => Math.random().toString(36).substring(2, 10); 
 
         // --- TRIGGERS DE ACTUALIZACIÓN VISUAL ---
         window.triggerConfiguracion = () => {
@@ -648,12 +670,14 @@
             window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent("Hola, me comunico desde la tienda en línea. Quiero realizar una consulta.")}`, '_blank');
         };
 
-        // --- UI BÁSICA ---
+        // --- UI BÁSICA Y NAVEGACIÓN ---
         window.cambiarVista = (rol) => {
             document.getElementById('vista-comprador').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('btn-flotante-wsp').classList.toggle('hidden', rol !== 'comprador');
             document.getElementById('vista-dueno').classList.toggle('hidden', rol !== 'dueno');
             if(rol === 'dueno') window.togglePanel('panel-inventario');
+            // Resetear scroll al cambiar
+            window.scrollTo(0,0);
         };
         
         window.togglePanel = (id) => {
@@ -663,6 +687,48 @@
         
         window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
         window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); renderizarCatalogoYStock(); };
+
+        // --- GESTIÓN DE CATEGORÍAS ---
+        window.renderizarBotonesCategorias = () => {
+            const cont = document.getElementById('contenedor-categorias');
+            cont.innerHTML = `<button class="btn-categoria ${categoriaActiva === '' ? 'active' : ''}" onclick="window.filtrarPorCategoria('')">Todos</button>`;
+            categoriasGlobales.forEach(c => {
+                cont.innerHTML += `<button class="btn-categoria ${categoriaActiva === c ? 'active' : ''}" onclick="window.filtrarPorCategoria('${c}')">${c}</button>`;
+            });
+        };
+
+        window.filtrarPorCategoria = (cat) => {
+            categoriaActiva = cat;
+            window.renderizarBotonesCategorias();
+            renderizarCatalogoYStock();
+        };
+
+        window.actualizarSelectCategoriasModal = (selectVal = null) => {
+            const sel = document.getElementById('prod-categoria');
+            sel.innerHTML = '';
+            categoriasGlobales.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
+            if (selectVal && categoriasGlobales.includes(selectVal)) {
+                sel.value = selectVal;
+            } else if (categoriasGlobales.length > 0) {
+                sel.value = categoriasGlobales[0];
+            }
+        };
+
+        window.crearCategoriaModal = () => {
+            const nuevaCat = prompt("Ingrese el nombre de la nueva categoría:");
+            if (nuevaCat && nuevaCat.trim() !== '') {
+                const nombreLimpio = nuevaCat.trim();
+                if (!categoriasGlobales.includes(nombreLimpio)) {
+                    categoriasGlobales.push(nombreLimpio);
+                    window.renderizarBotonesCategorias(); // Actualizar vista tienda
+                    window.actualizarSelectCategoriasModal(nombreLimpio); // Actualizar e auto-seleccionar
+                } else {
+                    alert("Esta categoría ya existe.");
+                    window.actualizarSelectCategoriasModal(nombreLimpio);
+                }
+            }
+        };
+
 
         // --- CONFIGURACIÓN ---
         window.guardarConfiguracion = () => {
@@ -702,13 +768,20 @@
 
         window.abrirModal = (id = null) => {
             const modal = document.getElementById('modal-producto'); document.getElementById('contenedor-variantes').innerHTML = '';
+            
             if (id) {
                 const p = productos.find(x => x.id === id); document.getElementById('modal-titulo').textContent = "Modificar Atributos";
                 document.getElementById('prod-id').value = p.id; document.getElementById('prod-nombre').value = p.nombre; document.getElementById('prod-imagen').value = p.imagen || "";
+                
+                window.actualizarSelectCategoriasModal(p.categoria);
+
                 Object.entries(p.variantes || {}).forEach(([vId, v]) => window.agregarFilaVariante(vId, v.detalle, v.costo, v.precio, v.stock, true));
             } else {
                 document.getElementById('modal-titulo').textContent = "Alta de Producto";
                 document.getElementById('prod-id').value = ""; document.getElementById('prod-nombre').value = ""; document.getElementById('prod-imagen').value = "";
+                
+                window.actualizarSelectCategoriasModal();
+
                 window.agregarFilaVariante('', 'Única', '', '', '', false);
             }
             modal.classList.remove('hidden');
@@ -716,7 +789,11 @@
         window.cerrarModal = () => document.getElementById('modal-producto').classList.add('hidden');
 
         window.guardarProducto = () => {
-            const id = document.getElementById('prod-id').value; const nombre = document.getElementById('prod-nombre').value; const imagen = document.getElementById('prod-imagen').value;
+            const id = document.getElementById('prod-id').value; 
+            const nombre = document.getElementById('prod-nombre').value; 
+            const imagen = document.getElementById('prod-imagen').value;
+            const categoriaProd = document.getElementById('prod-categoria').value || 'General';
+
             if (!nombre) return;
             const vars = {}; document.querySelectorAll('.variant-row').forEach(f => {
                 const vId = f.querySelector('.v-id').value; const cInp = f.querySelector('.v-costo');
@@ -727,9 +804,9 @@
             if (id) {
                 const pAct = productos.find(p => p.id === id);
                 Object.keys(vars).forEach(vId => { if (pAct.variantes && pAct.variantes[vId]) { vars[vId].stock = pAct.variantes[vId].stock; vars[vId].costo = pAct.variantes[vId].costo; } });
-                pAct.nombre = nombre; pAct.imagen = imagen; pAct.variantes = vars;
+                pAct.nombre = nombre; pAct.imagen = imagen; pAct.categoria = categoriaProd; pAct.variantes = vars;
             } else { 
-                productos.push({ id: genIdDB(), nombre, imagen, variantes: vars });
+                productos.push({ id: genIdDB(), nombre, imagen, categoria: categoriaProd, variantes: vars });
             }
             window.triggerProductos();
             window.cerrarModal();
@@ -1184,28 +1261,51 @@
         // --- RENDERIZADO DEL CATÁLOGO ---
         function renderizarCatalogoYStock() {
             const c = document.getElementById('catalogo-productos'); const t = document.getElementById('tabla-stock'); c.innerHTML=''; t.innerHTML='';
-            const f = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
+            
+            // FIltrar por busqueda y por categoria activa
+            const f = productos.filter(p => {
+                const coincideTexto = p.nombre.toLowerCase().includes(terminoBusqueda);
+                const coincideCategoria = categoriaActiva === '' || p.categoria === categoriaActiva;
+                return coincideTexto && coincideCategoria;
+            });
             
             // --- ALERTAS DE STOCK ---
             let hAgot = ''; let hPoco = ''; let countA = 0;
             
+            // También renderizar inventario admin (este no se filtra por categoría de tienda, se muestran todos o filtramos en tabla)
+            // Para mantener simpleza, la busqueda afecta a ambos, pero la categoría solo a la tienda. 
+            const adminProds = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
+
+            // RENDER TIENDA
             f.forEach(p => {
                 const img = p.imagen || 'https://via.placeholder.com/300x200?text=IMG'; const vE = Object.entries(p.variantes || {}); if(vE.length===0) return;
                 
-                let sT = 0; let sO = ''; let mT = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">';
+                let sO = ''; 
                 vE.forEach(([id, v]) => { 
-                    sT += v.stock; sO += `<option value="${id}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`; 
+                    sO += `<option value="${id}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`; 
+                }); 
+
+                c.innerHTML += `<div class="card"><img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${p.nombre}</h3>
+                    <select id="sel-var-${p.id}" class="select-variante" onchange="window.cambiarVarianteUI('${p.id}', this)">${sO}</select>
+                    <p id="precio-display-${p.id}" style="font-size:1.3rem; margin:0 0 5px 0; color:var(--text-main);">$${window.formatearNum(vE[0][1].precio)}</p><p id="stock-disp-${p.id}" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Disponibilidad: ${window.formatearNum(vE[0][1].stock)}</p>
+                    <div class="acciones-compra"><input type="number" id="cant-${p.id}" class="input-cantidad" value="1" min="1" max="${vE[0][1].stock}" ${vE[0][1].stock===0?'disabled':''}><button id="btn-add-${p.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('${p.id}')" ${vE[0][1].stock===0?'disabled':''}>${vE[0][1].stock===0?'Agotado':'Agregar'}</button></div></div>`;
+            });
+
+            // RENDER TABLA ADMIN Y ALERTAS
+            adminProds.forEach(p => {
+                const img = p.imagen || 'https://via.placeholder.com/300x200?text=IMG'; const vE = Object.entries(p.variantes || {}); if(vE.length===0) return;
+                
+                let sT = 0; let mT = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">';
+                vE.forEach(([id, v]) => { 
+                    sT += v.stock;
                     mT += `<div style="margin-bottom:3px;">${v.detalle} - <span style="color:var(--text-main);">${window.formatearNum(v.stock)}</span></div>`; 
                     
                     if(v.stock === 0) { hAgot += `<li><span>${p.nombre} - ${v.detalle}</span><span style="color:var(--primary);">0</span></li>`; countA++; }
                     else if(v.stock < 6) { hPoco += `<li><span>${p.nombre} - ${v.detalle}</span><span>${v.stock}</span></li>`; countA++; }
                 }); mT += '</div>';
 
-                c.innerHTML += `<div class="card"><img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${p.nombre}</h3>
-                    <select id="sel-var-${p.id}" class="select-variante" onchange="window.cambiarVarianteUI('${p.id}', this)">${sO}</select>
-                    <p id="precio-display-${p.id}" style="font-size:1.3rem; margin:0 0 5px 0; color:var(--text-main);">$${window.formatearNum(vE[0][1].precio)}</p><p id="stock-disp-${p.id}" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Disponibilidad: ${window.formatearNum(vE[0][1].stock)}</p>
-                    <div class="acciones-compra"><input type="number" id="cant-${p.id}" class="input-cantidad" value="1" min="1" max="${vE[0][1].stock}" ${vE[0][1].stock===0?'disabled':''}><button id="btn-add-${p.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('${p.id}')" ${vE[0][1].stock===0?'disabled':''}>${vE[0][1].stock===0?'Agotado':'Agregar'}</button></div></div>`;
                 t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; object-fit:cover; filter:grayscale(30%);" onerror="this.style.display='none'"><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px;">${p.nombre}</span></div></td>
+                    <td style="color:var(--text-muted); font-size:0.8rem;">${p.categoria || 'General'}</td>
                     <td>${mT}</td><td style="color:var(--text-main); font-weight:300; font-size:1.1rem;">${window.formatearNum(sT)}</td>
                     <td><button class="secondary" style="margin-right:5px;" onclick="window.abrirModal('${p.id}')">Configurar</button><button class="outline" onclick="window.abrirModalStock('${p.id}')">Reponer</button></td></tr>`;
             });
@@ -1237,6 +1337,7 @@
         // --- INICIALIZACIÓN ---
         window.onload = () => {
             window.triggerConfiguracion();
+            window.renderizarBotonesCategorias(); // Inicializa los botones de filtros
             window.triggerProductos();
             window.triggerGastos();
             window.triggerIngresos();
