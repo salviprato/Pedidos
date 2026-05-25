@@ -205,7 +205,14 @@
             <div class="search-container">
                 <input type="text" class="input-busqueda" placeholder="Buscar producto..." onkeyup="window.buscarProductos(this.value)">
             </div>
-            <button onclick="window.abrirCarrito()" class="btn-carrito-nav">Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span></button>
+            
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <button onclick="window.abrirAuth('login')" class="outline" id="btn-login" style="padding: 8px 16px;">Iniciar Sesión</button>
+                <button onclick="window.abrirAuth('register')" class="secondary" id="btn-register" style="padding: 8px 16px;">Registrarse</button>
+                <span id="user-greeting" class="hidden" style="color: var(--primary); font-weight: 500; font-size: 0.85rem; padding: 0 10px;"></span>
+
+                <button onclick="window.abrirCarrito()" class="btn-carrito-nav">Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span></button>
+            </div>
         </div>
         
         <div id="contenedor-categorias" class="filtros-scroll"></div>
@@ -219,9 +226,27 @@
         </svg>
     </button>
 
+    <div id="modal-auth" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 400px; padding: 30px;">
+            <h3 id="auth-titulo" style="text-align: center; border: none; margin-bottom: 25px;">Iniciar Sesión</h3>
+            <div class="form-group">
+                <label>Email</label>
+                <input type="email" id="auth-email" placeholder="correo@ejemplo.com">
+            </div>
+            <div class="form-group">
+                <label>Contraseña</label>
+                <input type="password" id="auth-pass" placeholder="******">
+            </div>
+            <div class="modal-actions" style="flex-direction: column; gap: 10px; border: none; padding-top: 0; margin-top: 25px;">
+                <button onclick="window.procesarAuth()" style="width: 100%; padding: 12px;" id="btn-submit-auth">Ingresar</button>
+                <button class="outline" onclick="window.cerrarAuth()" style="width: 100%; padding: 12px;">Cancelar</button>
+            </div>
+            <p id="auth-switch-text" style="text-align: center; margin-top: 20px; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; text-decoration: underline;" onclick="window.switchAuthMode()">¿No tienes cuenta? Regístrate aquí</p>
+        </div>
+    </div>
+
     <div id="modal-carrito" class="modal-overlay hidden">
         <div class="modal-content">
-            
             <div id="carrito-vista-lista">
                 <h3>Resumen de Pedido</h3>
                 <div id="lista-carrito"></div>
@@ -597,7 +622,7 @@
         
         let categoriasClientes = [
             { nombre: 'Consumidor Final', descuentoGlobal: 0, descuentosCat: {} },
-            { nombre: 'Mayorista', descuentoGlobal: 15, descuentosCat: { 'Bebidas': 25 } } // Ejemplo inicial
+            { nombre: 'Mayorista', descuentoGlobal: 15, descuentosCat: { 'Bebidas': 25 } } 
         ];
 
         let productos = [
@@ -613,10 +638,53 @@
 
         let metricasChart = null;
         let carritoMostrador = [];
+        let authMode = 'login'; // 'login' | 'register'
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
         const genIdDB = () => Math.random().toString(36).substring(2, 10); 
+
+        // --- AUTH SIMULADA ---
+        window.abrirAuth = (mode) => {
+            authMode = mode;
+            document.getElementById('auth-email').value = '';
+            document.getElementById('auth-pass').value = '';
+            window.actualizarModalAuth();
+            document.getElementById('modal-auth').classList.remove('hidden');
+        };
+        window.cerrarAuth = () => document.getElementById('modal-auth').classList.add('hidden');
+        window.switchAuthMode = () => {
+            authMode = authMode === 'login' ? 'register' : 'login';
+            window.actualizarModalAuth();
+        };
+        window.actualizarModalAuth = () => {
+            if(authMode === 'login') {
+                document.getElementById('auth-titulo').textContent = 'Iniciar Sesión';
+                document.getElementById('btn-submit-auth').textContent = 'Ingresar';
+                document.getElementById('auth-switch-text').textContent = '¿No tienes cuenta? Regístrate aquí';
+            } else {
+                document.getElementById('auth-titulo').textContent = 'Registrarse';
+                document.getElementById('btn-submit-auth').textContent = 'Crear Cuenta';
+                document.getElementById('auth-switch-text').textContent = '¿Ya tienes cuenta? Inicia sesión';
+            }
+        };
+        window.procesarAuth = () => {
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-pass').value;
+            if(!email || !email.includes('@') || !pass) {
+                alert("Por favor ingresa un email y contraseña válidos.");
+                return;
+            }
+            
+            // Simular Login exitoso
+            document.getElementById('btn-login').classList.add('hidden');
+            document.getElementById('btn-register').classList.add('hidden');
+            const greeting = document.getElementById('user-greeting');
+            greeting.textContent = `Hola, ${email.split('@')[0]}`;
+            greeting.classList.remove('hidden');
+            
+            window.cerrarAuth();
+        };
 
         // --- TRIGGERS VISUALES ---
         window.triggerConfiguracion = () => {
@@ -769,7 +837,6 @@
             categoriasGlobales = categoriasGlobales.filter(c => c !== cat);
             productos.forEach(p => { if(p.categoria === cat) p.categoria = 'General'; });
             
-            // Eliminar de las excepciones de clientes
             categoriasClientes.forEach(cli => {
                 if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat];
             });
@@ -789,7 +856,7 @@
             }
         };
         window.eliminarCategoriaCliente = (i) => {
-            if(i === 0) return; // Protege consumidor final
+            if(i === 0) return; 
             categoriasClientes.splice(i, 1);
             window.renderizarConfigCategorias(); window.actualizarSelectsClientes();
         };
@@ -829,7 +896,6 @@
             
             window.renderizarCarrito(); window.renderizarCarritoMostrador();
         };
-
 
         // --- CONFIGURACIÓN SISTEMA ---
         window.guardarConfiguracion = () => {
@@ -893,6 +959,18 @@
                 pAct.nombre = nombre; pAct.imagen = imagen; pAct.categoria = categoriaProd; pAct.variantes = vars;
             } else { productos.push({ id: genIdDB(), nombre, imagen, categoria: categoriaProd, variantes: vars }); }
             window.triggerProductos(); window.cerrarModal();
+        };
+
+        window.borrarProducto = (id) => {
+            if(confirm("¿Estás seguro de que deseas eliminar permanentemente este producto del catálogo?")) {
+                productos = productos.filter(p => p.id !== id);
+                carrito = carrito.filter(c => c.idProd !== id);
+                carritoMostrador = carritoMostrador.filter(c => c.idProd !== id);
+                
+                window.renderizarCarrito();
+                window.renderizarCarritoMostrador();
+                window.triggerProductos();
+            }
         };
 
         window.abrirModalStock = (id) => {
@@ -1245,7 +1323,11 @@
                 t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:500;">${p.nombre}</span></div></td>
                     <td style="color:var(--text-muted); font-size:0.8rem;">${p.categoria || 'General'}</td>
                     <td>${mT}</td><td style="color:var(--text-main); font-weight:500; font-size:1.1rem;">${window.formatearNum(sT)}</td>
-                    <td><button class="secondary" style="margin-right:5px; padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModal('${p.id}')">Configurar</button><button class="outline" style="padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModalStock('${p.id}')">Reponer</button></td></tr>`;
+                    <td>
+                        <button class="secondary" style="margin-right:5px; padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModal('${p.id}')">Configurar</button>
+                        <button class="outline" style="margin-right:5px; padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModalStock('${p.id}')">Reponer</button>
+                        <button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${p.id}')">Borrar</button>
+                    </td></tr>`;
             });
 
             const contAlertas = document.getElementById('modulo-alertas');
