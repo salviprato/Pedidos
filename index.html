@@ -202,7 +202,7 @@
             .header-tienda { flex-direction: column; text-align: center; align-items: stretch; gap: 10px; }
             .header-tienda h2 { text-align: center; }
             .search-container { max-width: 100%; margin: 5px 0; }
-            .header-tienda > div { justify-content: center; } /* Centra los botones de auth y carrito */
+            .header-tienda > div { justify-content: center; } 
             
             .modal-content { padding: 20px; }
             .panel-oscuro-container { padding: 15px; }
@@ -386,13 +386,20 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
                 <h3 style="margin: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 1rem; color: var(--text-main);">Catálogo de Productos</h3>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; max-width: 500px; justify-content: flex-end;">
+                <div style="display: flex; gap: 10px; flex-wrap: wrap; width: 100%; max-width: 600px; justify-content: flex-end; align-items: flex-start;">
                     <div class="search-container" style="flex: 1;"><input type="text" class="input-busqueda" placeholder="Buscar..." onkeyup="window.buscarProductos(this.value)"></div>
-                    <button onclick="window.abrirModal()">Crear Producto</button>
+                    <div style="display: flex; flex-direction: column; gap: 8px;">
+                        <button onclick="window.abrirModal()">Crear Producto</button>
+                        <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                            <button onclick="window.abrirModalPack()" style="background-color: var(--accent);">Crear Pack</button>
+                            <button onclick="window.abrirModalOferta()" style="background-color: var(--accent);">Crear Oferta</button>
+                        </div>
+                    </div>
                 </div>
             </div>
+
             <div class="table-responsive">
                 <table>
                     <thead><tr><th>Producto</th><th>Categoría</th><th>Variantes</th><th>Stock Total</th><th>Acciones</th></tr></thead>
@@ -640,6 +647,50 @@
         </div>
     </div>
 
+    <div id="modal-pack" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Crear Pack</h3>
+            <div class="form-group"><label>Nombre del Pack</label><input type="text" id="pack-nombre"></div>
+            <div class="form-group"><label>URL Imagen</label><input type="text" id="pack-imagen" placeholder="https://..."></div>
+            <div class="dark-input-group">
+                <div><label>Precio de Venta $</label><input type="number" id="pack-precio"></div>
+                <div><label>Stock Disponible</label><input type="number" id="pack-stock" value="1"></div>
+            </div>
+            <hr>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <label style="margin:0;">Componentes del Pack</label>
+                <button type="button" class="secondary" onclick="window.agregarFilaComponente()">Agregar Producto</button>
+            </div>
+            <div id="contenedor-componentes"></div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.cerrarModalPack()">Descartar</button>
+                <button onclick="window.guardarPack()">Guardar Pack</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-oferta" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Crear Oferta</h3>
+            <div class="form-group">
+                <label>Producto a Ofertar</label>
+                <select id="oferta-prod" onchange="window.actualizarSelectOfertaVar()"></select>
+            </div>
+            <div class="form-group">
+                <label>Variante</label>
+                <select id="oferta-var"></select>
+            </div>
+            <div class="form-group">
+                <label>Nuevo Precio $</label>
+                <input type="number" id="oferta-precio">
+            </div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.cerrarModalOferta()">Descartar</button>
+                <button onclick="window.guardarOferta()">Guardar Oferta</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-stock" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Reponer Inventario</h3>
@@ -662,8 +713,8 @@
     </div>
 
     <script>
-        // --- ESTADO LOCAL EN MEMORIA ---
-        let categoriasGlobales = ['General', 'Bebidas', 'Snacks'];
+        // MODIFICACIÓN: SE AÑADIERON "Packs" Y "Ofertas"
+        let categoriasGlobales = ['General', 'Bebidas', 'Snacks', 'Packs', 'Ofertas'];
         let categoriaActiva = '';
         
         let categoriasClientes = [
@@ -835,10 +886,8 @@
         window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
         window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); renderizarCatalogoYStock(); };
 
-
-        // --- CATEGORÍAS (PRODUCTOS Y CLIENTES) ---
+        // --- CATEGORÍAS ---
         window.renderizarConfigCategorias = () => {
-            // Productos
             const ulP = document.getElementById('lista-categorias-prod');
             ulP.innerHTML = '';
             categoriasGlobales.forEach(c => {
@@ -846,7 +895,6 @@
                 ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`;
             });
 
-            // Clientes
             const listC = document.getElementById('lista-categorias-cli');
             listC.innerHTML = '';
             categoriasClientes.forEach((c, i) => {
@@ -881,7 +929,6 @@
             });
         };
 
-        // Acciones Prods
         window.agregarCategoriaProd = () => {
             const val = document.getElementById('nueva-cat-prod').value.trim();
             if(val && !categoriasGlobales.includes(val)) {
@@ -902,7 +949,6 @@
             window.renderizarConfigCategorias(); window.renderizarBotonesCategorias(); window.actualizarSelectCategoriasModal(); window.triggerProductos();
         };
 
-        // Acciones Clientes
         window.agregarCategoriaCliente = () => {
             const nom = document.getElementById('nueva-cat-cli-nombre').value.trim();
             const desc = parseFloat(document.getElementById('nueva-cat-cli-desc').value) || 0;
@@ -1017,6 +1063,110 @@
                 pAct.nombre = nombre; pAct.imagen = imagen; pAct.categoria = categoriaProd; pAct.variantes = vars;
             } else { productos.push({ id: genIdDB(), nombre, imagen, categoria: categoriaProd, variantes: vars }); }
             window.triggerProductos(); window.cerrarModal();
+        };
+
+        // --- LÓGICA DE PACKS ---
+        window.abrirModalPack = () => {
+            document.getElementById('pack-nombre').value = '';
+            document.getElementById('pack-imagen').value = '';
+            document.getElementById('pack-precio').value = '';
+            document.getElementById('pack-stock').value = '1';
+            document.getElementById('contenedor-componentes').innerHTML = '';
+            window.agregarFilaComponente(); 
+            document.getElementById('modal-pack').classList.remove('hidden');
+        };
+        
+        window.cerrarModalPack = () => document.getElementById('modal-pack').classList.add('hidden');
+
+        window.agregarFilaComponente = () => {
+            const cont = document.getElementById('contenedor-componentes');
+            const cId = Date.now() + Math.floor(Math.random() * 1000);
+            let opts = '<option value="">Seleccionar producto...</option>';
+            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => {
+                opts += `<option value="${p.id}|${vId}">${p.nombre} - ${v.detalle}</option>`;
+            }));
+            const div = document.createElement('div'); div.className = 'variant-row'; div.id = `comp-${cId}`;
+            div.innerHTML = `
+                <div style="flex:2"><span class="mini-label">Producto</span><select class="c-prod">${opts}</select></div>
+                <div><span class="mini-label">Cantidad</span><input type="number" class="c-cant" value="1" min="1"></div>
+                <button type="button" class="danger" style="margin-top: 15px; padding: 6px 10px;" onclick="this.parentElement.remove()">X</button>
+            `;
+            cont.appendChild(div);
+        };
+
+        window.guardarPack = () => {
+            const nombre = document.getElementById('pack-nombre').value;
+            const imagen = document.getElementById('pack-imagen').value;
+            const precio = parseFloat(document.getElementById('pack-precio').value) || 0;
+            const stock = parseInt(document.getElementById('pack-stock').value) || 0;
+            if (!nombre) return;
+
+            let descripcionComponentes = [];
+            document.querySelectorAll('#contenedor-componentes .variant-row').forEach(f => {
+                const val = f.querySelector('.c-prod').value;
+                const cant = f.querySelector('.c-cant').value;
+                if(val) {
+                    const text = f.querySelector('.c-prod').options[f.querySelector('.c-prod').selectedIndex].text;
+                    descripcionComponentes.push(`${cant}x ${text}`);
+                }
+            });
+
+            const detalleFinal = descripcionComponentes.length > 0 ? descripcionComponentes.join(' + ') : 'Pack Único';
+
+            productos.push({
+                id: genIdDB(),
+                nombre: nombre,
+                imagen: imagen,
+                categoria: 'Packs',
+                variantes: {
+                    ['var_' + Date.now()]: { detalle: detalleFinal, precio: precio, stock: stock }
+                }
+            });
+            window.triggerProductos();
+            window.cerrarModalPack();
+        };
+
+        // --- LÓGICA DE OFERTAS ---
+        window.abrirModalOferta = () => {
+            const sel = document.getElementById('oferta-prod');
+            sel.innerHTML = '<option value="">Seleccione un producto...</option>';
+            productos.forEach(p => sel.innerHTML += `<option value="${p.id}">${p.nombre}</option>`);
+            document.getElementById('oferta-var').innerHTML = '';
+            document.getElementById('oferta-precio').value = '';
+            document.getElementById('modal-oferta').classList.remove('hidden');
+        };
+
+        window.cerrarModalOferta = () => document.getElementById('modal-oferta').classList.add('hidden');
+
+        window.actualizarSelectOfertaVar = () => {
+            const idProd = document.getElementById('oferta-prod').value;
+            const selVar = document.getElementById('oferta-var');
+            selVar.innerHTML = '';
+            if(!idProd) return;
+            const p = productos.find(x => x.id === idProd);
+            if(p) {
+                Object.entries(p.variantes).forEach(([vId, v]) => {
+                    selVar.innerHTML += `<option value="${vId}">${v.detalle} (Actual: $${v.precio})</option>`;
+                });
+            }
+        };
+
+        window.guardarOferta = () => {
+            const idProd = document.getElementById('oferta-prod').value;
+            const idVar = document.getElementById('oferta-var').value;
+            const precio = parseFloat(document.getElementById('oferta-precio').value);
+
+            if(!idProd || !idVar || isNaN(precio)) return;
+
+            const p = productos.find(x => x.id === idProd);
+            if(p) {
+                p.categoria = 'Ofertas';
+                if(p.variantes[idVar]) {
+                    p.variantes[idVar].precio = precio;
+                }
+            }
+            window.triggerProductos();
+            window.cerrarModalOferta();
         };
 
         window.borrarProducto = (id) => {
@@ -1313,7 +1463,6 @@
                 }
             });
 
-            // Generar vista de lista de datos
             let listHTML = '<ul style="list-style:none; padding:0; margin:0;">';
             let hayDatos = false;
             for(let i = 0; i < etiquetas.length; i++) {
@@ -1328,7 +1477,6 @@
             listHTML += '</ul>';
             document.getElementById('metricas-data-list').innerHTML = hayDatos ? listHTML : 'No hay datos para mostrar en este periodo.';
         }
-
 
         // --- CARRITO COMPRADOR (TIENDA WEB) ---
         window.cambiarVarianteUI = (id, sel) => {
