@@ -713,7 +713,6 @@
     </div>
 
     <script>
-        // MODIFICACIÓN: SE AÑADIERON "Packs" Y "Ofertas"
         let categoriasGlobales = ['General', 'Bebidas', 'Snacks', 'Packs', 'Ofertas'];
         let categoriaActiva = '';
         
@@ -797,7 +796,6 @@
                 });
             }
 
-            // Actualizar Logo
             const logoCont = document.getElementById('logo-container');
             const logoImg = document.getElementById('logo-display');
             if (configTienda.logo && configTienda.logo.trim() !== '') {
@@ -891,7 +889,8 @@
             const ulP = document.getElementById('lista-categorias-prod');
             ulP.innerHTML = '';
             categoriasGlobales.forEach(c => {
-                const btnBorrar = c !== 'General' ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : '';
+                // FIX PROTECCIÓN: No dejar borrar categorías de sistema
+                const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : '';
                 ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`;
             });
 
@@ -937,7 +936,11 @@
             }
         };
         window.eliminarCategoriaProd = (cat) => {
-            if(cat === 'General') return;
+            // FIX PROTECCIÓN: Evitar rotura interna por borrado accidental
+            if(cat === 'General' || cat === 'Packs' || cat === 'Ofertas') {
+                alert("Esta categoría del sistema no se puede eliminar.");
+                return;
+            }
             categoriasGlobales = categoriasGlobales.filter(c => c !== cat);
             productos.forEach(p => { if(p.categoria === cat) p.categoria = 'General'; });
             
@@ -1052,11 +1055,17 @@
             const id = document.getElementById('prod-id').value; const nombre = document.getElementById('prod-nombre').value; const imagen = document.getElementById('prod-imagen').value; const categoriaProd = document.getElementById('prod-categoria').value || 'General';
             if (!nombre) return;
             const vars = {}; 
-            document.querySelectorAll('.variant-row').forEach(f => {
-                const vId = f.querySelector('.v-id').value;
+            
+            // FIX ESPECÍFICO: Solo buscamos filas dentro de #contenedor-variantes
+            // Esto evita que lea las filas del modal de Packs y dé error TypeError.
+            document.querySelectorAll('#contenedor-variantes .variant-row').forEach(f => {
+                const vIdElem = f.querySelector('.v-id');
+                if(!vIdElem) return; // Validación doble
+                const vId = vIdElem.value;
                 vars[vId] = { detalle: f.querySelector('.v-detalle').value || '-', precio: parseFloat(f.querySelector('.v-precio').value) || 0 };
                 const sInp = f.querySelector('.v-stock'); if (!sInp.disabled) { vars[vId].stock = parseInt(sInp.value) || 0; }
             });
+
             if (id) {
                 const pAct = productos.find(p => p.id === id);
                 Object.keys(vars).forEach(vId => { if (pAct.variantes && pAct.variantes[vId]) { vars[vId].stock = pAct.variantes[vId].stock; } });
@@ -1102,6 +1111,7 @@
             if (!nombre) return;
 
             let descripcionComponentes = [];
+            // FIX: También usar selector estricto para mayor seguridad
             document.querySelectorAll('#contenedor-componentes .variant-row').forEach(f => {
                 const val = f.querySelector('.c-prod').value;
                 const cant = f.querySelector('.c-cant').value;
