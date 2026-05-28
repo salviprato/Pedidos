@@ -103,10 +103,10 @@
         .container { background: transparent; padding: 0; max-width: 1400px; margin: 0 auto; }
         .panel-oscuro-container { background-color: var(--card-bg); padding: 30px; border: 1px solid var(--border); margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
         
-        input, select { 
+        input, select, textarea { 
             width: 100%; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 4px; font-family: inherit; transition: border-color 0.3s;
         }
-        input:focus, select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(141, 110, 99, 0.1);}
+        input:focus, select:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 2px rgba(141, 110, 99, 0.1);}
         input::placeholder { color: var(--text-dark); }
         
         .search-container { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; }
@@ -121,7 +121,7 @@
         .header-tienda h2 { margin: 0; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--accent); }
         
         .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-top: 10px; }
-        .card { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; text-align: center; display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s; border-radius: 8px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; text-align: center; display: flex; flex-direction: column; transition: transform 0.3s, box-shadow 0.3s; border-radius: 8px; position: relative;}
         .card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); border-color: var(--border); }
         .card-img { width: 100%; height: 220px; object-fit: cover; margin-bottom: 20px; background-color: var(--bg-color); border-radius: 4px; }
         .card h3 { margin: 0 0 15px 0; font-weight: 500; font-size: 1.1rem; letter-spacing: 0.5px; text-transform: uppercase; color: var(--primary); }
@@ -193,6 +193,14 @@
         .alerta-lista { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--text-muted); }
         .alerta-lista li { display: flex; justify-content: space-between; margin-bottom: 6px; }
 
+        /* Ribbon de Oferta / Packs */
+        .badge-promo {
+            position: absolute; top: 10px; left: 10px; background: #ef4444; color: white;
+            padding: 4px 8px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase;
+            border-radius: 4px; letter-spacing: 1px; z-index: 10;
+        }
+        .badge-pack { background: #3b82f6; }
+
         /* ===== RESPONSIVE DESIGN ===== */
         @media (max-width: 768px) {
             body { padding: 10px; }
@@ -263,7 +271,7 @@
     <button id="btn-flotante-wsp" class="btn-flotante-wsp" onclick="window.contactarWspLocal()" title="Contactar por WhatsApp">
         <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.885-.653-1.48-1.459-1.653-1.756-.173-.298-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-        </svg>
+         </svg>
     </button>
 
     <div id="modal-auth" class="modal-overlay hidden">
@@ -388,14 +396,18 @@
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
                 <h3 style="margin: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 1rem; color: var(--text-main);">Catálogo de Productos</h3>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; max-width: 500px; justify-content: flex-end;">
+                <div style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; max-width: 650px; justify-content: flex-end; align-items: center;">
                     <div class="search-container" style="flex: 1;"><input type="text" class="input-busqueda" placeholder="Buscar..." onkeyup="window.buscarProductos(this.value)"></div>
-                    <button onclick="window.abrirModal()">Crear Producto</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button onclick="window.abrirModal()">Crear Producto</button>
+                        <button onclick="window.abrirModalOferta()" class="secondary" style="border-color: var(--accent); color: var(--primary);">Crear Oferta</button>
+                        <button onclick="window.abrirModalPack()" class="secondary" style="border-color: var(--accent); color: var(--primary);">Crear Pack</button>
+                    </div>
                 </div>
             </div>
             <div class="table-responsive">
                 <table>
-                    <thead><tr><th>Producto</th><th>Categoría</th><th>Variantes</th><th>Stock Total</th><th>Acciones</th></tr></thead>
+                    <thead><tr><th>Producto / Combo</th><th>Categoría</th><th>Variantes / Estructura</th><th>Stock Total</th><th>Acciones</th></tr></thead>
                     <tbody id="tabla-stock"></tbody>
                 </table>
             </div>
@@ -640,6 +652,61 @@
         </div>
     </div>
 
+    <div id="modal-oferta" class="modal-overlay hidden">
+        <div class="modal-content" style="max-width: 450px;">
+            <h3>Crear Oferta Especial</h3>
+            <div class="form-group">
+                <label>Seleccionar Producto / Variante</label>
+                <select id="oferta-select-prod" onchange="window.actualizarPrecioBaseOferta()"></select>
+            </div>
+            <div class="form-group">
+                <label>Precio Original</label>
+                <input type="text" id="oferta-precio-base" disabled value="$0">
+            </div>
+            <div class="form-group">
+                <label>Precio de Oferta Final ($)</label>
+                <input type="number" id="oferta-precio-final" placeholder="Ej: 1200">
+            </div>
+            <div class="form-group">
+                <label>Válido hasta (Fecha Límite)</label>
+                <input type="date" id="oferta-fecha-limite">
+            </div>
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.cerrarModalOferta()">Cancelar</button>
+                <button onclick="window.guardarOferta()">Aplicar Oferta</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal-pack" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Configurar Pack / Combo Promocional</h3>
+            <div class="form-group">
+                <label>Nombre del Pack</label>
+                <input type="text" id="pack-nombre" placeholder="Ej: Combo Asado Extra">
+            </div>
+            <div class="form-group">
+                <label>URL Imagen del Pack</label>
+                <input type="text" id="pack-imagen" placeholder="https://...">
+            </div>
+            <div class="form-group">
+                <label>Precio de Venta del Pack ($)</label>
+                <input type="number" id="pack-precio" placeholder="Ej: 5000">
+            </div>
+            <hr>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                <label style="font-weight: 600; font-size: 0.8rem; text-transform: uppercase;">Productos Integrantes</label>
+                <button type="button" class="secondary" onclick="window.agregarFilaItemPack()">Añadir Componente</button>
+            </div>
+            <div id="contenedor-items-pack"></div>
+            
+            <div class="modal-actions">
+                <button class="secondary" onclick="window.cerrarModalPack()">Descartar</button>
+                <button onclick="window.guardarPack()">Guardar Pack</button>
+            </div>
+        </div>
+    </div>
+
     <div id="modal-stock" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Reponer Inventario</h3>
@@ -663,7 +730,7 @@
 
     <script>
         // --- ESTADO LOCAL EN MEMORIA ---
-        let categoriasGlobales = ['General', 'Bebidas', 'Snacks'];
+        let categoriasGlobales = ['General', 'Bebidas', 'Snacks', 'Combos'];
         let categoriaActiva = '';
         
         let categoriasClientes = [
@@ -674,6 +741,8 @@
         let productos = [
             { id: 'demo1', nombre: 'Producto de Prueba', imagen: '', categoria: 'General', variantes: { 'var_1': { detalle: 'Única', precio: 1500, stock: 10 } } }
         ]; 
+        let packs = []; // Almacena combos de múltiples productos
+        
         let carrito = []; 
         let terminoBusqueda = "";
         let ingresosGlobales = []; 
@@ -777,8 +846,17 @@
             renderizarCatalogoYStock(); 
             const sel = document.getElementById('mostrador-prod'); sel.innerHTML = '<option value="">Seleccionar...</option>';
             productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { 
-                if(v.stock>0) sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}" data-precio="${v.precio}" data-detalle="${v.detalle}" data-stock="${v.stock}">${p.nombre} - ${v.detalle}</option>`; 
+                if(v.stock>0) {
+                    let pr = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? v.precioOferta : v.precio;
+                    sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}" data-precio="${pr}" data-detalle="${v.detalle}" data-stock="${v.stock}">${p.nombre} - ${v.detalle}</option>`; 
+                }
             }));
+            packs.forEach(pk => {
+                let stPack = window.calcularStockPack(pk);
+                if(stPack > 0) {
+                    sel.innerHTML += `<option value="pack_${pk.id}" data-idprod="pack_${pk.id}" data-precio="${pk.precio}" data-detalle="Combo Pack" data-stock="${stPack}">[PACK] ${pk.nombre}</option>`;
+                }
+            });
         };
 
         window.triggerGastos = () => {
@@ -842,7 +920,7 @@
             const ulP = document.getElementById('lista-categorias-prod');
             ulP.innerHTML = '';
             categoriasGlobales.forEach(c => {
-                const btnBorrar = c !== 'General' ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : '';
+                const btnBorrar = (c !== 'General' && c !== 'Combos') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : '';
                 ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`;
             });
 
@@ -881,7 +959,6 @@
             });
         };
 
-        // Acciones Prods
         window.agregarCategoriaProd = () => {
             const val = document.getElementById('nueva-cat-prod').value.trim();
             if(val && !categoriasGlobales.includes(val)) {
@@ -890,7 +967,7 @@
             }
         };
         window.eliminarCategoriaProd = (cat) => {
-            if(cat === 'General') return;
+            if(cat === 'General' || cat === 'Combos') return;
             categoriasGlobales = categoriasGlobales.filter(c => c !== cat);
             productos.forEach(p => { if(p.categoria === cat) p.categoria = 'General'; });
             
@@ -902,7 +979,6 @@
             window.renderizarConfigCategorias(); window.renderizarBotonesCategorias(); window.actualizarSelectCategoriasModal(); window.triggerProductos();
         };
 
-        // Acciones Clientes
         window.agregarCategoriaCliente = () => {
             const nom = document.getElementById('nueva-cat-cli-nombre').value.trim();
             const desc = parseFloat(document.getElementById('nueva-cat-cli-desc').value) || 0;
@@ -939,7 +1015,9 @@
 
         window.actualizarSelectCategoriasModal = (selectVal = null) => {
             const sel = document.getElementById('prod-categoria'); sel.innerHTML = '';
-            categoriasGlobales.forEach(c => sel.innerHTML += `<option value="${c}">${c}</option>`);
+            categoriasGlobales.forEach(c => {
+                if (c !== 'Combos') sel.innerHTML += `<option value="${c}">${c}</option>`;
+            });
             if (selectVal && categoriasGlobales.includes(selectVal)) { sel.value = selectVal; }
         };
 
@@ -1008,20 +1086,34 @@
             const vars = {}; 
             document.querySelectorAll('.variant-row').forEach(f => {
                 const vId = f.querySelector('.v-id').value;
-                vars[vId] = { detalle: f.querySelector('.v-detalle').value || '-', precio: parseFloat(f.querySelector('.v-precio').value) || 0 };
-                const sInp = f.querySelector('.v-stock'); if (!sInp.disabled) { vars[vId].stock = parseInt(sInp.value) || 0; }
+                vars[vId] = { 
+                    detalle: f.querySelector('.v-detalle').value || '-', 
+                    precio: parseFloat(f.querySelector('.v-precio').value) || 0,
+                    stock: 0
+                };
+                const sInp = f.querySelector('.v-stock'); 
+                if (id) {
+                    const pAct = productos.find(p => p.id === id);
+                    if (pAct && pAct.variantes && pAct.variantes[vId]) {
+                        vars[vId].stock = pAct.variantes[vId].stock;
+                        if (pAct.variantes[vId].precioOferta) vars[vId].precioOferta = pAct.variantes[vId].precioOferta;
+                        if (pAct.variantes[vId].fechaLimiteOferta) vars[vId].fechaLimiteOferta = pAct.variantes[vId].fechaLimiteOferta;
+                    }
+                } else {
+                    vars[vId].stock = parseInt(sInp.value) || 0;
+                }
             });
             if (id) {
                 const pAct = productos.find(p => p.id === id);
-                Object.keys(vars).forEach(vId => { if (pAct.variantes && pAct.variantes[vId]) { vars[vId].stock = pAct.variantes[vId].stock; } });
                 pAct.nombre = nombre; pAct.imagen = imagen; pAct.categoria = categoriaProd; pAct.variantes = vars;
             } else { productos.push({ id: genIdDB(), nombre, imagen, categoria: categoriaProd, variantes: vars }); }
             window.triggerProductos(); window.cerrarModal();
         };
 
         window.borrarProducto = (id) => {
-            if(confirm("¿Estás seguro de que deseas eliminar permanentemente este producto del catálogo?")) {
+            if(confirm("¿Estás seguro de que deseas eliminar permanentemente este elemento del catálogo?")) {
                 productos = productos.filter(p => p.id !== id);
+                packs = packs.filter(p => p.id !== id);
                 carrito = carrito.filter(c => c.idProd !== id);
                 carritoMostrador = carritoMostrador.filter(c => c.idProd !== id);
                 
@@ -1049,6 +1141,159 @@
             window.triggerProductos(); window.cerrarModalStock();
         };
 
+        // --- LÓGICA DE OFERTAS (NUEVO) ---
+        window.verificarVigenciaOferta = (fechaLimite) => {
+            if(!fechaLimite) return false;
+            const hoy = new Date();
+            hoy.setHours(0,0,0,0);
+            const limite = new Date(fechaLimite + 'T00:00:00');
+            return hoy <= limite;
+        };
+
+        window.abrirModalOferta = () => {
+            const sel = document.getElementById('oferta-select-prod');
+            sel.innerHTML = '';
+            productos.forEach(p => {
+                Object.entries(p.variantes).forEach(([vId, v]) => {
+                    sel.innerHTML += `<option value="${p.id}|${vId}">${p.nombre} (${v.detalle})</option>`;
+                });
+            });
+            window.actualizarPrecioBaseOferta();
+            document.getElementById('oferta-precio-final').value = '';
+            document.getElementById('oferta-fecha-limite').value = '';
+            document.getElementById('modal-oferta').classList.remove('hidden');
+        };
+
+        window.cerrarModalOferta = () => document.getElementById('modal-oferta').classList.add('hidden');
+
+        window.actualizarPrecioBaseOferta = () => {
+            const combinedId = document.getElementById('oferta-select-prod').value;
+            if(!combinedId) return;
+            const [pId, vId] = combinedId.split('|');
+            const p = productos.find(x => x.id === pId);
+            if(p && p.variantes[vId]) {
+                document.getElementById('oferta-precio-base').value = `$${window.formatearNum(p.variantes[vId].precio)}`;
+            }
+        };
+
+        window.guardarOferta = () => {
+            const combinedId = document.getElementById('oferta-select-prod').value;
+            const prFinal = parseFloat(document.getElementById('oferta-precio-final').value) || 0;
+            const fLimite = document.getElementById('oferta-fecha-limite').value;
+
+            if(!combinedId || prFinal <= 0 || !fLimite) {
+                alert("Complete todos los parámetros requeridos para la oferta.");
+                return;
+            }
+
+            const [pId, vId] = combinedId.split('|');
+            const p = productos.find(x => x.id === pId);
+            if(p && p.variantes[vId]) {
+                p.variantes[vId].precioOferta = prFinal;
+                p.variantes[vId].fechaLimiteOferta = fLimite;
+                alert("Oferta asignada exitosamente.");
+                window.triggerProductos();
+                window.cerrarModalOferta();
+            }
+        };
+
+        // --- LÓGICA DE PACKS / COMBOS (NUEVO) ---
+        window.calcularStockPack = (pack) => {
+            let stocksDisponibles = [];
+            pack.items.forEach(it => {
+                const p = productos.find(x => x.id === it.idProd);
+                if(p && p.variantes[it.idVar]) {
+                    stocksDisponibles.push(Math.floor(p.variantes[it.idVar].stock / it.cantidad));
+                } else {
+                    stocksDisponibles.push(0);
+                }
+            });
+            return stocksDisponibles.length > 0 ? Math.min(...stocksDisponibles) : 0;
+        };
+
+        window.agregarFilaItemPack = (idProd = '', idVar = '', cantidad = 1) => {
+            const cont = document.getElementById('contenedor-items-pack');
+            const rowId = 'pack_row_' + Math.random().toString(36).substring(2, 7);
+            
+            const div = document.createElement('div');
+            div.className = 'variant-row';
+            div.id = rowId;
+
+            let optProds = '';
+            productos.forEach(p => {
+                Object.entries(p.variantes).forEach(([vId, v]) => {
+                    let sel = (p.id === idProd && vId === idVar) ? 'selected' : '';
+                    optProds += `<option value="${p.id}|${vId}" ${sel}>${p.nombre} (${v.detalle})</option>`;
+                });
+            });
+
+            div.innerHTML = `
+                <div style="flex:3">
+                    <span class="mini-label">Producto Componente</span>
+                    <select class="pack-item-select">${optProds}</select>
+                </div>
+                <div style="flex:1; max-width:100px;">
+                    <span class="mini-label">Cantidad</span>
+                    <input type="number" class="pack-item-cant" value="${cantidad}" min="1">
+                </div>
+                <button type="button" class="danger" style="margin-top: 15px; padding: 6px 10px;" onclick="document.getElementById('${rowId}').remove()">X</button>
+            `;
+            cont.appendChild(div);
+        };
+
+        window.abrirModalPack = () => {
+            document.getElementById('pack-nombre').value = '';
+            document.getElementById('pack-imagen').value = '';
+            document.getElementById('pack-precio').value = '';
+            document.getElementById('contenedor-items-pack').innerHTML = '';
+            window.agregarFilaItemPack();
+            document.getElementById('modal-pack').classList.remove('hidden');
+        };
+
+        window.cerrarModalPack = () => document.getElementById('modal-pack').classList.add('hidden');
+
+        window.guardarPack = () => {
+            const nombre = document.getElementById('pack-nombre').value.trim();
+            const imagen = document.getElementById('pack-imagen').value.trim();
+            const precio = parseFloat(document.getElementById('pack-precio').value) || 0;
+            
+            const rows = document.querySelectorAll('#contenedor-items-pack .variant-row');
+            if(!nombre || precio <= 0 || rows.length === 0) {
+                alert("Escriba un nombre válido, precio e ingrese artículos al combo.");
+                return;
+            }
+
+            let itemsCombo = [];
+            rows.forEach(r => {
+                const combined = r.querySelector('.pack-item-select').value;
+                const cant = parseInt(r.querySelector('.pack-item-cant').value) || 1;
+                if(combined) {
+                    const [pId, vId] = combined.split('|');
+                    const pRef = productos.find(x => x.id === pId);
+                    itemsCombo.push({
+                        idProd: pId,
+                        idVar: vId,
+                        cantidad: cant,
+                        nombre: pRef ? pRef.nombre : 'Producto',
+                        detalle: pRef && pRef.variantes[vId] ? pRef.variantes[vId].detalle : ''
+                    });
+                }
+            });
+
+            packs.push({
+                id: genIdDB(),
+                nombre,
+                imagen,
+                precio,
+                categoria: 'Combos',
+                items: itemsCombo
+            });
+
+            alert("Combo Pack guardado exitosamente.");
+            window.triggerProductos();
+            window.cerrarModalPack();
+        };
+
         // --- FINANZAS Y MOSTRADOR ---
         window.registrarGasto = () => {
             const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0;
@@ -1059,11 +1304,27 @@
         window.agregarItemMostrador = () => {
             const sel = document.getElementById('mostrador-prod'); const cant = parseInt(document.getElementById('mostrador-cant').value) || 1; const opt = sel.options[sel.selectedIndex];
             if(!opt.value || cant <= 0) return;
-            const stock = parseInt(opt.getAttribute('data-stock')); let existIdx = carritoMostrador.findIndex(x => x.idVar === opt.value && x.idProd === opt.getAttribute('data-idprod'));
-            let qtyInCart = existIdx !== -1 ? carritoMostrador[existIdx].cantidad : 0;
-            if (cant + qtyInCart > stock) { alert("Stock insuficiente para esta variante."); return; }
-            if(existIdx !== -1) { carritoMostrador[existIdx].cantidad += cant; } else {
-                carritoMostrador.push({ idProd: opt.getAttribute('data-idprod'), idVar: opt.value, nombre: opt.text.split(' - ')[0], detalle: opt.getAttribute('data-detalle'), precio: parseFloat(opt.getAttribute('data-precio')), cantidad: cant });
+
+            const valId = opt.value;
+            const stock = parseInt(opt.getAttribute('data-stock'));
+
+            if(valId.startsWith('pack_')) {
+                let pkId = valId.replace('pack_', '');
+                const pk = packs.find(x => x.id === pkId);
+                let existIdx = carritoMostrador.findIndex(x => x.idProd === valId);
+                let qtyInCart = existIdx !== -1 ? carritoMostrador[existIdx].cantidad : 0;
+                if (cant + qtyInCart > stock) { alert("Stock del combo insuficiente."); return; }
+
+                if(existIdx !== -1) { carritoMostrador[existIdx].cantidad += cant; } else {
+                    carritoMostrador.push({ idProd: valId, idVar: 'pack', nombre: pk.nombre, detalle: 'Pack Promocional', precio: pk.precio, cantidad: cant, isPack: true, packRef: pk });
+                }
+            } else {
+                let existIdx = carritoMostrador.findIndex(x => x.idVar === valId && x.idProd === opt.getAttribute('data-idprod'));
+                let qtyInCart = existIdx !== -1 ? carritoMostrador[existIdx].cantidad : 0;
+                if (cant + qtyInCart > stock) { alert("Stock insuficiente para esta variante."); return; }
+                if(existIdx !== -1) { carritoMostrador[existIdx].cantidad += cant; } else {
+                    carritoMostrador.push({ idProd: opt.getAttribute('data-idprod'), idVar: valId, nombre: opt.text.split(' - ')[0], detalle: opt.getAttribute('data-detalle'), precio: parseFloat(opt.getAttribute('data-precio')), cantidad: cant, isPack: false });
+                }
             }
             window.renderizarCarritoMostrador(); document.getElementById('mostrador-cant').value = '1';
         };
@@ -1074,7 +1335,7 @@
             const list = document.getElementById('lista-mostrador');
             const selectCliente = document.getElementById('mostrador-tipo-cliente');
             const clientIndex = selectCliente ? parseInt(selectCliente.value) : 0;
-            const perfilCli = categoriasClientes[clientIndex] || categoriasClientes[0];
+            const perfilCli = javaPerfil = categoriasClientes[clientIndex] || categoriasClientes[0];
 
             list.innerHTML = ''; let subtotalBruto = 0; let descuentoMonto = 0;
             
@@ -1082,8 +1343,14 @@
                 list.innerHTML = '<li style="color:var(--text-dark); text-align:center; font-style:italic;">Agrega productos para la venta</li>';
             } else {
                 carritoMostrador.forEach((item, idx) => {
-                    const prodRef = productos.find(x => x.id === item.idProd);
-                    const cat = prodRef ? prodRef.categoria : 'General';
+                    let cat = 'General';
+                    if(!item.isPack) {
+                        const prodRef = productos.find(x => x.id === item.idProd);
+                        cat = prodRef ? prodRef.categoria : 'General';
+                    } else {
+                        cat = 'Combos';
+                    }
+                    
                     const descPct = (perfilCli.descuentosCat && perfilCli.descuentosCat[cat] !== undefined) ? perfilCli.descuentosCat[cat] : perfilCli.descuentoGlobal;
                     
                     const lineTotal = item.precio * item.cantidad;
@@ -1131,8 +1398,17 @@
             const clienteName = selCliente.options[selCliente.selectedIndex].text.split(' (')[0];
 
             for(const item of carritoMostrador) {
-                const prod = productos.find(x => x.id === item.idProd);
-                if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock -= item.cantidad; }
+                if(!item.isPack) {
+                    const prod = productos.find(x => x.id === item.idProd);
+                    if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock -= item.cantidad; }
+                } else {
+                    item.packRef.items.forEach(comp => {
+                        const prod = productos.find(x => x.id === comp.idProd);
+                        if(prod && prod.variantes[comp.idVar]) {
+                            prod.variantes[comp.idVar].stock -= (comp.cantidad * item.cantidad);
+                        }
+                    });
+                }
             }
             
             ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'venta_mostrador', detalle: `Venta Mostrador [${clienteName}] (${countItems} items)`, efectivo: efe, transferencia: trans, itemsCount: countItems });
@@ -1203,7 +1479,7 @@
             const p = pedidosGlobales.find(x => x.id === id);
             if(p) {
                 if(!p.estadoPago) {
-                    ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 });
+                    browseIngresos = ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 });
                     p.estadoPago = true; window.triggerIngresos();
                 }
                 p.estadoEntrega = true; window.triggerPedidos();
@@ -1215,9 +1491,19 @@
             if(!confirm("¿Cancelar este pedido y reponer el stock?")) return;
             const p = pedidosGlobales.find(x => x.id === id); if(!p) return;
             for (const item of p.items) {
-                if(item.idProd && item.idVar) {
-                    const prod = productos.find(x => x.id === item.idProd);
-                    if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock += item.cantidad; }
+                if(!item.isPack) {
+                    if(item.idProd && item.idVar) {
+                        const prod = productos.find(x => x.id === item.idProd);
+                        if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock += item.cantidad; }
+                    }
+                } else {
+                    const pk = packs.find(x => x.id === item.idProd.replace('pack_',''));
+                    if(pk) {
+                        pk.items.forEach(comp => {
+                            const prod = productos.find(x => x.id === comp.idProd);
+                            if(prod && prod.variantes[comp.idVar]) prod.variantes[comp.idVar].stock += (comp.cantidad * item.cantidad);
+                        });
+                    }
                 }
             }
             pedidosGlobales = pedidosGlobales.filter(x => x.id !== id); window.triggerProductos(); window.triggerPedidos();
@@ -1343,10 +1629,26 @@
         window.cerrarCarritoExito = () => { window.vaciarCarrito(); window.cerrarCarrito(); }
 
         window.agregarAlCarrito = (id) => {
-            const p = productos.find(x => x.id === id); const vId = document.getElementById(`sel-var-${id}`).value; const v = p.variantes[vId]; const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
-            if (carrito.filter(i => i.idProd === id && i.idVar === vId).length + c > v.stock) return;
-            for(let i=0; i<c; i++) carrito.push({ idProd: id, idVar: vId, nombre: p.nombre, detalle: v.detalle, precio: v.precio });
-            actualizarBadge(); renderizarCarrito(); document.getElementById(`cant-${id}`).value = 1;
+            if(id.startsWith('pack_')) {
+                // Agregar combo pack al carrito
+                let pkId = id.replace('pack_', '');
+                const pk = packs.find(x => x.id === pkId);
+                const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
+                let stockMax = window.calcularStockPack(pk);
+                
+                let actualInCart = carrito.filter(i => i.idProd === id).length;
+                if(actualInCart + c > stockMax) { alert("No puedes agregar más de este combo (límite de stock de componentes)"); return; }
+                
+                for(let i=0; i<c; i++) carrito.push({ idProd: id, idVar: 'pack', nombre: pk.nombre, detalle: 'Combo Promocional', precio: pk.precio, isPack: true, packRef: pk });
+                actualizarBadge(); renderizarCarrito(); document.getElementById(`cant-${id}`).value = 1;
+            } else {
+                const p = productos.find(x => x.id === id); const vId = document.getElementById(`sel-var-${id}`).value; const v = p.variantes[vId]; const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
+                let prFinal = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? v.precioOferta : v.precio;
+                
+                if (carrito.filter(i => i.idProd === id && i.idVar === vId).length + c > v.stock) return;
+                for(let i=0; i<c; i++) carrito.push({ idProd: id, idVar: vId, nombre: p.nombre, detalle: v.detalle, precio: prFinal, isPack: false });
+                actualizarBadge(); renderizarCarrito(); document.getElementById(`cant-${id}`).value = 1;
+            }
         };
         window.quitarDelCarrito = (idx) => { carrito.splice(idx, 1); actualizarBadge(); renderizarCarrito(); };
         window.vaciarCarrito = () => { carrito = []; actualizarBadge(); renderizarCarrito(); };
@@ -1354,26 +1656,60 @@
 
         window.renderizarCatalogoYStock = () => {
             const c = document.getElementById('catalogo-productos'); const t = document.getElementById('tabla-stock'); c.innerHTML=''; t.innerHTML='';
-            const f = productos.filter(p => { const coincideTexto = p.nombre.toLowerCase().includes(terminoBusqueda); const coincideCategoria = categoriaActiva === '' || p.categoria === categoriaActiva; return coincideTexto && coincideCategoria; });
-            let hAgot = ''; let hPoco = ''; let countA = 0;
-            const adminProds = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
+            
+            // FILTRADO COMPRADOR (PRODS + PACKS)
+            const fProds = productos.filter(p => { const coincideTexto = p.nombre.toLowerCase().includes(terminoBusqueda); const coincideCategoria = categoriaActiva === '' || p.categoria === categoriaActiva; return coincideTexto && coincideCategoria; });
+            const fPacks = packs.filter(pk => { const coincideTexto = pk.nombre.toLowerCase().includes(terminoBusqueda); const coincideCategoria = categoriaActiva === '' || categoriaActiva === 'Combos'; return coincideTexto && coincideCategoria; });
 
-            // RENDER TIENDA
-            f.forEach(p => {
+            let hAgot = ''; let hPoco = ''; let countA = 0;
+
+            // RENDER PRODS TIENDA
+            fProds.forEach(p => {
                 const img = p.imagen || 'https://via.placeholder.com/300x200?text=IMG'; const vE = Object.entries(p.variantes || {}); if(vE.length===0) return;
-                let sO = ''; vE.forEach(([id, v]) => { sO += `<option value="${id}" data-precio="${v.precio}" data-stock="${v.stock}">${v.detalle}</option>`; }); 
-                c.innerHTML += `<div class="card"><img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${p.nombre}</h3>
+                let sO = ''; vE.forEach(([id, v]) => { 
+                    let pr = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? v.precioOferta : v.precio;
+                    sO += `<option value="${id}" data-precio="${pr}" data-stock="${v.stock}">${v.detalle}</option>`; 
+                }); 
+                
+                let esOferta = vE[0][1].precioOferta && window.verificarVigenciaOferta(vE[0][1].fechaLimiteOferta);
+                let badgeHTML = esOferta ? `<div class="badge-promo">Oferta</div>` : '';
+                let prDisplay = esOferta ? vE[0][1].precioOferta : vE[0][1].precio;
+
+                c.innerHTML += `<div class="card">${badgeHTML}<img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${p.nombre}</h3>
                     <select id="sel-var-${p.id}" class="select-variante" onchange="window.cambiarVarianteUI('${p.id}', this)">${sO}</select>
-                    <p id="precio-display-${p.id}" style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:var(--primary);">$${window.formatearNum(vE[0][1].precio)}</p><p id="stock-disp-${p.id}" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Disponibilidad: ${window.formatearNum(vE[0][1].stock)}</p>
+                    <p id="precio-display-${p.id}" style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:var(--primary);">$${window.formatearNum(prDisplay)}</p><p id="stock-disp-${p.id}" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Disponibilidad: ${window.formatearNum(vE[0][1].stock)}</p>
                     <div class="acciones-compra"><input type="number" id="cant-${p.id}" class="input-cantidad" value="1" min="1" max="${vE[0][1].stock}" ${vE[0][1].stock===0?'disabled':''}><button id="btn-add-${p.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('${p.id}')" ${vE[0][1].stock===0?'disabled':''}>${vE[0][1].stock===0?'Agotado':'Agregar'}</button></div></div>`;
             });
 
-            // RENDER TABLA ADMIN
+            // RENDER PACKS TIENDA
+            fPacks.forEach(pk => {
+                const img = pk.imagen || 'https://via.placeholder.com/300x200?text=PACK';
+                let stockCombo = window.calcularStockPack(pk);
+                let badgeHTML = `<div class="badge-promo badge-pack">Pack</div>`;
+
+                let descItems = '<div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; min-height:30px;">';
+                pk.items.forEach(i => descItems += `${i.nombre} (${i.detalle}) x${i.cantidad} | `);
+                descItems = descItems.substring(0, descItems.length - 3) + '</div>';
+
+                c.innerHTML += `<div class="card">${badgeHTML}<img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${pk.nombre}</h3>
+                    ${descItems}
+                    <p style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:var(--primary);">$${window.formatearNum(pk.precio)}</p>
+                    <p style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Combos Disponibles: ${window.formatearNum(stockCombo)}</p>
+                    <div class="acciones-compra">
+                        <input type="number" id="cant-pack_${pk.id}" class="input-cantidad" value="1" min="1" max="${stockCombo}" ${stockCombo===0?'disabled':''}>
+                        <button id="btn-add-pack_${pk.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('pack_${pk.id}')" ${stockCombo===0?'disabled':''}>${stockCombo===0?'Agotado':'Agregar Combo'}</button>
+                    </div></div>`;
+            });
+
+            // RENDER TABLA ADMIN (PRODS BASE)
+            const adminProds = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
             adminProds.forEach(p => {
                 const img = p.imagen || 'https://via.placeholder.com/300x200?text=IMG'; const vE = Object.entries(p.variantes || {}); if(vE.length===0) return;
                 let sT = 0; let mT = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">';
                 vE.forEach(([id, v]) => { 
-                    sT += v.stock; mT += `<div style="margin-bottom:3px;">${v.detalle} - <span style="color:var(--text-main); font-weight:500;">${window.formatearNum(v.stock)}</span></div>`; 
+                    sT += v.stock; 
+                    let txtOferta = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? ` <span style="color:#ef4444; font-weight:600;">(En Oferta $${v.precioOferta})</span>` : '';
+                    mT += `<div style="margin-bottom:3px;">${v.detalle} - <span style="color:var(--text-main); font-weight:500;">${window.formatearNum(v.stock)} u.</span> | $${window.formatearNum(v.precio)}${txtOferta}</div>`; 
                     if(v.stock === 0) { hAgot += `<li><span>${p.nombre} - ${v.detalle}</span><span style="color:var(--primary); font-weight:600;">0</span></li>`; countA++; }
                     else if(v.stock < 6) { hPoco += `<li><span>${p.nombre} - ${v.detalle}</span><span style="font-weight:500;">${v.stock}</span></li>`; countA++; }
                 }); mT += '</div>';
@@ -1387,6 +1723,23 @@
                             <button class="outline" style="padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModalStock('${p.id}')">Reponer</button>
                             <button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${p.id}')">Borrar</button>
                         </div>
+                    </td></tr>`;
+            });
+
+            // RENDER TABLA ADMIN (PACKS)
+            const adminPacks = packs.filter(pk => pk.nombre.toLowerCase().includes(terminoBusqueda));
+            adminPacks.forEach(pk => {
+                const img = pk.imagen || 'https://via.placeholder.com/300x200?text=PACK';
+                let stockCombo = window.calcularStockPack(pk);
+                let estructura = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">';
+                pk.items.forEach(it => estructura += `<div>• ${it.nombre} (${it.detalle}) x${it.cantidad}</div>`);
+                estructura += `<div>Valor Especial Pack: <strong>$${window.formatearNum(pk.precio)}</strong></div></div>`;
+
+                t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:var(--accent); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:600;">[PACK] ${pk.nombre}</span></div></td>
+                    <td style="color:var(--text-muted); font-size:0.8rem;">Combos</td>
+                    <td>${estructura}</td><td style="color:var(--text-main); font-weight:500; font-size:1.1rem;">${window.formatearNum(stockCombo)}</td>
+                    <td>
+                        <button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${pk.id}')">Eliminar Pack</button>
                     </td></tr>`;
             });
 
@@ -1412,8 +1765,14 @@
                 carrito.forEach((p, idx) => { 
                     const u = p.idProd+'_'+p.idVar; if(!cV[u]) cV[u] = {...p, c:0, idx}; cV[u].c++; 
                     
-                    const prodRef = productos.find(x => x.id === p.idProd);
-                    const cat = prodRef ? prodRef.categoria : 'General';
+                    let cat = 'General';
+                    if(!p.isPack) {
+                        const prodRef = productos.find(x => x.id === p.idProd);
+                        cat = prodRef ? prodRef.categoria : 'General';
+                    } else {
+                        cat = 'Combos';
+                    }
+                    
                     const descPct = (perfilCli.descuentosCat && perfilCli.descuentosCat[cat] !== undefined) ? perfilCli.descuentosCat[cat] : perfilCli.descuentoGlobal;
                     
                     subtotalBruto += p.precio;
@@ -1454,20 +1813,35 @@
             document.getElementById('btn-comprar').disabled = true;
             try {
                 const cP = {}; const iM = []; const cV = {}; let subtotalBruto = 0;
-                carrito.forEach(i => { if(!cP[i.idProd]) cP[i.idProd]={}; cP[i.idProd][i.idVar]=(cP[i.idProd][i.idVar]||0)+1; subtotalBruto += i.precio; const u=i.idProd+'_'+i.idVar; if(!cV[u]) cV[u]={...i,c:0}; cV[u].c++; });
-                Object.values(cV).forEach(i => iM.push({ idProd: i.idProd, idVar: i.idVar, nombre:i.nombre, detalle:i.detalle, precio:i.precio, cantidad:i.c }));
+                
+                // Agrupado y control de stock mixto (productos individuales y packs)
+                carrito.forEach(i => { 
+                    const u=i.idProd+'_'+i.idVar; 
+                    if(!cV[u]) cV[u]={...i,c:0}; 
+                    cV[u].c++; 
+                    subtotalBruto += i.precio; 
+                });
+                Object.values(cV).forEach(i => iM.push({ idProd: i.idProd, idVar: i.idVar, nombre:i.nombre, detalle:i.detalle, precio:i.precio, cantidad:i.c, isPack: i.isPack || false }));
                 
                 let cEnv = (mE==='Envio'&&configTienda.envioDisponible) ? configTienda.envioPrecio : 0;
                 let descuentoMonto = parseFloat(document.getElementById('total-carrito').getAttribute('data-descuentomonto')) || 0;
                 let totalNeto = (subtotalBruto - descuentoMonto) + cEnv;
 
+                // Descuento efectivo de inventario
+                carrito.forEach(item => {
+                    if(!item.isPack) {
+                        const p = productos.find(x => x.id === item.idProd);
+                        if(p && p.variantes[item.idVar]) p.variantes[item.idVar].stock -= 1;
+                    } else {
+                        item.packRef.items.forEach(comp => {
+                            const p = productos.find(x => x.id === comp.idProd);
+                            if(p && p.variantes[comp.idVar]) p.variantes[comp.idVar].stock -= comp.cantidad;
+                        });
+                    }
+                });
+
                 const selCliente = document.getElementById('checkout-tipo-cliente');
                 const tipoClienteTxt = selCliente ? selCliente.options[selCliente.selectedIndex].text.split(' (')[0] : '';
-
-                for (const [iP, vs] of Object.entries(cP)) { 
-                    const p = productos.find(x => x.id === iP);
-                    if(p) { for(const [iV,c] of Object.entries(vs)) { if(p.variantes[iV]) p.variantes[iV].stock -= c; } }
-                }
                 const idC = generarIdCorto();
                 
                 pedidosGlobales.push({ 
