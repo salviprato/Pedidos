@@ -271,7 +271,7 @@
     <button id="btn-flotante-wsp" class="btn-flotante-wsp" onclick="window.contactarWspLocal()" title="Contactar por WhatsApp">
         <svg viewBox="0 0 24 24" width="32" height="32" fill="currentColor">
             <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.305-.885-.653-1.48-1.459-1.653-1.756-.173-.298-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413z"/>
-         </svg>
+        </svg>
     </button>
 
     <div id="modal-auth" class="modal-overlay hidden">
@@ -730,7 +730,7 @@
 
     <script>
         // --- ESTADO LOCAL EN MEMORIA ---
-        let categoriasGlobales = ['General', 'Bebidas', 'Snacks', 'Combos'];
+        let categoriasGlobales = ['General', 'Bebidas', 'Snacks', 'Packs', 'Ofertas'];
         let categoriaActiva = '';
         
         let categoriasClientes = [
@@ -920,7 +920,7 @@
             const ulP = document.getElementById('lista-categorias-prod');
             ulP.innerHTML = '';
             categoriasGlobales.forEach(c => {
-                const btnBorrar = (c !== 'General' && c !== 'Combos') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : '';
+                const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : '';
                 ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`;
             });
 
@@ -967,7 +967,7 @@
             }
         };
         window.eliminarCategoriaProd = (cat) => {
-            if(cat === 'General' || cat === 'Combos') return;
+            if(cat === 'General' || cat === 'Packs' || cat === 'Ofertas') return;
             categoriasGlobales = categoriasGlobales.filter(c => c !== cat);
             productos.forEach(p => { if(p.categoria === cat) p.categoria = 'General'; });
             
@@ -1016,7 +1016,7 @@
         window.actualizarSelectCategoriasModal = (selectVal = null) => {
             const sel = document.getElementById('prod-categoria'); sel.innerHTML = '';
             categoriasGlobales.forEach(c => {
-                if (c !== 'Combos') sel.innerHTML += `<option value="${c}">${c}</option>`;
+                if (c !== 'Packs' && c !== 'Ofertas') sel.innerHTML += `<option value="${c}">${c}</option>`;
             });
             if (selectVal && categoriasGlobales.includes(selectVal)) { sel.value = selectVal; }
         };
@@ -1084,7 +1084,8 @@
             const id = document.getElementById('prod-id').value; const nombre = document.getElementById('prod-nombre').value; const imagen = document.getElementById('prod-imagen').value; const categoriaProd = document.getElementById('prod-categoria').value || 'General';
             if (!nombre) return;
             const vars = {}; 
-            document.querySelectorAll('.variant-row').forEach(f => {
+            // EL ERROR ESTABA AQUÍ: Ahora solo lee filas DENTRO del modal de producto
+            document.querySelectorAll('#contenedor-variantes .variant-row').forEach(f => {
                 const vId = f.querySelector('.v-id').value;
                 vars[vId] = { 
                     detalle: f.querySelector('.v-detalle').value || '-', 
@@ -1285,7 +1286,7 @@
                 nombre,
                 imagen,
                 precio,
-                categoria: 'Combos',
+                categoria: 'Packs', // <--- Asignado estáticamente
                 items: itemsCombo
             });
 
@@ -1348,7 +1349,7 @@
                         const prodRef = productos.find(x => x.id === item.idProd);
                         cat = prodRef ? prodRef.categoria : 'General';
                     } else {
-                        cat = 'Combos';
+                        cat = 'Packs';
                     }
                     
                     const descPct = (perfilCli.descuentosCat && perfilCli.descuentosCat[cat] !== undefined) ? perfilCli.descuentosCat[cat] : perfilCli.descuentoGlobal;
@@ -1658,8 +1659,23 @@
             const c = document.getElementById('catalogo-productos'); const t = document.getElementById('tabla-stock'); c.innerHTML=''; t.innerHTML='';
             
             // FILTRADO COMPRADOR (PRODS + PACKS)
-            const fProds = productos.filter(p => { const coincideTexto = p.nombre.toLowerCase().includes(terminoBusqueda); const coincideCategoria = categoriaActiva === '' || p.categoria === categoriaActiva; return coincideTexto && coincideCategoria; });
-            const fPacks = packs.filter(pk => { const coincideTexto = pk.nombre.toLowerCase().includes(terminoBusqueda); const coincideCategoria = categoriaActiva === '' || categoriaActiva === 'Combos'; return coincideTexto && coincideCategoria; });
+            const fProds = productos.filter(p => { 
+                const coincideTexto = p.nombre.toLowerCase().includes(terminoBusqueda); 
+                let coincideCategoria = false;
+                if (categoriaActiva === '') coincideCategoria = true;
+                else if (categoriaActiva === 'Ofertas') {
+                    // Muestra producto si tiene alguna variante en oferta vigente
+                    coincideCategoria = Object.values(p.variantes || {}).some(v => v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta));
+                } else {
+                    coincideCategoria = p.categoria === categoriaActiva;
+                }
+                return coincideTexto && coincideCategoria; 
+            });
+            const fPacks = packs.filter(pk => { 
+                const coincideTexto = pk.nombre.toLowerCase().includes(terminoBusqueda); 
+                const coincideCategoria = categoriaActiva === '' || categoriaActiva === 'Packs'; 
+                return coincideTexto && coincideCategoria; 
+            });
 
             let hAgot = ''; let hPoco = ''; let countA = 0;
 
@@ -1736,7 +1752,7 @@
                 estructura += `<div>Valor Especial Pack: <strong>$${window.formatearNum(pk.precio)}</strong></div></div>`;
 
                 t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:var(--accent); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:600;">[PACK] ${pk.nombre}</span></div></td>
-                    <td style="color:var(--text-muted); font-size:0.8rem;">Combos</td>
+                    <td style="color:var(--text-muted); font-size:0.8rem;">Packs</td>
                     <td>${estructura}</td><td style="color:var(--text-main); font-weight:500; font-size:1.1rem;">${window.formatearNum(stockCombo)}</td>
                     <td>
                         <button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${pk.id}')">Eliminar Pack</button>
@@ -1770,7 +1786,7 @@
                         const prodRef = productos.find(x => x.id === p.idProd);
                         cat = prodRef ? prodRef.categoria : 'General';
                     } else {
-                        cat = 'Combos';
+                        cat = 'Packs';
                     }
                     
                     const descPct = (perfilCli.descuentosCat && perfilCli.descuentosCat[cat] !== undefined) ? perfilCli.descuentosCat[cat] : perfilCli.descuentoGlobal;
