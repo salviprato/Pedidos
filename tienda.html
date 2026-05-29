@@ -77,7 +77,14 @@
         .badge-promo { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; padding: 4px 8px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; border-radius: 4px; letter-spacing: 1px; z-index: 10;} 
         .badge-pack { background: #3b82f6; }
         
-        @media (max-width: 768px) { .header-tienda { flex-direction: column; text-align: center; gap: 10px; } .search-container { max-width: 100%; } .modal-content { padding: 20px; } .checkout-options > div[style*="display: flex"] { flex-direction: column; gap: 10px; } .acciones-compra { flex-direction: row; } }
+        @media (max-width: 768px) { 
+            .header-tienda { flex-direction: column; text-align: center; gap: 15px; } 
+            .search-container { max-width: 100%; } 
+            .auth-carrito-container { max-width: 100% !important; }
+            .modal-content { padding: 20px; } 
+            .checkout-options > div[style*="display: flex"] { flex-direction: column; gap: 10px; } 
+            .acciones-compra { flex-direction: row; } 
+        }
     </style>
 </head>
 <body>
@@ -88,12 +95,22 @@
 
         <div class="header-tienda">
             <h2>Catálogo</h2>
-            <div class="search-container"><input type="text" class="input-busqueda" placeholder="Buscar producto..." onkeyup="window.buscarProductos(this.value)"></div>
-            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">
-                <button onclick="window.abrirAuth('login')" class="outline" id="btn-login" style="padding: 8px 16px;">Iniciar Sesión</button>
-                <button onclick="window.abrirAuth('register')" class="secondary" id="btn-register" style="padding: 8px 16px;">Registrarse</button>
-                <span id="user-greeting" class="hidden" style="color: var(--primary); font-weight: 500; font-size: 0.85rem; padding: 0 10px;"></span>
-                <button onclick="window.abrirCarrito()" class="btn-carrito-nav" style="width: 100%; justify-content: center; margin-top: 5px;">Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span></button>
+            
+            <div class="search-container">
+                <input type="text" class="input-busqueda" placeholder="Buscar producto..." autocomplete="off" name="busqueda" onkeyup="window.buscarProductos(this.value)">
+            </div>
+            
+            <div class="auth-carrito-container" style="display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 280px; align-items: stretch;">
+                <div id="auth-buttons-container" style="display: flex; gap: 10px; width: 100%;">
+                    <button onclick="window.abrirAuth('login')" class="outline" style="flex: 1; border-radius: 20px; padding: 8px 0; font-size: 0.75rem; text-align: center;">Iniciar Sesión</button>
+                    <button onclick="window.abrirAuth('register')" class="secondary" style="flex: 1; border-radius: 20px; padding: 8px 0; font-size: 0.75rem; text-align: center;">Registrarse</button>
+                </div>
+                
+                <span id="user-greeting" class="hidden" style="color: var(--primary); font-weight: 500; font-size: 0.85rem; text-align: center;"></span>
+                
+                <button onclick="window.abrirCarrito()" class="btn-carrito-nav" style="width: 100%; justify-content: center;">
+                    Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span>
+                </button>
             </div>
         </div>
         
@@ -187,14 +204,14 @@
         // AUTENTICACIÓN FIREBASE
         onAuthStateChanged(auth, (user) => {
             if (user) {
-                document.getElementById('btn-login').classList.add('hidden');
-                document.getElementById('btn-register').classList.add('hidden');
+                // Ocultar botones de login y mostrar nombre de usuario
+                document.getElementById('auth-buttons-container').classList.add('hidden');
                 const greeting = document.getElementById('user-greeting');
                 greeting.innerHTML = `Hola, ${user.email.split('@')[0]} <span style="font-size:0.7rem; color:#ef4444; cursor:pointer; margin-left:5px;" onclick="window.cerrarSesion()">[Salir]</span>`;
                 greeting.classList.remove('hidden');
             } else {
-                document.getElementById('btn-login').classList.remove('hidden');
-                document.getElementById('btn-register').classList.remove('hidden');
+                // Mostrar botones de login
+                document.getElementById('auth-buttons-container').classList.remove('hidden');
                 document.getElementById('user-greeting').classList.add('hidden');
             }
         });
@@ -230,10 +247,10 @@
                 });
 
                 const prodSnap = await getDocs(collection(db, "productos"));
-                productos = prodSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
+                productos = prodSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; }); 
 
                 const packSnap = await getDocs(collection(db, "packs"));
-                packs = packSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
+                packs = packSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; }); 
 
                 iniciarTiendaUI();
             } catch (e) {
@@ -312,6 +329,10 @@
                 c.innerHTML += `<div class="card">${badgeHTML}<img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${pk.nombre}</h3>${descItems}<p style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:var(--primary);">$${window.formatearNum(pk.precio)}</p><p style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Combos Disponibles: ${window.formatearNum(stockCombo)}</p><div class="acciones-compra"><input type="number" id="cant-pack_${pk.id}" class="input-cantidad" value="1" min="1" max="${stockCombo}" ${stockCombo===0?'disabled':''}><button id="btn-add-pack_${pk.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('pack_${pk.id}')" ${stockCombo===0?'disabled':''}>${stockCombo===0?'Agotado':'Agregar Combo'}</button></div></div>`;
             });
         }
+
+        window.abrirCarrito = () => { document.getElementById('modal-carrito').classList.remove('hidden'); document.getElementById('carrito-vista-lista').classList.remove('hidden'); document.getElementById('carrito-vista-exito').classList.add('hidden'); };
+        window.cerrarCarrito = () => document.getElementById('modal-carrito').classList.add('hidden');
+        window.cerrarCarritoExito = () => { window.vaciarCarrito(); window.cerrarCarrito(); }
 
         window.agregarAlCarrito = (id) => {
             if(id.startsWith('pack_')) {
