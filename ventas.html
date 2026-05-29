@@ -5,9 +5,78 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tienda en Línea</title>
     <style>
-        :root { var(--primary): #5d4037; var(--primary-hover): #4e342e; var(--accent): #8d6e63; var(--bg-color): #f5f5f7; var(--card-bg): #ffffff; var(--card-hover): #f9f9f9; var(--border): #e0e0e0; var(--border-light): #eeeeee; var(--text-main): #212121; var(--text-muted): #616161; var(--text-dark): #9e9e9e; }
-        * { box-sizing: border-box; } body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); letter-spacing: 0.3px; }
-        .hidden { display: none !important; } button { background-color: var(--primary); color: #ffffff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; } button:hover { background-color: var(--primary-hover); } button:disabled { background-color: var(--border); color: var(--text-dark); cursor: not-allowed; } button.secondary { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); } button.secondary:hover { background-color: var(--card-hover); } button.outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); } button.danger { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); } .filtros-scroll { display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; } .filtros-scroll::-webkit-scrollbar { display: none; } .btn-categoria { background-color: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 18px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; text-transform: uppercase; letter-spacing: 1px; } .btn-categoria.active { background-color: var(--primary); color: #fff; border-color: var(--primary); } .btn-flotante-wsp { position: fixed; bottom: 30px; right: 30px; background-color: #25D366; color: #fff; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 999; padding: 0; } .container { background: transparent; padding: 0; max-width: 1400px; margin: 0 auto; } input, select { width: 100%; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 4px; font-family: inherit; } .search-container { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; } .search-container input { border: none; padding: 8px; box-shadow: none; outline: none; } #logo-container { text-align: center; margin-bottom: 25px; } #logo-display { max-height: 120px; max-width: 100%; object-fit: contain; } .header-tienda { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;} .header-tienda h2 { margin: 0; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--accent); } .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-top: 10px; } .card { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; text-align: center; display: flex; flex-direction: column; border-radius: 8px; position: relative;} .card-img { width: 100%; height: 220px; object-fit: cover; margin-bottom: 20px; background-color: var(--bg-color); border-radius: 4px; } .card h3 { margin: 0 0 15px 0; font-weight: 500; font-size: 1.1rem; text-transform: uppercase; color: var(--primary); } .btn-carrito-nav { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 20px; padding: 8px 18px; display:flex; align-items:center; position: relative;} .badge { background: var(--primary); color: #fff; padding: 2px 6px; font-size: 0.7rem; margin-left: 8px; border-radius: 10px;} .acciones-compra { display: flex; gap: 10px; margin-top: auto; flex-wrap: wrap; } .input-cantidad { width: 60px; text-align: center; flex-shrink: 0; } .select-variante { margin-bottom: 15px; } .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px;} .modal-content { background: var(--card-bg); padding: 40px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); } .form-group { margin-bottom: 20px; } .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 500;} .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-light); flex-wrap: wrap;} .carrito-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border-light); align-items: center; flex-wrap: wrap; gap: 10px;} .carrito-total { font-size: 1.2rem; font-weight: 500; text-align: right; margin: 25px 0; color: var(--primary); } .checkout-options { background: var(--bg-color); padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; border-radius: 8px;} .badge-promo { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; padding: 4px 8px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; border-radius: 4px; letter-spacing: 1px; z-index: 10;} .badge-pack { background: #3b82f6; }
+        /* ===== ESTILOS ELEGANTES - TEMA CLARO ===== */
+        :root {
+            --primary: #5d4037; 
+            --primary-hover: #4e342e; 
+            --accent: #8d6e63; 
+            --bg-color: #f5f5f7; 
+            --card-bg: #ffffff; 
+            --card-hover: #f9f9f9; 
+            --border: #e0e0e0; 
+            --border-light: #eeeeee; 
+            --text-main: #212121; 
+            --text-muted: #616161; 
+            --text-dark: #9e9e9e;
+        }
+        
+        * { box-sizing: border-box; } 
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); letter-spacing: 0.3px; }
+        .hidden { display: none !important; } 
+        
+        button { background-color: var(--primary); color: #ffffff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; } 
+        button:hover { background-color: var(--primary-hover); } 
+        button:disabled { background-color: var(--border); color: var(--text-dark); cursor: not-allowed; } 
+        button.secondary { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); } 
+        button.secondary:hover { background-color: var(--card-hover); } 
+        button.outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); } 
+        button.danger { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); } 
+        
+        .filtros-scroll { display: flex; gap: 12px; margin-bottom: 25px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; } 
+        .filtros-scroll::-webkit-scrollbar { display: none; } 
+        .btn-categoria { background-color: var(--card-bg); border: 1px solid var(--border); color: var(--text-muted); padding: 8px 18px; border-radius: 20px; font-size: 0.8rem; cursor: pointer; white-space: nowrap; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s;} 
+        .btn-categoria:hover { border-color: var(--accent); color: var(--text-main); }
+        .btn-categoria.active { background-color: var(--primary); color: #fff; border-color: var(--primary); } 
+        
+        .btn-flotante-wsp { position: fixed; bottom: 30px; right: 30px; background-color: #25D366; color: #fff; width: 60px; height: 60px; border-radius: 50%; display: flex; justify-content: center; align-items: center; box-shadow: 0 4px 15px rgba(0,0,0,0.15); z-index: 999; padding: 0; } 
+        .btn-flotante-wsp:hover { transform: scale(1.1); background-color: #20bd5a; }
+        
+        .container { background: transparent; padding: 0; max-width: 1400px; margin: 0 auto; } 
+        input, select { width: 100%; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 4px; font-family: inherit; } 
+        .search-container { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; } 
+        .search-container input { border: none; padding: 8px; box-shadow: none; outline: none; } 
+        
+        #logo-container { text-align: center; margin-bottom: 25px; } 
+        #logo-display { max-height: 120px; max-width: 100%; object-fit: contain; } 
+        
+        .header-tienda { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: wrap; gap: 15px;} 
+        .header-tienda h2 { margin: 0; font-weight: 400; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--accent); } 
+        
+        .grid-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 25px; margin-top: 10px; } 
+        .card { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; text-align: center; display: flex; flex-direction: column; border-radius: 8px; position: relative; transition: transform 0.3s, box-shadow 0.3s;} 
+        .card:hover { transform: translateY(-3px); box-shadow: 0 8px 25px rgba(0,0,0,0.05); border-color: var(--border); }
+        .card-img { width: 100%; height: 220px; object-fit: cover; margin-bottom: 20px; background-color: var(--bg-color); border-radius: 4px; } 
+        .card h3 { margin: 0 0 15px 0; font-weight: 500; font-size: 1.1rem; text-transform: uppercase; color: var(--primary); } 
+        
+        .btn-carrito-nav { background: var(--card-bg); color: var(--text-main); border: 1px solid var(--border); border-radius: 20px; padding: 8px 18px; display:flex; align-items:center; position: relative;} 
+        .badge { background: var(--primary); color: #fff; padding: 2px 6px; font-size: 0.7rem; margin-left: 8px; border-radius: 10px;} 
+        .acciones-compra { display: flex; gap: 10px; margin-top: auto; flex-wrap: wrap; } 
+        .input-cantidad { width: 60px; text-align: center; flex-shrink: 0; } 
+        .select-variante { margin-bottom: 15px; } 
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px;} 
+        .modal-content { background: var(--card-bg); padding: 40px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); } 
+        .form-group { margin-bottom: 20px; } 
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; font-weight: 500;} 
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-light); flex-wrap: wrap;} 
+        
+        .carrito-item { display: flex; justify-content: space-between; padding: 15px 0; border-bottom: 1px solid var(--border-light); align-items: center; flex-wrap: wrap; gap: 10px;} 
+        .carrito-total { font-size: 1.2rem; font-weight: 500; text-align: right; margin: 25px 0; color: var(--primary); } 
+        .checkout-options { background: var(--bg-color); padding: 20px; border: 1px solid var(--border); margin-bottom: 20px; border-radius: 8px;} 
+        
+        .badge-promo { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; padding: 4px 8px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; border-radius: 4px; letter-spacing: 1px; z-index: 10;} 
+        .badge-pack { background: #3b82f6; }
+        
         @media (max-width: 768px) { .header-tienda { flex-direction: column; text-align: center; gap: 10px; } .search-container { max-width: 100%; } .modal-content { padding: 20px; } .checkout-options > div[style*="display: flex"] { flex-direction: column; gap: 10px; } .acciones-compra { flex-direction: row; } }
     </style>
 </head>
@@ -15,7 +84,7 @@
     <div id="vista-comprador" class="container">
         
         <div id="logo-container" class="hidden"><img id="logo-display" src="" alt="Logo de la Tienda"></div>
-        <div id="info-local-comprador" style="background: #ffffff; padding: 15px 20px; border: 1px solid #e0e0e0; border-radius: 8px; margin-bottom: 30px; font-size: 0.85rem; color: #616161; display: none; text-align: center; letter-spacing: 0.5px;"></div>
+        <div id="info-local-comprador" style="background: var(--card-bg); padding: 15px 20px; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 30px; font-size: 0.85rem; color: var(--text-muted); display: none; text-align: center; letter-spacing: 0.5px;"></div>
 
         <div class="header-tienda">
             <h2>Catálogo</h2>
@@ -23,13 +92,13 @@
             <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: center;">
                 <button onclick="window.abrirAuth('login')" class="outline" id="btn-login" style="padding: 8px 16px;">Iniciar Sesión</button>
                 <button onclick="window.abrirAuth('register')" class="secondary" id="btn-register" style="padding: 8px 16px;">Registrarse</button>
-                <span id="user-greeting" class="hidden" style="color: #5d4037; font-weight: 500; font-size: 0.85rem; padding: 0 10px;"></span>
+                <span id="user-greeting" class="hidden" style="color: var(--primary); font-weight: 500; font-size: 0.85rem; padding: 0 10px;"></span>
                 <button onclick="window.abrirCarrito()" class="btn-carrito-nav" style="width: 100%; justify-content: center; margin-top: 5px;">Carrito <span id="badge-carrito" class="badge" style="display: none;">0</span></button>
             </div>
         </div>
         
         <div id="contenedor-categorias" class="filtros-scroll"></div>
-        <div id="catalogo-productos" class="grid-cards"><p style="color: #616161;">Conectando a la base de datos...</p></div>
+        <div id="catalogo-productos" class="grid-cards"><p style="color: var(--text-muted);">Conectando a la base de datos...</p></div>
     </div>
 
     <button id="btn-flotante-wsp" class="btn-flotante-wsp" onclick="window.contactarWspLocal()" title="Contactar por WhatsApp">
@@ -45,7 +114,7 @@
                 <button onclick="window.procesarAuth()" style="width: 100%; padding: 12px;" id="btn-submit-auth">Ingresar</button>
                 <button class="outline" onclick="window.cerrarAuth()" style="width: 100%; padding: 12px;">Cancelar</button>
             </div>
-            <p id="auth-switch-text" style="text-align: center; margin-top: 20px; font-size: 0.8rem; color: #616161; cursor: pointer; text-decoration: underline;" onclick="window.switchAuthMode()">¿No tienes cuenta? Regístrate aquí</p>
+            <p id="auth-switch-text" style="text-align: center; margin-top: 20px; font-size: 0.8rem; color: var(--text-muted); cursor: pointer; text-decoration: underline;" onclick="window.switchAuthMode()">¿No tienes cuenta? Regístrate aquí</p>
         </div>
     </div>
 
@@ -54,8 +123,8 @@
             <div id="carrito-vista-lista">
                 <h3>Resumen de Pedido</h3>
                 <div id="lista-carrito"></div>
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top: 1px solid #eeeeee; padding-top: 20px; flex-wrap: wrap; gap: 10px;">
-                    <div style="flex: 1; min-width: 180px;"><label style="font-size:0.75rem; color:#616161; text-transform:uppercase; font-weight:500; display:block; margin-bottom:5px;">Tipo de Cliente</label><select id="checkout-tipo-cliente" onchange="window.renderizarCarrito()" style="width:100%; padding: 8px;"></select></div>
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:20px; border-top: 1px solid var(--border-light); padding-top: 20px; flex-wrap: wrap; gap: 10px;">
+                    <div style="flex: 1; min-width: 180px;"><label style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; font-weight:500; display:block; margin-bottom:5px;">Tipo de Cliente</label><select id="checkout-tipo-cliente" onchange="window.renderizarCarrito()" style="width:100%; padding: 8px;"></select></div>
                     <div class="carrito-total" style="margin: 0; min-width: 150px;">Total: $<span id="total-carrito">0</span></div>
                 </div>
                 <div class="checkout-options" id="checkout-form" style="margin-top: 25px;">
@@ -63,7 +132,7 @@
                     <div class="form-group"><label>Teléfono de Contacto</label><input type="tel" id="checkout-telefono" required></div>
                     <div class="form-group"><label>Forma de Pago</label><select id="metodo-pago"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia Bancaria</option></select></div>
                     <div class="form-group"><label>Entrega</label><select id="metodo-entrega" onchange="window.toggleDireccion()"><option value="Retiro">Retiro en local</option><option value="Envio">Envío a domicilio</option></select></div>
-                    <div class="form-group" id="caja-direccion" style="display: none;"><label>Dirección Completa</label><input type="text" id="checkout-direccion"><span id="aviso-envio" style="color: #8d6e63; font-size: 0.8rem; display: block; margin-top: 8px;"></span></div>
+                    <div class="form-group" id="caja-direccion" style="display: none;"><label>Dirección Completa</label><input type="text" id="checkout-direccion"><span id="aviso-envio" style="color: var(--accent); font-size: 0.8rem; display: block; margin-top: 8px;"></span></div>
                 </div>
                 <div class="modal-actions">
                     <button class="secondary" onclick="window.cerrarCarrito()">Volver</button>
@@ -73,9 +142,9 @@
             </div>
             <div id="carrito-vista-exito" class="hidden" style="text-align: center;">
                 <h3>Orden Generada</h3>
-                <p style="font-size: 0.85rem; color: #616161; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Código de Identificación</p>
-                <div id="exito-id" style="font-size: 2.5rem; font-weight: 500; color: #5d4037; margin-bottom: 30px;">#XYZ1</div>
-                <p style="color: #616161; font-size: 0.9rem; line-height: 1.6; margin-bottom: 30px;">Notifique al local para coordinar la entrega y el pago del pedido.</p>
+                <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Código de Identificación</p>
+                <div id="exito-id" style="font-size: 2.5rem; font-weight: 500; color: var(--primary); margin-bottom: 30px;">#XYZ1</div>
+                <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 30px;">Notifique al local para coordinar la entrega y el pago del pedido.</p>
                 <button onclick="window.enviarWhatsapp()" style="width: 100%; padding: 15px; font-size: 0.9rem;">Contactar Asesor</button>
                 <button class="secondary" style="width: 100%; margin-top: 15px; padding: 15px;" onclick="window.cerrarCarritoExito()">Finalizar</button>
             </div>
@@ -161,10 +230,10 @@
                 });
 
                 const prodSnap = await getDocs(collection(db, "productos"));
-                productos = prodSnap.docs.map(d => d.data());
+                productos = prodSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; }); // Fix de ID
 
                 const packSnap = await getDocs(collection(db, "packs"));
-                packs = packSnap.docs.map(d => d.data());
+                packs = packSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; }); // Fix de ID
 
                 iniciarTiendaUI();
             } catch (e) {
@@ -179,8 +248,8 @@
             if (configTienda.logo && configTienda.logo.trim() !== '') { logoImg.src = configTienda.logo; logoCont.classList.remove('hidden'); }
             const info = document.getElementById('info-local-comprador'); let html = ''; let diasAbiertos = []; const strDias = { 'check-lu':'Lu', 'check-ma':'Ma', 'check-mi':'Mi', 'check-ju':'Ju', 'check-vi':'Vi', 'check-sa':'Sá', 'check-do':'Do' };
             if(configTienda.diasApertura) Object.entries(configTienda.diasApertura).forEach(([id, c]) => { if(c) diasAbiertos.push(strDias[id]); });
-            if(diasAbiertos.length > 0) { const txtDias = diasAbiertos.length === 7 ? "LUN A DOM" : diasAbiertos.join(' - '); const txtEstado = window.estaElLocalAbierto() ? '<span style="color:#5d4037; font-weight:600;">ABIERTO AHORA</span>' : '<span style="color:#9e9e9e;">CERRADO AHORA</span>'; html += `${txtDias} | ${configTienda.horaApertura} a ${configTienda.horaCierre} hs. | ${txtEstado}`; }
-            if(configTienda.envioDisponible) html += `<br><span style="font-size:0.75rem; color:#9e9e9e;">TARIFA ENVÍO $${window.formatearNum(configTienda.envioPrecio)}</span>`;
+            if(diasAbiertos.length > 0) { const txtDias = diasAbiertos.length === 7 ? "LUN A DOM" : diasAbiertos.join(' - '); const txtEstado = window.estaElLocalAbierto() ? '<span style="color:var(--primary); font-weight:600;">ABIERTO AHORA</span>' : '<span style="color:var(--text-dark);">CERRADO AHORA</span>'; html += `${txtDias} | ${configTienda.horaApertura} a ${configTienda.horaCierre} hs. | ${txtEstado}`; }
+            if(configTienda.envioDisponible) html += `<br><span style="font-size:0.75rem; color:var(--text-dark);">TARIFA ENVÍO $${window.formatearNum(configTienda.envioPrecio)}</span>`;
             if(html) { info.innerHTML = html; info.style.display = 'block'; }
             
             window.renderizarBotonesCategorias(); 
@@ -207,7 +276,7 @@
         window.cambiarVarianteUI = (id, sel) => {
             const o = sel.options[sel.selectedIndex]; const stk = parseInt(o.getAttribute('data-stock'));
             const isOferta = o.getAttribute('data-esoferta') === 'true'; const pFinal = o.getAttribute('data-precio'); const pOrig = o.getAttribute('data-precio-orig');
-            let priceHtml = isOferta ? `<span style="text-decoration:line-through; color:#9e9e9e; font-size:0.85rem; margin-right:8px;">$${window.formatearNum(pOrig)}</span>$${window.formatearNum(pFinal)}` : `$${window.formatearNum(pFinal)}`;
+            let priceHtml = isOferta ? `<span style="text-decoration:line-through; color:var(--text-dark); font-size:0.85rem; margin-right:8px;">$${window.formatearNum(pOrig)}</span>$${window.formatearNum(pFinal)}` : `$${window.formatearNum(pFinal)}`;
             document.getElementById(`precio-display-${id}`).innerHTML = priceHtml;
             const badge = document.getElementById(`badge-oferta-${id}`); if(badge) badge.style.display = isOferta ? 'inline-block' : 'none';
             const b = document.getElementById(`btn-add-${id}`); const i = document.getElementById(`cant-${id}`); document.getElementById(`stock-disp-${id}`).textContent = `Disponibilidad: ${window.formatearNum(stk)}`; i.max = stk;
@@ -219,7 +288,7 @@
             const fProds = productos.filter(p => { const coincideTexto = p.nombre.toLowerCase().includes(terminoBusqueda); let coincideCategoria = false; if (categoriaActiva === '') coincideCategoria = true; else if (categoriaActiva === 'Ofertas') coincideCategoria = Object.values(p.variantes || {}).some(v => v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta)); else coincideCategoria = p.categoria === categoriaActiva; return coincideTexto && coincideCategoria; });
             const fPacks = packs.filter(pk => { return pk.nombre.toLowerCase().includes(terminoBusqueda) && (categoriaActiva === '' || categoriaActiva === 'Packs'); });
 
-            if(fProds.length === 0 && fPacks.length === 0) { c.innerHTML = '<p>No se encontraron productos.</p>'; return; }
+            if(fProds.length === 0 && fPacks.length === 0) { c.innerHTML = '<p style="color:var(--text-muted)">No se encontraron productos.</p>'; return; }
 
             fProds.forEach(p => {
                 const img = p.imagen || 'https://via.placeholder.com/300x200?text=IMG'; let vE = Object.entries(p.variantes || {}); 
@@ -230,17 +299,17 @@
                 let esOfertaInicial = vE[0][1].precioOferta && window.verificarVigenciaOferta(vE[0][1].fechaLimiteOferta);
                 let badgeHTML = `<div id="badge-oferta-${p.id}" class="badge-promo" style="display: ${esOfertaInicial ? 'inline-block' : 'none'};">Oferta</div>`;
                 let prDisplay = esOfertaInicial ? vE[0][1].precioOferta : vE[0][1].precio; let pOrig = vE[0][1].precio;
-                let priceHtml = esOfertaInicial ? `<span style="text-decoration:line-through; color:#9e9e9e; font-size:0.85rem; margin-right:8px;">$${window.formatearNum(pOrig)}</span>$${window.formatearNum(prDisplay)}` : `$${window.formatearNum(prDisplay)}`;
+                let priceHtml = esOfertaInicial ? `<span style="text-decoration:line-through; color:var(--text-dark); font-size:0.85rem; margin-right:8px;">$${window.formatearNum(pOrig)}</span>$${window.formatearNum(prDisplay)}` : `$${window.formatearNum(prDisplay)}`;
 
-                c.innerHTML += `<div class="card">${badgeHTML}<img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${p.nombre}</h3><select id="sel-var-${p.id}" class="select-variante" onchange="window.cambiarVarianteUI('${p.id}', this)">${sO}</select><p id="precio-display-${p.id}" style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:#5d4037;">${priceHtml}</p><p id="stock-disp-${p.id}" style="font-size:0.7rem; color:#616161; margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Disponibilidad: ${window.formatearNum(vE[0][1].stock)}</p><div class="acciones-compra"><input type="number" id="cant-${p.id}" class="input-cantidad" value="1" min="1" max="${vE[0][1].stock}" ${vE[0][1].stock===0?'disabled':''}><button id="btn-add-${p.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('${p.id}')" ${vE[0][1].stock===0?'disabled':''}>${vE[0][1].stock===0?'Agotado':'Agregar'}</button></div></div>`;
+                c.innerHTML += `<div class="card">${badgeHTML}<img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${p.nombre}</h3><select id="sel-var-${p.id}" class="select-variante" onchange="window.cambiarVarianteUI('${p.id}', this)">${sO}</select><p id="precio-display-${p.id}" style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:var(--primary);">${priceHtml}</p><p id="stock-disp-${p.id}" style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Disponibilidad: ${window.formatearNum(vE[0][1].stock)}</p><div class="acciones-compra"><input type="number" id="cant-${p.id}" class="input-cantidad" value="1" min="1" max="${vE[0][1].stock}" ${vE[0][1].stock===0?'disabled':''}><button id="btn-add-${p.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('${p.id}')" ${vE[0][1].stock===0?'disabled':''}>${vE[0][1].stock===0?'Agotado':'Agregar'}</button></div></div>`;
             });
 
             fPacks.forEach(pk => {
                 const img = pk.imagen || 'https://via.placeholder.com/300x200?text=PACK'; let stockCombo = window.calcularStockPack(pk);
                 let badgeHTML = `<div class="badge-promo badge-pack">Pack</div>`;
-                let descItems = '<div style="font-size:0.7rem; color:#616161; margin-bottom:10px; min-height:30px;">'; pk.items.forEach(i => descItems += `${i.nombre} (${i.detalle}) x${i.cantidad} | `); descItems = descItems.substring(0, descItems.length - 3) + '</div>';
+                let descItems = '<div style="font-size:0.7rem; color:var(--text-muted); margin-bottom:10px; min-height:30px;">'; pk.items.forEach(i => descItems += `${i.nombre} (${i.detalle}) x${i.cantidad} | `); descItems = descItems.substring(0, descItems.length - 3) + '</div>';
 
-                c.innerHTML += `<div class="card">${badgeHTML}<img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${pk.nombre}</h3>${descItems}<p style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:#5d4037;">$${window.formatearNum(pk.precio)}</p><p style="font-size:0.7rem; color:#616161; margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Combos Disponibles: ${window.formatearNum(stockCombo)}</p><div class="acciones-compra"><input type="number" id="cant-pack_${pk.id}" class="input-cantidad" value="1" min="1" max="${stockCombo}" ${stockCombo===0?'disabled':''}><button id="btn-add-pack_${pk.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('pack_${pk.id}')" ${stockCombo===0?'disabled':''}>${stockCombo===0?'Agotado':'Agregar Combo'}</button></div></div>`;
+                c.innerHTML += `<div class="card">${badgeHTML}<img src="${img}" class="card-img" onerror="this.src='https://via.placeholder.com/300x200?text=X'"><h3>${pk.nombre}</h3>${descItems}<p style="font-size:1.3rem; font-weight:600; margin:0 0 5px 0; color:var(--primary);">$${window.formatearNum(pk.precio)}</p><p style="font-size:0.7rem; color:var(--text-muted); margin-bottom:20px; text-transform:uppercase; letter-spacing:1px;">Combos Disponibles: ${window.formatearNum(stockCombo)}</p><div class="acciones-compra"><input type="number" id="cant-pack_${pk.id}" class="input-cantidad" value="1" min="1" max="${stockCombo}" ${stockCombo===0?'disabled':''}><button id="btn-add-pack_${pk.id}" style="flex-grow:1;" onclick="window.agregarAlCarrito('pack_${pk.id}')" ${stockCombo===0?'disabled':''}>${stockCombo===0?'Agotado':'Agregar Combo'}</button></div></div>`;
             });
         }
 
@@ -273,7 +342,7 @@
             l.innerHTML = ''; let subtotalBruto = 0; let descuentoMonto = 0;
             
             if (carrito.length === 0) { 
-                l.innerHTML = '<p style="text-align:center; color:#616161; font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">Vacío</p>'; 
+                l.innerHTML = '<p style="text-align:center; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase; letter-spacing:1px;">Vacío</p>'; 
                 bc.disabled = true; document.getElementById('checkout-form').style.display = 'none'; document.getElementById('btn-vaciar').style.display = 'none'; 
             } else {
                 bc.disabled = false; document.getElementById('checkout-form').style.display = 'block'; document.getElementById('btn-vaciar').style.display = 'inline-block';
@@ -284,10 +353,10 @@
                     const descPct = (perfilCli.descuentosCat && perfilCli.descuentosCat[cat] !== undefined) ? perfilCli.descuentosCat[cat] : perfilCli.descuentoGlobal;
                     subtotalBruto += p.precio; descuentoMonto += p.precio * (descPct / 100);
                 });
-                Object.values(cV).forEach(i => { l.innerHTML += `<div class="carrito-item"><div><span style="color:#212121; font-size:0.95rem; text-transform:uppercase; font-weight:500;">${i.nombre}</span><br><span style="color:#616161; font-size:0.75rem; text-transform:uppercase;">${i.detalle} x${i.c}</span></div><div style="display:flex; align-items:center; gap:15px;"><span style="color:#212121; font-size:0.95rem; font-weight:500;">$${window.formatearNum(i.precio*i.c)}</span><button onclick="window.quitarDelCarrito(${i.idx})" class="danger" style="padding:4px 8px; border-radius:4px;">X</button></div></div>`; });
+                Object.values(cV).forEach(i => { l.innerHTML += `<div class="carrito-item"><div><span style="color:var(--text-main); font-size:0.95rem; text-transform:uppercase; font-weight:500;">${i.nombre}</span><br><span style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">${i.detalle} x${i.c}</span></div><div style="display:flex; align-items:center; gap:15px;"><span style="color:var(--text-main); font-size:0.95rem; font-weight:500;">$${window.formatearNum(i.precio*i.c)}</span><button onclick="window.quitarDelCarrito(${i.idx})" class="danger" style="padding:4px 8px; border-radius:4px;">X</button></div></div>`; });
             } 
             let total = subtotalBruto - descuentoMonto;
-            if (descuentoMonto > 0) { l.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0;"><span style="color:#8d6e63; font-size:0.85rem; font-weight:500;">Ahorro Cliente (${perfilCli.nombre})</span><span style="color:#8d6e63; font-weight:600;">-$${window.formatearNum(descuentoMonto)}</span></div>`; }
+            if (descuentoMonto > 0) { l.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0;"><span style="color:var(--accent); font-size:0.85rem; font-weight:500;">Ahorro Cliente (${perfilCli.nombre})</span><span style="color:var(--accent); font-weight:600;">-$${window.formatearNum(descuentoMonto)}</span></div>`; }
             if(document.getElementById('metodo-entrega') && document.getElementById('metodo-entrega').value === 'Envio' && configTienda.envioDisponible && carrito.length > 0) { total += configTienda.envioPrecio; }
             ts.textContent = window.formatearNum(total); ts.setAttribute('data-descuentomonto', descuentoMonto);
         };
@@ -320,10 +389,8 @@
                     metodoEntrega: mE, estadoPago: false, estadoEntrega: false, total: totalNeto, costoEnvio: cEnv, descuentoMonto: descuentoMonto, tipoCliente: tipoClienteTxt, items: iM 
                 };
 
-                // Guardar en Firestore
                 await addDoc(collection(db, "pedidos"), nuevoPedido);
                 
-                // Actualizar UI
                 document.getElementById('exito-id').textContent = `#${idC}`;
                 document.getElementById('carrito-vista-lista').classList.add('hidden'); document.getElementById('carrito-vista-exito').classList.remove('hidden');
                 document.getElementById('checkout-nombre').value = ""; document.getElementById('checkout-apellido').value = ""; document.getElementById('checkout-telefono').value = ""; document.getElementById('checkout-direccion').value = "";
@@ -333,7 +400,6 @@
             } finally { document.getElementById('btn-comprar').disabled = false; window.vaciarCarrito(); }
         };
 
-        // INICIO
         window.onload = cargarDatosBD;
     </script>
 </body>
