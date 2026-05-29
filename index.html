@@ -219,7 +219,7 @@
                         <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Horarios Operativos</h4>
                         <div class="dark-input-group"><div><label>Apertura</label><input type="time" id="conf-apertura"></div><div><label>Cierre</label><input type="time" id="conf-cierre"></div></div>
                         <div class="dias-checkbox-group"><label class="dia-checkbox"><input type="checkbox" id="check-lu"> Lu</label><label class="dia-checkbox"><input type="checkbox" id="check-ma"> Ma</label><label class="dia-checkbox"><input type="checkbox" id="check-mi"> Mi</label><label class="dia-checkbox"><input type="checkbox" id="check-ju"> Ju</label><label class="dia-checkbox"><input type="checkbox" id="check-vi"> Vi</label><label class="dia-checkbox"><input type="checkbox" id="check-sa"> Sá</label><label class="dia-checkbox"><input type="checkbox" id="check-do"> Do</label></div>
-                        <button style="margin-top: 20px; width: 100%;" onclick="window.guardarConfiguracion()">Guardar Preferencias</button>
+                        <button style="margin-top: 20px; width: 100%;" onclick="window.guardarConfiguracion()">Guardar Preferences</button>
                     </div>
                 </div>
                 <div class="modulo-oscuro">
@@ -321,7 +321,6 @@
                 const confDoc = await getDocs(collection(db, "configuracion")); confDoc.forEach(d => { if(d.id === 'tienda') configTienda = d.data(); });
                 const catDoc = await getDocs(collection(db, "categorias")); catDoc.forEach(d => { if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales; if(d.id === 'clientes') categoriasClientes = d.data().lista || categoriasClientes; });
                 
-                // Mapeo exhaustivo forzando .id para evitar bugs de botones rotos
                 const pDoc = await getDocs(collection(db, "productos")); productos = pDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
                 const pkDoc = await getDocs(collection(db, "packs")); packs = pkDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
                 
@@ -337,7 +336,7 @@
         window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
         window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); window.renderizarCatalogoYStock(); };
 
-        // CONFIG Y CATEGORÍAS (Guardando en Firebase)
+        // CONFIG Y CATEGORÍAS
         window.renderizarConfigCategorias = () => {
             const ulP = document.getElementById('lista-categorias-prod'); if(!ulP) return;
             ulP.innerHTML = ''; categoriasGlobales.forEach(c => { const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`; });
@@ -353,7 +352,7 @@
         const guardarCategoriasFirebase = async () => { await setDoc(doc(db, "categorias", "globales"), { lista: categoriasGlobales }); await setDoc(doc(db, "categorias", "clientes"), { lista: categoriasClientes }); };
         
         window.agregarCategoriaProd = () => { const val = document.getElementById('nueva-cat-prod').value.trim(); if(val && !categoriasGlobales.includes(val)) { categoriasGlobales.push(val); document.getElementById('nueva-cat-prod').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); guardarCategoriasFirebase(); } };
-        window.eliminarCategoriaProd = (cat) => { if(cat==='General'||cat==='Packs'||cat==='Ofertas') return; categoriasGlobales = categoriasGlobales.filter(c => c !== cat); productos.forEach(p => { if(p.categoria === cat) { p.categoria = 'General'; setDoc(doc(db, "productos", p.id), p); } }); categoriasClientes.forEach(cli => { if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat]; }); window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); window.triggerProductos(); guardarCategoriasFirebase(); };
+        window.eliminarCategoriaProd = (cat) => { if(cat==='General'||cat==='Packs'||cat==='Ofertas') return; categoriasGlobales = categoriasGlobales.filter(c => c !== cat); productos.forEach(p => { if(p.categoria === cat) { p.categoria = 'General'; setDoc(doc(db, "productos", p.id), p); } }); categoriasClientes.forEach(cli => { if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat]; }); window.renderizarConfigCategorias(); window.actualizarSelectiasModal(); window.triggerProductos(); guardarCategoriasFirebase(); };
         window.agregarCategoriaCliente = () => { const nom = document.getElementById('nueva-cat-cli-nombre').value.trim(); const desc = parseFloat(document.getElementById('nueva-cat-cli-desc').value) || 0; if(nom && !categoriasClientes.find(c => c.nombre === nom)) { categoriasClientes.push({nombre: nom, descuentoGlobal: desc, descuentosCat: {}}); document.getElementById('nueva-cat-cli-nombre').value = ''; document.getElementById('nueva-cat-cli-desc').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); } };
         window.eliminarCategoriaCliente = (i) => { if(i === 0) return; categoriasClientes.splice(i, 1); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); };
         window.agregarExcepcionCliente = (i) => { const cat = document.getElementById(`exc-cat-${i}`).value; const desc = parseFloat(document.getElementById(`exc-desc-${i}`).value); if(cat && !isNaN(desc)) { categoriasClientes[i].descuentosCat[cat] = desc; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); } };
@@ -364,7 +363,7 @@
         window.guardarConfiguracion = async () => { const logo = document.getElementById('conf-logo').value.trim(); const telefono = document.getElementById('conf-tel').value.replace(/[^0-9]/g, ''); const diasApertura = {}; ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => diasApertura[id] = document.getElementById(id).checked); configTienda = { logo, telefono, horaApertura: document.getElementById('conf-apertura').value, horaCierre: document.getElementById('conf-cierre').value, diasApertura, envioDisponible: document.getElementById('conf-envio-disp').value === 'si', envioPrecio: parseFloat(document.getElementById('conf-envio-precio').value) || 0 }; await setDoc(doc(db, "configuracion", "tienda"), configTienda); alert("Configuración guardada en Firebase"); };
         window.triggerConfiguracion = () => { document.getElementById('conf-logo').value = configTienda.logo || ''; document.getElementById('conf-tel').value = configTienda.telefono || ''; document.getElementById('conf-apertura').value = configTienda.horaApertura || '09:00'; document.getElementById('conf-cierre').value = configTienda.horaCierre || '18:00'; document.getElementById('conf-envio-disp').value = configTienda.envioDisponible ? 'si' : 'no'; document.getElementById('conf-envio-precio').value = configTienda.envioPrecio || 0; if(configTienda.diasApertura) { ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => { document.getElementById(id).checked = configTienda.diasApertura[id] || false; }); } };
 
-        // PRODUCTOS Y PACKS (Guardando en Firebase)
+        // PRODUCTOS Y PACKS
         window.verificarVigenciaOferta = (fechaLimite) => { if(!fechaLimite) return false; const hoy = new Date(); hoy.setHours(0,0,0,0); const limite = new Date(fechaLimite + 'T00:00:00'); return hoy <= limite; };
         window.calcularStockPack = (pack) => { let stocksDisponibles = []; pack.items.forEach(it => { const p = productos.find(x => x.id === it.idProd); if(p && p.variantes[it.idVar]) stocksDisponibles.push(Math.floor(p.variantes[it.idVar].stock / it.cantidad)); else stocksDisponibles.push(0); }); return stocksDisponibles.length > 0 ? Math.min(...stocksDisponibles) : 0; };
         window.agregarFilaVariante = (idVar = '', detalle = '', precio = '', stock = '', bloqueado = false) => { const cont = document.getElementById('contenedor-variantes'); const vId = idVar || 'var_' + Date.now() + Math.floor(Math.random() * 1000); const div = document.createElement('div'); div.className = 'variant-row'; div.id = `row-${vId}`; div.innerHTML = `<input type="hidden" class="v-id" value="${vId}"><div style="flex:2"><span class="mini-label">Atributo / Tamaño</span><input type="text" class="v-detalle" value="${detalle}"></div><div><span class="mini-label">Valor Venta $</span><input type="number" class="v-precio" value="${precio}"></div><div><span class="mini-label">Stock Actual</span><input type="number" class="v-stock" value="${stock}" ${bloqueado ? 'disabled' : ''}></div><button type="button" class="danger" style="margin-top: 15px; padding: 6px 10px;" onclick="this.parentElement.remove()">X</button>`; cont.appendChild(div); };
@@ -383,7 +382,7 @@
             let pObj = id ? productos.find(p => p.id === id) : { id: genIdDB() };
             pObj.nombre = nombre; pObj.imagen = imagen; pObj.categoria = categoriaProd; pObj.variantes = vars;
             
-            await setDoc(doc(db, "productos", pObj.id), pObj); // FIREBASE
+            await setDoc(doc(db, "productos", pObj.id), pObj); 
             if(!id) productos.push(pObj);
             window.triggerProductos(); window.cerrarModal();
         };
@@ -400,7 +399,7 @@
         window.guardarNuevoStock = async () => { 
             const id = document.getElementById('stock-id-prod').value; const vId = document.getElementById('stock-select-var').value; const cant = parseInt(document.getElementById('stock-cantidad').value) || 0; const costoTotalLote = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0; if (cant <= 0 || !vId) return; 
             const p = productos.find(x => x.id === id); p.variantes[vId].stock += cant; 
-            await setDoc(doc(db, "productos", p.id), p); // FIREBASE
+            await setDoc(doc(db, "productos", p.id), p); 
             if(costoTotalLote > 0) { 
                 let g = { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: costoTotalLote };
                 const gRef = await addDoc(collection(db, "gastos"), g); g.id = gRef.id; gastosGlobales.push(g); window.triggerGastos(); 
@@ -499,7 +498,6 @@
             if (abonado === 0 && totalFinal > 0) { alert("Ingresa el monto de pago (Efectivo o Transferencia)."); return; }
             const selCliente = document.getElementById('mostrador-tipo-cliente'); const clienteName = selCliente.options[selCliente.selectedIndex].text.split(' (')[0];
             
-            // Actualizar stock en BD
             for(const item of carritoMostrador) {
                 if(!item.isPack) { const prod = productos.find(x => x.id === item.idProd); if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock -= item.cantidad; setDoc(doc(db, "productos", prod.id), prod); } } 
                 else { item.packRef.items.forEach(comp => { const prod = productos.find(x => x.id === comp.idProd); if(prod && prod.variantes[comp.idVar]) { prod.variantes[comp.idVar].stock -= (comp.cantidad * item.cantidad); setDoc(doc(db, "productos", prod.id), prod); } }); }
@@ -550,7 +548,7 @@
                 await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); window.triggerPedidos(); window.triggerIngresos(); 
             } 
         };
-        window.marcarEntregado = async (idDoc, telefono) => {
+        window.marcarEntregado = async (idDoc, font) => {
             const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) {
                 if(!p.estadoPago) { 
@@ -560,10 +558,10 @@
                 }
                 await updateDoc(doc(db, "pedidos", idDoc), { estadoEntrega: true, estadoPago: true });
                 p.estadoEntrega = true; window.triggerPedidos();
-                if (telefono) { let numLimpio = telefono.replace(/[^0-9]/g, ''); window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent("Su pedido ha sido entregado, muchas gracias por comprar con nosotros.")}`, '_blank'); }
+                if (font) { let numLimpio = font.replace(/[^0-9]/g, ''); window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent("Su pedido ha sido entregado, muchas gracias por comprar con nosotros.")}`, '_blank'); }
             }
         };
-        window.cancelarPedido = async (idDoc, telefono) => {
+        window.cancelarPedido = async (idDoc, font) => {
             if(!confirm("¿Cancelar este pedido y reponer el stock?")) return;
             const p = pedidosGlobales.find(x => x.idDoc === idDoc); if(!p) return;
             for (const item of p.items) {
@@ -579,7 +577,7 @@
             let cestas = []; let hoy = new Date(); hoy.setHours(0,0,0,0);
             if(periodo === '7d') { for(let i=6; i>=0; i--) { let d = new Date(hoy); d.setDate(d.getDate() - i); cestas.push({ label: `${d.getDate()}/${d.getMonth()+1}`, start: d.getTime(), end: d.getTime() + 86400000 }); } } 
             else if(periodo === '1m') { for(let i=3; i>=0; i--) { let end = new Date(hoy); end.setDate(end.getDate() - (i*7)); let start = new Date(end); start.setDate(start.getDate() - 6); cestas.push({ label: `Sem ${start.getDate()}/${start.getMonth()+1}`, start: start.getTime(), end: end.getTime() + 86400000 }); } } 
-            else if(periodo === '3m' || periodo === '6m' || periodo === '1y') { let meses = periodo === '3m' ? 3 : (periodo === '6m' ? 6 : 12); for(let i=meses-1; i>=0; i--) { let d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1); let n = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]; let end = new Date(hoy.getFullYear(), hoy.getMonth() - i + 1, 0); cestas.push({ label: `${n[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`, start: d.getTime(), end: end.getTime() + 86400000 }); } }
+            else if(periodo === '3m' || periodo === '6m' || periodo === '1y') { let meses = periodo === '3m' ? 3 : (periodo === '6m' ? 6 : 12); for(let i=meses-1; i>=0; i--) { let d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1); let n = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]; let end = new Date(hoy.getFullYear(), hoy.getMonth() - i + 1, 0); cestas.push({ label: `${n[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`, start: d.getTime(), end: d.getTime() + 86400000 }); } }
             return cestas;
         }
 
