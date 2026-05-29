@@ -230,10 +230,10 @@
                 });
 
                 const prodSnap = await getDocs(collection(db, "productos"));
-                productos = prodSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; }); // Fix de ID
+                productos = prodSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
 
                 const packSnap = await getDocs(collection(db, "packs"));
-                packs = packSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; }); // Fix de ID
+                packs = packSnap.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
 
                 iniciarTiendaUI();
             } catch (e) {
@@ -313,10 +313,6 @@
             });
         }
 
-        window.abrirCarrito = () => { document.getElementById('modal-carrito').classList.remove('hidden'); document.getElementById('carrito-vista-lista').classList.remove('hidden'); document.getElementById('carrito-vista-exito').classList.add('hidden'); };
-        window.cerrarCarrito = () => document.getElementById('modal-carrito').classList.add('hidden');
-        window.cerrarCarritoExito = () => { window.vaciarCarrito(); window.cerrarCarrito(); }
-
         window.agregarAlCarrito = (id) => {
             if(id.startsWith('pack_')) {
                 let pkId = id.replace('pack_', ''); const pk = packs.find(x => x.id === pkId); const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
@@ -361,14 +357,20 @@
             ts.textContent = window.formatearNum(total); ts.setAttribute('data-descuentomonto', descuentoMonto);
         };
 
-        // ENVIAR A FIREBASE
+        window.enviarWhatsapp = () => {
+            if(!configTienda.telefono) { alert("El local aún no configuró su número de contacto."); return; }
+            const numeroLimpio = configTienda.telefono.replace(/[^0-9]/g, '');
+            let texto = `Hola! Acabo de completar mi pedido en el sitio web. Por favor coordinemos el pago y la entrega.`;
+            window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent(texto)}`, '_blank');
+        };
+
         window.finalizarCompra = async () => {
             if (carrito.length === 0) return;
             const n = document.getElementById('checkout-nombre').value; const a = document.getElementById('checkout-apellido').value; const t = document.getElementById('checkout-telefono').value;
             if (!n || !a || !t) return;
             const mE = document.getElementById('metodo-entrega').value; const d = document.getElementById('checkout-direccion').value;
             if (mE === 'Envio' && !d) return;
-            if(!window.estaElLocalAbierto()) alert("El local se encuentra cerrado. El pedido quedará en cola para su procesamiento.");
+            if(!window.estaElLocalAbierto()) alert("El local se encuentra cerrado. El pedido quedará en cola.");
             
             document.getElementById('btn-comprar').disabled = true;
             try {
