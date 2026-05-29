@@ -6,19 +6,96 @@
     <title>Panel de Administración</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        :root { var(--primary): #5d4037; var(--primary-hover): #4e342e; var(--accent): #8d6e63; var(--bg-color): #f5f5f7; var(--card-bg): #ffffff; var(--card-hover): #f9f9f9; var(--border): #e0e0e0; var(--border-light): #eeeeee; var(--text-main): #212121; var(--text-muted): #616161; var(--text-dark): #9e9e9e; }
-        * { box-sizing: border-box; } body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); letter-spacing: 0.3px; }
-        .hidden { display: none !important; } button { background-color: #5d4037; color: #ffffff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; } button:hover { background-color: #4e342e; } button:disabled { background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; } button.secondary { background-color: transparent; border: 1px solid #e0e0e0; color: #212121; } button.secondary:hover { background-color: #f9f9f9; } button.outline { background-color: transparent; border: 1px solid #e0e0e0; color: #616161; } button.danger { background-color: transparent; border: 1px solid #e0e0e0; color: #616161; } button.danger:hover { color: #ef4444; border-color: #ef4444; background-color: #fef2f2;}
-        .container { background: transparent; padding: 0; max-width: 1400px; margin: 0 auto; } .panel-oscuro-container { background-color: #ffffff; padding: 30px; border: 1px solid #e0e0e0; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);} input, select { width: 100%; background: #ffffff; border: 1px solid #e0e0e0; color: #212121; padding: 10px; border-radius: 4px; font-family: inherit; } .search-container { display: flex; align-items: center; background: #ffffff; border: 1px solid #e0e0e0; padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; } .search-container input { border: none; padding: 8px; box-shadow: none; outline:none; } .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px;} .modal-content { background: #ffffff; padding: 40px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); } .modal-content h3 { font-weight: 500; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eeeeee; padding-bottom: 15px; margin-top: 0; color: #5d4037; } .form-group { margin-bottom: 20px; } .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: #616161; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;} .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eeeeee; flex-wrap: wrap;} .table-responsive { overflow-x: auto; width: 100%; } table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; min-width: 600px;} th, td { padding: 15px 10px; text-align: left; border-bottom: 1px solid #eeeeee; } th { font-weight: 600; color: #616161; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: #f5f5f7;} tr:hover td { background-color: #f9f9f9; } .modulo-oscuro { background-color: #ffffff; border: 1px solid #e0e0e0; margin-bottom: 15px; border-radius: 6px; overflow: hidden;} .modulo-header { padding: 15px 20px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; color: #5d4037; background-color: #f5f5f7;} .modulo-header:hover { background-color: #eeeeee; } .modulo-body { padding: 25px; border-top: 1px solid #e0e0e0; } .dark-input-group { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; } .dark-input-group > div { flex: 1; min-width: 150px; } .widget-balance { flex: 1; background: #ffffff; padding: 25px; text-align: center; border: 1px solid #e0e0e0; min-width: 150px; border-radius: 8px;} .widget-balance h4 { margin: 0 0 10px 0; color: #616161; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; } .widget-balance p { margin: 0; font-size: 1.8rem; font-weight: 500; } .pedido-card { background: #ffffff; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 15px; border-radius: 8px;} .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #eeeeee; padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;} .pedido-id { color: #8d6e63; font-size: 1.2rem; font-weight: 500; margin-bottom: 5px; display: inline-block; letter-spacing: 1px; } .pedido-items { list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 0.9rem; color: #616161; line-height: 1.6; } .pedido-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; } .variant-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; background: #f5f5f7; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; flex-wrap: wrap;} .variant-row > div { flex: 1; min-width: 120px; } .mini-label { font-size: 0.7rem; color: #616161; margin-bottom: 5px; display: block; text-transform: uppercase; font-weight: 500;} .dias-checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; } .dia-checkbox { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #212121; text-transform: uppercase; letter-spacing: 1px;} hr { border: 0; border-top: 1px solid #eeeeee; margin: 30px 0; } .alerta-container { display: flex; gap: 20px; flex-wrap: wrap; } .alerta-col { flex: 1; min-width: 200px; background: #f5f5f7; padding: 15px; border: 1px solid #e0e0e0; border-left: 4px solid #8d6e63; border-radius: 4px;} .alerta-col h4 { margin: 0 0 10px 0; color: #5d4037; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #eeeeee; padding-bottom: 8px;} .alerta-lista { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #616161; } .alerta-lista li { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        /* ===== ESTILOS ELEGANTES - TEMA CLARO ===== */
+        :root {
+            --primary: #5d4037; 
+            --primary-hover: #4e342e; 
+            --accent: #8d6e63; 
+            --bg-color: #f5f5f7; 
+            --card-bg: #ffffff; 
+            --card-hover: #f9f9f9; 
+            --border: #e0e0e0; 
+            --border-light: #eeeeee; 
+            --text-main: #212121; 
+            --text-muted: #616161; 
+            --text-dark: #9e9e9e;
+        }
+        
+        * { box-sizing: border-box; } 
+        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); letter-spacing: 0.3px; }
+        .hidden { display: none !important; } 
+        
+        button { background-color: var(--primary); color: #ffffff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; } 
+        button:hover { background-color: var(--primary-hover); } 
+        button:disabled { background-color: var(--border); color: var(--text-dark); cursor: not-allowed; } 
+        button.secondary { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); } 
+        button.secondary:hover { background-color: var(--card-hover); } 
+        button.outline { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); } 
+        button.danger { background-color: transparent; border: 1px solid var(--border); color: var(--text-muted); } 
+        button.danger:hover { color: #ef4444; border-color: #ef4444; background-color: #fef2f2;}
+        
+        .container { background: transparent; padding: 0; max-width: 1400px; margin: 0 auto; } 
+        .panel-oscuro-container { background-color: var(--card-bg); padding: 30px; border: 1px solid var(--border); margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);} 
+        
+        input, select { width: 100%; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 4px; font-family: inherit; } 
+        .search-container { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; } 
+        .search-container input { border: none; padding: 8px; box-shadow: none; outline:none; } 
+        
+        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px;} 
+        .modal-content { background: var(--card-bg); padding: 40px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); } 
+        .modal-content h3 { font-weight: 500; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-top: 0; color: var(--primary); } 
+        
+        .form-group { margin-bottom: 20px; } 
+        .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; font-weight: 500;} 
+        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border-light); flex-wrap: wrap;} 
+        
+        .table-responsive { overflow-x: auto; width: 100%; } 
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; min-width: 600px;} 
+        th, td { padding: 15px 10px; text-align: left; border-bottom: 1px solid var(--border-light); } 
+        th { font-weight: 600; color: var(--text-muted); text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: var(--bg-color);} 
+        tr:hover td { background-color: var(--card-hover); } 
+        
+        .modulo-oscuro { background-color: var(--card-bg); border: 1px solid var(--border); margin-bottom: 15px; border-radius: 6px; overflow: hidden;} 
+        .modulo-header { padding: 15px 20px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; color: var(--primary); background-color: var(--bg-color);} 
+        .modulo-header:hover { background-color: var(--border-light); } 
+        .modulo-body { padding: 25px; border-top: 1px solid var(--border); } 
+        
+        .dark-input-group { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; } 
+        .dark-input-group > div { flex: 1; min-width: 150px; } 
+        
+        .widget-balance { flex: 1; background: var(--card-bg); padding: 25px; text-align: center; border: 1px solid var(--border); min-width: 150px; border-radius: 8px;} 
+        .widget-balance h4 { margin: 0 0 10px 0; color: var(--text-muted); font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; } 
+        .widget-balance p { margin: 0; font-size: 1.8rem; font-weight: 500; } 
+        
+        .pedido-card { background: var(--card-bg); border: 1px solid var(--border); padding: 20px; margin-bottom: 15px; border-radius: 8px;} 
+        .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid var(--border-light); padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;} 
+        .pedido-id { color: var(--accent); font-size: 1.2rem; font-weight: 500; margin-bottom: 5px; display: inline-block; letter-spacing: 1px; } 
+        .pedido-items { list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 0.9rem; color: var(--text-muted); line-height: 1.6; } 
+        .pedido-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; } 
+        
+        .variant-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; background: var(--bg-color); padding: 15px; border: 1px solid var(--border); border-radius: 6px; flex-wrap: wrap;} 
+        .variant-row > div { flex: 1; min-width: 120px; } 
+        .mini-label { font-size: 0.7rem; color: var(--text-muted); margin-bottom: 5px; display: block; text-transform: uppercase; font-weight: 500;} 
+        
+        .dias-checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; } 
+        .dia-checkbox { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: var(--text-main); text-transform: uppercase; letter-spacing: 1px;} 
+        hr { border: 0; border-top: 1px solid var(--border-light); margin: 30px 0; } 
+        
+        .alerta-container { display: flex; gap: 20px; flex-wrap: wrap; } 
+        .alerta-col { flex: 1; min-width: 200px; background: var(--bg-color); padding: 15px; border: 1px solid var(--border); border-left: 4px solid var(--accent); border-radius: 4px;} 
+        .alerta-col h4 { margin: 0 0 10px 0; color: var(--primary); font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid var(--border-light); padding-bottom: 8px;} 
+        .alerta-lista { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: var(--text-muted); } 
+        .alerta-lista li { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        
         @media (max-width: 768px) { .search-container { max-width: 100%; margin: 5px 0; } .modal-content { padding: 20px; } .panel-oscuro-container { padding: 15px; } .dark-input-group { flex-direction: column; align-items: stretch; gap: 10px; } .dark-input-group > div { width: 100%; } }
     </style>
 </head>
 <body>
 
     <div id="vista-dueno" class="container">
-        <h2 style="margin-top: 0; margin-bottom: 30px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: #5d4037;">Administración</h2>
+        <h2 style="margin-top: 0; margin-bottom: 30px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--primary);">Administración</h2>
         
-        <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; border-bottom: 1px solid #eeeeee; padding-bottom: 20px;">
+        <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; border-bottom: 1px solid var(--border-light); padding-bottom: 20px;">
             <button class="secondary" onclick="window.togglePanel('panel-inventario')">Inventario</button>
             <button class="secondary" onclick="window.togglePanel('panel-pedidos')">Pedidos</button>
             <button class="secondary" onclick="window.togglePanel('panel-finanzas')">Finanzas</button>
@@ -27,10 +104,10 @@
         </div>
 
         <div id="panel-inventario" class="panel-oscuro-container">
-            <div id="modulo-alertas" class="modulo-oscuro" style="display: none; border-color: #5d4037;">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-alertas')" style="background-color: #ffffff;">
-                    <span style="color: #8d6e63;">Alertas de Inventario</span>
-                    <span id="badge-alertas" style="color: #5d4037; font-weight: bold;"></span>
+            <div id="modulo-alertas" class="modulo-oscuro" style="display: none; border-color: var(--primary);">
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-alertas')" style="background-color: var(--card-bg);">
+                    <span style="color: var(--accent);">Alertas de Inventario</span>
+                    <span id="badge-alertas" style="color: var(--primary); font-weight: bold;"></span>
                 </div>
                 <div id="body-alertas" class="modulo-body alerta-container">
                     <div class="alerta-col"><h4>Agotados</h4><ul id="lista-alertas-agotados" class="alerta-lista"></ul></div>
@@ -39,13 +116,13 @@
             </div>
 
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
-                <h3 style="margin: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 1rem; color: #212121;">Catálogo de Productos</h3>
+                <h3 style="margin: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 1rem; color: var(--text-main);">Catálogo de Productos</h3>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; max-width: 650px; justify-content: flex-end; align-items: center;">
                     <div class="search-container" style="flex: 1;"><input type="text" class="input-busqueda" placeholder="Buscar..." onkeyup="window.buscarProductos(this.value)"></div>
                     <div style="display: flex; gap: 8px;">
                         <button onclick="window.abrirModal()">Crear Producto</button>
-                        <button onclick="window.abrirModalOferta()" class="secondary" style="border-color: #8d6e63; color: #5d4037;">Crear Oferta</button>
-                        <button onclick="window.abrirModalPack()" class="secondary" style="border-color: #8d6e63; color: #5d4037;">Crear Pack</button>
+                        <button onclick="window.abrirModalOferta()" class="secondary" style="border-color: var(--accent); color: var(--primary);">Crear Oferta</button>
+                        <button onclick="window.abrirModalPack()" class="secondary" style="border-color: var(--accent); color: var(--primary);">Crear Pack</button>
                     </div>
                 </div>
             </div>
@@ -58,7 +135,7 @@
         </div>
 
         <div id="panel-pedidos" class="panel-oscuro-container hidden">
-            <h3 style="margin: 0 0 25px 0; font-weight: 500; text-transform: uppercase; font-size: 1rem; color: #212121;">Gestión de Operaciones</h3>
+            <h3 style="margin: 0 0 25px 0; font-weight: 500; text-transform: uppercase; font-size: 1rem; color: var(--text-main);">Gestión de Operaciones</h3>
             <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-pedidos-pendientes')"><span>Operaciones Pendientes</span></div>
                 <div id="body-pedidos-pendientes" class="modulo-body"><div id="lista-pedidos-pendientes"></div></div>
@@ -78,9 +155,9 @@
                         <div><label>Periodo</label><select id="filtro-periodo" onchange="window.calcularBalanceEnVivo()"><option value="hoy">Hoy</option><option value="semana">Última Semana</option><option value="mes">Último Mes</option><option value="siempre">Histórico Completo</option></select></div>
                     </div>
                     <div style="display: flex; gap: 15px; margin-top: 20px; flex-wrap: wrap;">
-                        <div class="widget-balance"><h4>Ingresos</h4><p id="bal-ingresos" style="color: #212121;">$0</p></div>
-                        <div class="widget-balance"><h4>Egresos</h4><p id="bal-gastos" style="color: #616161;">$0</p></div>
-                        <div class="widget-balance"><h4>Ganancia Neta</h4><p id="bal-neta" style="color: #5d4037;">$0</p></div>
+                        <div class="widget-balance"><h4>Ingresos</h4><p id="bal-ingresos" style="color: var(--text-main);">$0</p></div>
+                        <div class="widget-balance"><h4>Egresos</h4><p id="bal-gastos" style="color: var(--text-muted);">$0</p></div>
+                        <div class="widget-balance"><h4>Ganancia Neta</h4><p id="bal-neta" style="color: var(--primary);">$0</p></div>
                     </div>
                 </div>
             </div>
@@ -91,18 +168,18 @@
             <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>Ventas Físicas e Ingresos</span></div>
                 <div id="body-ingresos" class="modulo-body hidden">
-                    <div style="border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 20px; background: #ffffff; border-radius:6px;">
+                    <div style="border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; background: var(--card-bg); border-radius:6px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap: wrap; gap: 10px;">
                             <label style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">Venta de Mostrador</label>
                             <div style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
                         </div>
                         <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
                         <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
-                        <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: #5d4037; font-size: 1.1rem; border-bottom: 1px solid #eeeeee; padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
+                        <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
                         <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" id="mostrador-transf" placeholder="Transf. $"></div></div>
                         <button onclick="window.registrarVentaMostrador()" style="width:100%; margin-top: 10px;">Registrar Venta</button>
                     </div>
-                    <div style="border: 1px solid #e0e0e0; padding: 20px; background: #ffffff; border-radius:6px;">
+                    <div style="border: 1px solid var(--border); padding: 20px; background: var(--card-bg); border-radius:6px;">
                         <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:15px; font-weight:600;">Ingreso Extraordinario</label>
                         <div class="dark-input-group"><div style="flex: 2;"><input type="text" id="ingreso-manual-detalle" placeholder="Concepto..."></div><div><input type="number" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div><div><input type="number" id="ingreso-manual-transf" placeholder="Transf. $"></div></div>
                         <button class="secondary" onclick="window.registrarIngresoManual()" style="width:100%; margin-top: 10px;">Registrar</button>
@@ -125,8 +202,8 @@
                 <div style="flex: 1;"><label>Período:</label><select id="select-periodo-metricas" onchange="window.actualizarGraficos()"><option value="1y">1 Año (Mes a Mes)</option><option value="6m" selected>6 Meses (Mes a Mes)</option><option value="3m">3 Meses (Mes a Mes)</option><option value="1m">1 Mes (Semanas)</option><option value="7d">1 Semana (Días)</option></select></div>
                 <div style="flex: 1;"><label>Categoría Analizada:</label><select id="select-categoria-metricas" onchange="window.actualizarGraficos()"><option value="efectivo">Pagos en Efectivo</option><option value="transferencia">Pagos Transferencia</option><option value="ventas_web">Ventas Web</option><option value="ventas_fisicas">Ventas Físicas</option><option value="neto">Ganancias Netas</option><option value="gastos">Gastos</option></select></div>
             </div>
-            <div style="height: 350px; margin-top: 20px; margin-bottom: 25px; background: #f5f5f7; padding: 15px; border: 1px solid #e0e0e0; border-radius: 8px;"><canvas id="graficoMetricas"></canvas></div>
-            <div id="metricas-data-list" style="font-size:0.85rem; color:#616161; border: 1px solid #eeeeee; padding: 15px; border-radius: 6px;"></div>
+            <div style="height: 350px; margin-top: 20px; margin-bottom: 25px; background: var(--bg-color); padding: 15px; border: 1px solid var(--border); border-radius: 8px;"><canvas id="graficoMetricas"></canvas></div>
+            <div id="metricas-data-list" style="font-size:0.85rem; color:var(--text-muted); border: 1px solid var(--border-light); padding: 15px; border-radius: 6px;"></div>
         </div>
 
         <div id="panel-config" class="panel-oscuro-container hidden">
@@ -134,12 +211,12 @@
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
                 <div class="modulo-oscuro">
                     <div class="modulo-body">
-                        <h4 style="margin: 0 0 15px 0; color: #5d4037; font-size: 0.85rem; text-transform: uppercase;">Contacto y Logística</h4>
+                        <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Contacto y Logística</h4>
                         <div class="form-group"><label>URL Logo</label><input type="text" id="conf-logo"></div>
                         <div class="form-group"><label>Teléfono (WhatsApp)</label><input type="text" id="conf-tel"></div>
                         <div class="dark-input-group"><div><label>Envíos</label><select id="conf-envio-disp"><option value="si">Habilitado</option><option value="no">Deshabilitado</option></select></div><div><label>Tarifa $</label><input type="number" id="conf-envio-precio"></div></div>
                         <hr>
-                        <h4 style="margin: 0 0 15px 0; color: #5d4037; font-size: 0.85rem; text-transform: uppercase;">Horarios Operativos</h4>
+                        <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Horarios Operativos</h4>
                         <div class="dark-input-group"><div><label>Apertura</label><input type="time" id="conf-apertura"></div><div><label>Cierre</label><input type="time" id="conf-cierre"></div></div>
                         <div class="dias-checkbox-group"><label class="dia-checkbox"><input type="checkbox" id="check-lu"> Lu</label><label class="dia-checkbox"><input type="checkbox" id="check-ma"> Ma</label><label class="dia-checkbox"><input type="checkbox" id="check-mi"> Mi</label><label class="dia-checkbox"><input type="checkbox" id="check-ju"> Ju</label><label class="dia-checkbox"><input type="checkbox" id="check-vi"> Vi</label><label class="dia-checkbox"><input type="checkbox" id="check-sa"> Sá</label><label class="dia-checkbox"><input type="checkbox" id="check-do"> Do</label></div>
                         <button style="margin-top: 20px; width: 100%;" onclick="window.guardarConfiguracion()">Guardar Preferencias</button>
@@ -147,11 +224,11 @@
                 </div>
                 <div class="modulo-oscuro">
                     <div class="modulo-body">
-                        <h4 style="margin: 0 0 15px 0; color: #5d4037; font-size: 0.85rem; text-transform: uppercase;">Categorías de Productos</h4>
+                        <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Categorías de Productos</h4>
                         <div class="dark-input-group" style="margin-bottom: 10px;"><div style="flex: 2;"><input type="text" id="nueva-cat-prod" placeholder="Nueva categoría..."></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarCategoriaProd()">Agregar</button></div></div>
                         <ul id="lista-categorias-prod" style="list-style:none; padding:0; margin-bottom:30px; font-size:0.85rem;"></ul>
                         <hr>
-                        <h4 style="margin: 0 0 15px 0; color: #5d4037; font-size: 0.85rem; text-transform: uppercase;">Descuentos x Cliente</h4>
+                        <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Descuentos x Cliente</h4>
                         <div class="dark-input-group" style="margin-bottom: 10px;"><div style="flex:2;"><input type="text" id="nueva-cat-cli-nombre" placeholder="Perfil"></div><div style="flex:1;"><input type="number" id="nueva-cat-cli-desc" placeholder="%"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarCategoriaCliente()">Agregar</button></div></div>
                         <div id="lista-categorias-cli" style="font-size:0.85rem;"></div>
                     </div>
@@ -201,7 +278,7 @@
     <div id="modal-stock" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Reponer Inventario</h3>
-            <p id="stock-nombre-prod" style="font-weight: 500; font-size: 1.1rem; margin-bottom: 25px; color: #5d4037; text-transform: uppercase;"></p>
+            <p id="stock-nombre-prod" style="font-weight: 500; font-size: 1.1rem; margin-bottom: 25px; color: var(--primary); text-transform: uppercase;"></p>
             <input type="hidden" id="stock-id-prod">
             <div class="form-group"><label>Variante a Reponer</label><select id="stock-select-var"></select></div>
             <div class="form-group"><label>Cantidad Entrante</label><input type="number" id="stock-cantidad" min="1" value="1"></div>
@@ -243,8 +320,11 @@
             try {
                 const confDoc = await getDocs(collection(db, "configuracion")); confDoc.forEach(d => { if(d.id === 'tienda') configTienda = d.data(); });
                 const catDoc = await getDocs(collection(db, "categorias")); catDoc.forEach(d => { if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales; if(d.id === 'clientes') categoriasClientes = d.data().lista || categoriasClientes; });
-                const pDoc = await getDocs(collection(db, "productos")); productos = pDoc.docs.map(d => d.data());
-                const pkDoc = await getDocs(collection(db, "packs")); packs = pkDoc.docs.map(d => d.data());
+                
+                // Mapeo exhaustivo forzando .id para evitar bugs de botones rotos
+                const pDoc = await getDocs(collection(db, "productos")); productos = pDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
+                const pkDoc = await getDocs(collection(db, "packs")); packs = pkDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
+                
                 const pedDoc = await getDocs(collection(db, "pedidos")); pedidosGlobales = pedDoc.docs.map(d => { let obj = d.data(); obj.idDoc = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
                 const ingDoc = await getDocs(collection(db, "ingresos")); ingresosGlobales = ingDoc.docs.map(d => { let obj = d.data(); if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
                 const gasDoc = await getDocs(collection(db, "gastos")); gastosGlobales = gasDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
@@ -260,14 +340,14 @@
         // CONFIG Y CATEGORÍAS (Guardando en Firebase)
         window.renderizarConfigCategorias = () => {
             const ulP = document.getElementById('lista-categorias-prod'); if(!ulP) return;
-            ulP.innerHTML = ''; categoriasGlobales.forEach(c => { const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eeeeee;"><span style="color:#212121;">${c}</span> ${btnBorrar}</li>`; });
+            ulP.innerHTML = ''; categoriasGlobales.forEach(c => { const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`; });
             const listC = document.getElementById('lista-categorias-cli'); listC.innerHTML = '';
             categoriasClientes.forEach((c, i) => {
                 const btnBorrar = c.nombre !== 'Consumidor Final' ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaCliente(${i})">X</button>` : '';
-                let excHTML = ''; Object.entries(c.descuentosCat).forEach(([cat, desc]) => { excHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 0 4px 15px; font-size:0.75rem; color:#616161;"><span>↳ '${cat}': <strong style="color:#8d6e63;">-${desc}%</strong></span><button class="danger" style="padding:2px 6px; font-size:0.6rem; border:none;" onclick="window.eliminarExcepcionCliente(${i}, '${cat}')">x</button></div>`; });
+                let excHTML = ''; Object.entries(c.descuentosCat).forEach(([cat, desc]) => { excHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 0 4px 15px; font-size:0.75rem; color:var(--text-muted);"><span>↳ '${cat}': <strong style="color:var(--accent);">-${desc}%</strong></span><button class="danger" style="padding:2px 6px; font-size:0.6rem; border:none;" onclick="window.eliminarExcepcionCliente(${i}, '${cat}')">x</button></div>`; });
                 let selCat = `<select id="exc-cat-${i}" style="padding:4px; font-size:0.7rem;">`; categoriasGlobales.forEach(cg => selCat += `<option value="${cg}">${cg}</option>`); selCat += `</select>`;
                 const addExcHTML = `<div style="display:flex; gap:5px; margin-top:5px; padding-left:15px; align-items:center;">${selCat}<input type="number" id="exc-desc-${i}" placeholder="%" style="width:55px; padding:4px; font-size:0.7rem;"><button class="secondary" style="padding:4px 8px; font-size:0.7rem;" onclick="window.agregarExcepcionCliente(${i})">+</button></div>`;
-                listC.innerHTML += `<div style="margin-bottom:15px; padding:10px; border:1px solid #eeeeee; border-radius:6px; background:#f5f5f7;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span style="color:#212121; font-weight:500;">${c.nombre} <strong style="color:#5d4037;">(-${c.descuentoGlobal}% Global)</strong></span>${btnBorrar}</div>${excHTML}${c.nombre !== 'Consumidor Final' ? addExcHTML : ''}</div>`;
+                listC.innerHTML += `<div style="margin-bottom:15px; padding:10px; border:1px solid var(--border-light); border-radius:6px; background:var(--bg-color);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span style="color:var(--text-main); font-weight:500;">${c.nombre} <strong style="color:var(--primary);">(-${c.descuentoGlobal}% Global)</strong></span>${btnBorrar}</div>${excHTML}${c.nombre !== 'Consumidor Final' ? addExcHTML : ''}</div>`;
             });
         };
         const guardarCategoriasFirebase = async () => { await setDoc(doc(db, "categorias", "globales"), { lista: categoriasGlobales }); await setDoc(doc(db, "categorias", "clientes"), { lista: categoriasClientes }); };
@@ -310,7 +390,7 @@
 
         window.borrarProducto = async (id) => { 
             if(confirm("¿Seguro que deseas eliminar permanentemente este elemento?")) { 
-                await deleteDoc(doc(db, "productos", id)); await deleteDoc(doc(db, "packs", id)); // Intenta borrar en ambas por si acaso
+                await deleteDoc(doc(db, "productos", id)); await deleteDoc(doc(db, "packs", id)); 
                 productos = productos.filter(p => p.id !== id); packs = packs.filter(p => p.id !== id); carritoMostrador = carritoMostrador.filter(c => c.idProd !== id); window.renderizarCarritoMostrador(); window.triggerProductos(); 
             } 
         };
@@ -354,23 +434,23 @@
             const adminProds = productos.filter(p => p.nombre.toLowerCase().includes(terminoBusqueda));
             adminProds.forEach(p => {
                 const img = p.imagen || 'https://via.placeholder.com/300x200?text=IMG'; const vE = Object.entries(p.variantes || {}); if(vE.length===0) return;
-                let sT = 0; let mT = '<div style="font-size:0.75rem; color:#616161; text-transform:uppercase; letter-spacing:0.5px;">';
+                let sT = 0; let mT = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">';
                 vE.forEach(([id, v]) => { 
                     sT += v.stock; let txtOferta = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? ` <span style="color:#ef4444; font-weight:600;">(En Oferta $${v.precioOferta})</span>` : '';
-                    mT += `<div style="margin-bottom:3px;">${v.detalle} - <span style="color:#212121; font-weight:500;">${window.formatearNum(v.stock)} u.</span> | $${window.formatearNum(v.precio)}${txtOferta}</div>`; 
-                    if(v.stock === 0) { hAgot += `<li><span>${p.nombre} - ${v.detalle}</span><span style="color:#5d4037; font-weight:600;">0</span></li>`; countA++; }
+                    mT += `<div style="margin-bottom:3px;">${v.detalle} - <span style="color:var(--text-main); font-weight:500;">${window.formatearNum(v.stock)} u.</span> | $${window.formatearNum(v.precio)}${txtOferta}</div>`; 
+                    if(v.stock === 0) { hAgot += `<li><span>${p.nombre} - ${v.detalle}</span><span style="color:var(--primary); font-weight:600;">0</span></li>`; countA++; }
                     else if(v.stock < 6) { hPoco += `<li><span>${p.nombre} - ${v.detalle}</span><span style="font-weight:500;">${v.stock}</span></li>`; countA++; }
                 }); mT += '</div>';
-                t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:#212121; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:500;">${p.nombre}</span></div></td><td style="color:#616161; font-size:0.8rem;">${p.categoria || 'General'}</td><td>${mT}</td><td style="color:#212121; font-weight:500; font-size:1.1rem;">${window.formatearNum(sT)}</td><td><div style="display:flex; gap: 5px; flex-wrap: wrap;"><button class="secondary" style="padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModal('${p.id}')">Configurar</button><button class="outline" style="padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModalStock('${p.id}')">Reponer</button><button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${p.id}')">Borrar</button></div></td></tr>`;
+                t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:500;">${p.nombre}</span></div></td><td style="color:var(--text-muted); font-size:0.8rem;">${p.categoria || 'General'}</td><td>${mT}</td><td style="color:var(--text-main); font-weight:500; font-size:1.1rem;">${window.formatearNum(sT)}</td><td><div style="display:flex; gap: 5px; flex-wrap: wrap;"><button class="secondary" style="padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModal('${p.id}')">Configurar</button><button class="outline" style="padding:6px 12px; font-size:0.7rem;" onclick="window.abrirModalStock('${p.id}')">Reponer</button><button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${p.id}')">Borrar</button></div></td></tr>`;
             });
             const adminPacks = packs.filter(pk => pk.nombre.toLowerCase().includes(terminoBusqueda));
             adminPacks.forEach(pk => {
                 const img = pk.imagen || 'https://via.placeholder.com/300x200?text=PACK'; let stockCombo = window.calcularStockPack(pk);
-                let estructura = '<div style="font-size:0.75rem; color:#616161; text-transform:uppercase; letter-spacing:0.5px;">'; pk.items.forEach(it => estructura += `<div>• ${it.nombre} (${it.detalle}) x${it.cantidad}</div>`); estructura += `<div>Valor Especial Pack: <strong>$${window.formatearNum(pk.precio)}</strong></div></div>`;
-                t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:#8d6e63; text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:600;">[PACK] ${pk.nombre}</span></div></td><td style="color:#616161; font-size:0.8rem;">Packs</td><td>${estructura}</td><td style="color:#212121; font-weight:500; font-size:1.1rem;">${window.formatearNum(stockCombo)}</td><td><button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${pk.id}')">Eliminar Pack</button></td></tr>`;
+                let estructura = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">'; pk.items.forEach(it => estructura += `<div>• ${it.nombre} (${it.detalle}) x${it.cantidad}</div>`); estructura += `<div>Valor Especial Pack: <strong>$${window.formatearNum(pk.precio)}</strong></div></div>`;
+                t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:var(--accent); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:600;">[PACK] ${pk.nombre}</span></div></td><td style="color:var(--text-muted); font-size:0.8rem;">Packs</td><td>${estructura}</td><td style="color:var(--text-main); font-weight:500; font-size:1.1rem;">${window.formatearNum(stockCombo)}</td><td><button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${pk.id}')">Eliminar Pack</button></td></tr>`;
             });
             const contAlertas = document.getElementById('modulo-alertas');
-            if(countA > 0) { contAlertas.style.display = 'block'; document.getElementById('badge-alertas').textContent = `${countA} Avisos`; document.getElementById('lista-alertas-agotados').innerHTML = hAgot || '<li><span style="color:#9e9e9e;">Ninguno</span></li>'; document.getElementById('lista-alertas-bajo').innerHTML = hPoco || '<li><span style="color:#9e9e9e;">Ninguno</span></li>'; } 
+            if(countA > 0) { contAlertas.style.display = 'block'; document.getElementById('badge-alertas').textContent = `${countA} Avisos`; document.getElementById('lista-alertas-agotados').innerHTML = hAgot || '<li><span style="color:var(--text-dark);">Ninguno</span></li>'; document.getElementById('lista-alertas-bajo').innerHTML = hPoco || '<li><span style="color:var(--text-dark);">Ninguno</span></li>'; } 
             else { contAlertas.style.display = 'none'; }
         }
         window.triggerProductos = () => {
@@ -400,17 +480,17 @@
             const list = document.getElementById('lista-mostrador'); if(!list) return;
             const selectCliente = document.getElementById('mostrador-tipo-cliente'); const clientIndex = selectCliente ? parseInt(selectCliente.value) : 0; const perfilCli = categoriasClientes[clientIndex] || categoriasClientes[0];
             list.innerHTML = ''; let subtotalBruto = 0; let descuentoMonto = 0;
-            if(carritoMostrador.length === 0) { list.innerHTML = '<li style="color:#9e9e9e; text-align:center; font-style:italic;">Agrega productos para la venta</li>'; } 
+            if(carritoMostrador.length === 0) { list.innerHTML = '<li style="color:var(--text-dark); text-align:center; font-style:italic;">Agrega productos para la venta</li>'; } 
             else {
                 carritoMostrador.forEach((item, idx) => {
                     let cat = 'General'; if(!item.isPack) { const prodRef = productos.find(x => x.id === item.idProd); cat = prodRef ? prodRef.categoria : 'General'; } else { cat = 'Packs'; }
                     const descPct = (perfilCli.descuentosCat && perfilCli.descuentosCat[cat] !== undefined) ? perfilCli.descuentosCat[cat] : perfilCli.descuentoGlobal;
                     const lineTotal = item.precio * item.cantidad; const descLinea = lineTotal * (descPct / 100); subtotalBruto += lineTotal; descuentoMonto += descLinea;
-                    list.innerHTML += `<li style="display:flex; justify-content:space-between; border-bottom:1px solid #eeeeee; padding:8px 0; align-items:center; flex-wrap: wrap; gap: 5px;"><div style="flex: 1; min-width: 150px;"><span style="color:#212121; font-size:0.8rem;">${item.nombre} - ${item.detalle} (x${item.cantidad})</span>${descPct > 0 ? `<br><span style="font-size:0.7rem; color:#8d6e63;">(-${descPct}% descuento)</span>` : ''}</div><div style="display:flex; align-items:center; gap:10px;"><span style="color:#212121;">$${window.formatearNum(lineTotal - descLinea)}</span><button class="danger" style="padding:2px 6px; font-size:0.7rem; border-radius:4px;" onclick="window.quitarItemMostrador(${idx})">X</button></div></li>`;
+                    list.innerHTML += `<li style="display:flex; justify-content:space-between; border-bottom:1px solid var(--border-light); padding:8px 0; align-items:center; flex-wrap: wrap; gap: 5px;"><div style="flex: 1; min-width: 150px;"><span style="color:var(--text-main); font-size:0.8rem;">${item.nombre} - ${item.detalle} (x${item.cantidad})</span>${descPct > 0 ? `<br><span style="font-size:0.7rem; color:var(--accent);">(-${descPct}% descuento)</span>` : ''}</div><div style="display:flex; align-items:center; gap:10px;"><span style="color:var(--text-main);">$${window.formatearNum(lineTotal - descLinea)}</span><button class="danger" style="padding:2px 6px; font-size:0.7rem; border-radius:4px;" onclick="window.quitarItemMostrador(${idx})">X</button></div></li>`;
                 });
             }
             let totalFinal = subtotalBruto - descuentoMonto;
-            if (descuentoMonto > 0) { list.innerHTML += `<li style="display:flex; justify-content:space-between; padding:8px 0; align-items:center;"><span style="color:#8d6e63; font-size:0.8rem; font-weight:500;">Total Ahorro (${perfilCli.nombre})</span><span style="color:#8d6e63; font-weight:500;">-$${window.formatearNum(descuentoMonto)}</span></li>`; }
+            if (descuentoMonto > 0) { list.innerHTML += `<li style="display:flex; justify-content:space-between; padding:8px 0; align-items:center;"><span style="color:var(--accent); font-size:0.8rem; font-weight:500;">Total Ahorro (${perfilCli.nombre})</span><span style="color:var(--accent); font-weight:500;">-$${window.formatearNum(descuentoMonto)}</span></li>`; }
             document.getElementById('total-mostrador').textContent = window.formatearNum(totalFinal); document.getElementById('total-mostrador').setAttribute('data-total', totalFinal);
         };
         window.registrarVentaMostrador = async () => {
@@ -440,13 +520,13 @@
             ingresosGlobales.forEach(i => { if((hoy - i.fecha)/86400000 <= dias) tIng += (i.efectivo + i.transferencia); });
             gastosGlobales.forEach(g => { if((hoy - g.fecha)/86400000 <= dias) tGas += g.importe; });
             const net = tIng - tGas;
-            document.getElementById('bal-ingresos').textContent = `$${window.formatearNum(tIng)}`; document.getElementById('bal-gastos').textContent = `$${window.formatearNum(tGas)}`; document.getElementById('bal-neta').textContent = `${net>=0?'':'-'}$${window.formatearNum(Math.abs(net))}`; document.getElementById('bal-neta').style.color = net>=0?'#5d4037':'#616161';
+            document.getElementById('bal-ingresos').textContent = `$${window.formatearNum(tIng)}`; document.getElementById('bal-gastos').textContent = `$${window.formatearNum(tGas)}`; document.getElementById('bal-neta').textContent = `${net>=0?'':'-'}$${window.formatearNum(Math.abs(net))}`; document.getElementById('bal-neta').style.color = net>=0?'var(--primary)':'var(--text-muted)';
         };
         window.renderizarTransacciones = () => {
             let tr = []; ingresosGlobales.forEach(i => tr.push({ id: i.id, f: i.fecha, t: 'Ingreso', d: i.detalle, m: i.efectivo + i.transferencia })); gastosGlobales.forEach(g => tr.push({ id: g.id, f: g.fecha, t: 'Egreso', d: g.titulo+(g.descripcion?` - ${g.descripcion}`:''), m: g.importe })); tr.sort((a,b) => b.f - a.f); const tb = document.getElementById('tabla-transacciones'); if(!tb) return; tb.innerHTML = '';
-            tr.forEach(x => { const c = x.t === 'Ingreso' ? '#212121' : '#616161'; tb.innerHTML += `<tr><td style="color:#9e9e9e;">${x.f.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td style="color:${c}; text-transform:uppercase; font-size:0.7rem;">${x.t}</td><td style="color:#616161;">${x.d}</td><td style="color:${c}; font-weight:500;">$${window.formatearNum(x.m)}</td></tr>`; });
+            tr.forEach(x => { const c = x.t === 'Ingreso' ? 'var(--text-main)' : 'var(--text-muted)'; tb.innerHTML += `<tr><td style="color:var(--text-dark);">${x.f.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td style="color:${c}; text-transform:uppercase; font-size:0.7rem;">${x.t}</td><td style="color:var(--text-muted);">${x.d}</td><td style="color:${c}; font-weight:500;">$${window.formatearNum(x.m)}</td></tr>`; });
         };
-        window.triggerGastos = () => { gastosGlobales.sort((a,b) => b.fecha - a.fecha); const t = document.getElementById('tabla-gastos'); if(t) {t.innerHTML = ''; gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><span style="color:#212121; text-transform:uppercase; font-size:0.8rem;">${g.titulo}</span></td><td style="color:#616161;">$${window.formatearNum(g.importe)}</td><td><button class="danger" style="padding: 4px 8px; border-radius: 4px;" onclick="window.borrarGasto('${g.id}')">X</button></td></tr>`; });} window.calcularBalanceEnVivo(); window.renderizarTransacciones(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
+        window.triggerGastos = () => { gastosGlobales.sort((a,b) => b.fecha - a.fecha); const t = document.getElementById('tabla-gastos'); if(t) {t.innerHTML = ''; gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem;">${g.titulo}</span></td><td style="color:var(--text-muted);">$${window.formatearNum(g.importe)}</td><td><button class="danger" style="padding: 4px 8px; border-radius: 4px;" onclick="window.borrarGasto('${g.id}')">X</button></td></tr>`; });} window.calcularBalanceEnVivo(); window.renderizarTransacciones(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
         window.triggerIngresos = () => { ingresosGlobales.sort((a,b) => b.fecha - a.fecha); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
 
         // PEDIDOS Y MÉTRICAS
@@ -455,9 +535,9 @@
             const pend = pedidosGlobales.filter(p => !p.estadoEntrega).sort((a,b) => b.fecha - a.fecha); const entr = pedidosGlobales.filter(p => p.estadoEntrega).sort((a,b) => b.fecha - a.fecha);
             const card = (p, isP) => {
                 let it = ''; p.items.forEach(i => it += `<li>${i.nombre} - ${i.detalle} x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
-                if (p.descuentoMonto > 0) it += `<li style="color:#8d6e63; font-weight:500;">Descuento Aplicado (${p.tipoCliente}) - -$${window.formatearNum(p.descuentoMonto)}</li>`; if (p.costoEnvio) it += `<li style="color:#9e9e9e;">Envío - $${window.formatearNum(p.costoEnvio)}</li>`;
-                const bC = isP ? `<button class="danger" style="border: 1px solid #ef4444; color: #ef4444;" onclick="window.cancelarPedido('${p.idDoc}', '${p.telefono}')">Cancelar</button>` : ''; const bP = p.estadoPago ? `<span style="color:#9e9e9e; font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.idDoc}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">Registrar Pago</button>`; const bE = isP ? `<button onclick="window.marcarEntregado('${p.idDoc}', '${p.telefono}')">Entregado</button>` : `<span style="color:#9e9e9e; font-size:0.8rem;">FINALIZADO</span>`;
-                return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto}</span><br><span style="font-size:0.75rem; color:#9e9e9e; text-transform:uppercase;">${p.fecha.toLocaleString()}</span></div><span style="font-size:1.1rem; font-weight:600; color:#5d4037;">$${window.formatearNum(p.total)}</span></div><p style="margin:0 0 5px 0; color:#616161; font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:#212121; font-weight:500;">${p.nombreCliente} ${p.apellidoCliente} ${p.tipoCliente?`(${p.tipoCliente})`:''}</span></p><p style="margin:0 0 5px 0; color:#616161; font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${p.telefono.replace(/[^0-9]/g,'')}" target="_blank" style="color:#5d4037; font-weight:500; text-decoration:none;">${p.telefono}</a></p><p style="margin:0 0 20px 0; color:#616161; font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:#212121; font-weight:500;">${p.metodoEntrega}</span> ${p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p><ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bC} ${bP} ${bE}</div></div>`;
+                if (p.descuentoMonto > 0) it += `<li style="color:var(--accent); font-weight:500;">Descuento Aplicado (${p.tipoCliente}) - -$${window.formatearNum(p.descuentoMonto)}</li>`; if (p.costoEnvio) it += `<li style="color:var(--text-dark);">Envío - $${window.formatearNum(p.costoEnvio)}</li>`;
+                const bC = isP ? `<button class="danger" style="border: 1px solid #ef4444; color: #ef4444;" onclick="window.cancelarPedido('${p.idDoc}', '${p.telefono}')">Cancelar</button>` : ''; const bP = p.estadoPago ? `<span style="color:var(--text-dark); font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.idDoc}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">Registrar Pago</button>`; const bE = isP ? `<button onclick="window.marcarEntregado('${p.idDoc}', '${p.telefono}')">Entregado</button>` : `<span style="color:var(--text-dark); font-size:0.8rem;">FINALIZADO</span>`;
+                return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha.toLocaleString()}</span></div><span style="font-size:1.1rem; font-weight:600; color:var(--primary);">$${window.formatearNum(p.total)}</span></div><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:var(--text-main); font-weight:500;">${p.nombreCliente} ${p.apellidoCliente} ${p.tipoCliente?`(${p.tipoCliente})`:''}</span></p><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${p.telefono.replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--primary); font-weight:500; text-decoration:none;">${p.telefono}</a></p><p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main); font-weight:500;">${p.metodoEntrega}</span> ${p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p><ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bC} ${bP} ${bE}</div></div>`;
             };
             pend.forEach(p => lP.innerHTML += card(p, true)); entr.forEach(p => lH.innerHTML += card(p, false));
         };
@@ -524,7 +604,7 @@
             metricasChart = new Chart(ctx, { type: 'bar', data: { labels: etiquetas, datasets: [ { label: labelBar, data: datosBarras, backgroundColor: categoria === 'gastos' ? '#ef4444' : '#5d4037', borderRadius: 4, order: 2 }, { label: labelLine, data: datosLinea, type: 'line', borderColor: '#8d6e63', backgroundColor: 'rgba(141, 110, 99, 0.1)', borderWidth: 3, fill: true, tension: 0.3, order: 1 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: "'Helvetica Neue', sans-serif" } } }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; let value = context.parsed.y; if (label) { label += ': '; } if (isMoney && context.datasetIndex === 0) { label += '$' + value.toLocaleString('es-AR'); } else { label += value; } return label; } } } }, scales: { y: { beginAtZero: true, grid: { color: '#eeeeee' }, ticks: { callback: function(value) { return isMoney ? '$' + value.toLocaleString('es-AR') : value; } } }, x: { grid: { display: false } } } } });
             
             let listHTML = '<ul style="list-style:none; padding:0; margin:0;">'; let hayDatos = false;
-            for(let i = 0; i < etiquetas.length; i++) { if (datosBarras[i] !== 0 || datosLinea[i] !== 0) { hayDatos = true; listHTML += `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid #eeeeee;"><span style="color:#212121; font-weight:500;">${etiquetas[i]}</span><span style="color:#616161;">${isMoney ? '$'+window.formatearNum(datosBarras[i]) : datosBarras[i]} ${labelBar.toLowerCase()} | ${datosLinea[i]} ${labelLine.toLowerCase()}</span></li>`; } } listHTML += '</ul>';
+            for(let i = 0; i < etiquetas.length; i++) { if (datosBarras[i] !== 0 || datosLinea[i] !== 0) { hayDatos = true; listHTML += `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main); font-weight:500;">${etiquetas[i]}</span><span style="color:var(--text-muted);">${isMoney ? '$'+window.formatearNum(datosBarras[i]) : datosBarras[i]} ${labelBar.toLowerCase()} | ${datosLinea[i]} ${labelLine.toLowerCase()}</span></li>`; } } listHTML += '</ul>';
             document.getElementById('metricas-data-list').innerHTML = hayDatos ? listHTML : 'No hay datos para mostrar en este periodo.';
         }
 
