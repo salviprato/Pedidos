@@ -6,86 +6,11 @@
     <title>Panel de Administración</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ===== ESTILOS ELEGANTES - TEMA CLARO ===== */
-        :root {
-            var(--primary): #5d4037; var(--primary-hover): #4e342e; var(--accent): #8d6e63;
-            var(--bg-color): #f5f5f7; var(--card-bg): #ffffff; var(--card-hover): #f9f9f9;
-            var(--border): #e0e0e0; var(--border-light): #eeeeee;
-            var(--text-main): #212121; var(--text-muted): #616161; var(--text-dark): #9e9e9e;
-        }
-        * { box-sizing: border-box; }
-        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); letter-spacing: 0.3px; }
-        .hidden { display: none !important; }
-        
-        button { background-color: #5d4037; color: #ffffff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; }
-        button:hover { background-color: #4e342e; }
-        button:disabled { background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; }
-        button.secondary { background-color: transparent; border: 1px solid #e0e0e0; color: #212121; }
-        button.secondary:hover { background-color: #f9f9f9; }
-        button.outline { background-color: transparent; border: 1px solid #e0e0e0; color: #616161; }
-        button.danger { background-color: transparent; border: 1px solid #e0e0e0; color: #616161; }
-        button.danger:hover { color: #ef4444; border-color: #ef4444; background-color: #fef2f2;}
-        
-        .container { background: transparent; padding: 0; max-width: 1400px; margin: 0 auto; }
-        .panel-oscuro-container { background-color: #ffffff; padding: 30px; border: 1px solid #e0e0e0; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);}
-        
-        input, select { width: 100%; background: #ffffff; border: 1px solid #e0e0e0; color: #212121; padding: 10px; border-radius: 4px; font-family: inherit; }
-        .search-container { display: flex; align-items: center; background: #ffffff; border: 1px solid #e0e0e0; padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; }
-        .search-container input { border: none; padding: 8px; box-shadow: none; outline:none; }
-        
-        .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px;}
-        .modal-content { background: #ffffff; padding: 40px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); }
-        .modal-content h3 { font-weight: 500; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eeeeee; padding-bottom: 15px; margin-top: 0; color: #5d4037; }
-
-        .form-group { margin-bottom: 20px; }
-        .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: #616161; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;}
-        .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eeeeee; flex-wrap: wrap;}
-
-        .table-responsive { overflow-x: auto; width: 100%; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; min-width: 600px;}
-        th, td { padding: 15px 10px; text-align: left; border-bottom: 1px solid #eeeeee; }
-        th { font-weight: 600; color: #616161; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: #f5f5f7;}
-        tr:hover td { background-color: #f9f9f9; }
-
-        .modulo-oscuro { background-color: #ffffff; border: 1px solid #e0e0e0; margin-bottom: 15px; border-radius: 6px; overflow: hidden;}
-        .modulo-header { padding: 15px 20px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; color: #5d4037; background-color: #f5f5f7;}
-        .modulo-header:hover { background-color: #eeeeee; }
-        .modulo-body { padding: 25px; border-top: 1px solid #e0e0e0; }
-        
-        .dark-input-group { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; }
-        .dark-input-group > div { flex: 1; min-width: 150px; }
-        
-        .widget-balance { flex: 1; background: #ffffff; padding: 25px; text-align: center; border: 1px solid #e0e0e0; min-width: 150px; border-radius: 8px;}
-        .widget-balance h4 { margin: 0 0 10px 0; color: #616161; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; }
-        .widget-balance p { margin: 0; font-size: 1.8rem; font-weight: 500; }
-
-        .pedido-card { background: #ffffff; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 15px; border-radius: 8px;}
-        .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #eeeeee; padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;}
-        .pedido-id { color: #8d6e63; font-size: 1.2rem; font-weight: 500; margin-bottom: 5px; display: inline-block; letter-spacing: 1px; }
-        .pedido-items { list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 0.9rem; color: #616161; line-height: 1.6; }
-        .pedido-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; }
-
-        .variant-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; background: #f5f5f7; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; flex-wrap: wrap;}
-        .variant-row > div { flex: 1; min-width: 120px; }
-        .mini-label { font-size: 0.7rem; color: #616161; margin-bottom: 5px; display: block; text-transform: uppercase; font-weight: 500;}
-        
-        .dias-checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; }
-        .dia-checkbox { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #212121; text-transform: uppercase; letter-spacing: 1px;}
-        hr { border: 0; border-top: 1px solid #eeeeee; margin: 30px 0; }
-
-        .alerta-container { display: flex; gap: 20px; flex-wrap: wrap; }
-        .alerta-col { flex: 1; min-width: 200px; background: #f5f5f7; padding: 15px; border: 1px solid #e0e0e0; border-left: 4px solid #8d6e63; border-radius: 4px;}
-        .alerta-col h4 { margin: 0 0 10px 0; color: #5d4037; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #eeeeee; padding-bottom: 8px;}
-        .alerta-lista { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #616161; }
-        .alerta-lista li { display: flex; justify-content: space-between; margin-bottom: 6px; }
-
-        @media (max-width: 768px) {
-            .search-container { max-width: 100%; margin: 5px 0; }
-            .modal-content { padding: 20px; }
-            .panel-oscuro-container { padding: 15px; }
-            .dark-input-group { flex-direction: column; align-items: stretch; gap: 10px; }
-            .dark-input-group > div { width: 100%; }
-        }
+        :root { var(--primary): #5d4037; var(--primary-hover): #4e342e; var(--accent): #8d6e63; var(--bg-color): #f5f5f7; var(--card-bg): #ffffff; var(--card-hover): #f9f9f9; var(--border): #e0e0e0; var(--border-light): #eeeeee; var(--text-main): #212121; var(--text-muted): #616161; var(--text-dark): #9e9e9e; }
+        * { box-sizing: border-box; } body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; margin: 0; padding: 20px; background-color: var(--bg-color); color: var(--text-main); letter-spacing: 0.3px; }
+        .hidden { display: none !important; } button { background-color: #5d4037; color: #ffffff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; } button:hover { background-color: #4e342e; } button:disabled { background-color: #e0e0e0; color: #9e9e9e; cursor: not-allowed; } button.secondary { background-color: transparent; border: 1px solid #e0e0e0; color: #212121; } button.secondary:hover { background-color: #f9f9f9; } button.outline { background-color: transparent; border: 1px solid #e0e0e0; color: #616161; } button.danger { background-color: transparent; border: 1px solid #e0e0e0; color: #616161; } button.danger:hover { color: #ef4444; border-color: #ef4444; background-color: #fef2f2;}
+        .container { background: transparent; padding: 0; max-width: 1400px; margin: 0 auto; } .panel-oscuro-container { background-color: #ffffff; padding: 30px; border: 1px solid #e0e0e0; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);} input, select { width: 100%; background: #ffffff; border: 1px solid #e0e0e0; color: #212121; padding: 10px; border-radius: 4px; font-family: inherit; } .search-container { display: flex; align-items: center; background: #ffffff; border: 1px solid #e0e0e0; padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; } .search-container input { border: none; padding: 8px; box-shadow: none; outline:none; } .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px;} .modal-content { background: #ffffff; padding: 40px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid #e0e0e0; border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); } .modal-content h3 { font-weight: 500; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #eeeeee; padding-bottom: 15px; margin-top: 0; color: #5d4037; } .form-group { margin-bottom: 20px; } .form-group label { display: block; margin-bottom: 8px; font-size: 0.8rem; color: #616161; text-transform: uppercase; letter-spacing: 1px; font-weight: 500;} .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 30px; padding-top: 20px; border-top: 1px solid #eeeeee; flex-wrap: wrap;} .table-responsive { overflow-x: auto; width: 100%; } table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 0.9rem; min-width: 600px;} th, td { padding: 15px 10px; text-align: left; border-bottom: 1px solid #eeeeee; } th { font-weight: 600; color: #616161; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 1px; background-color: #f5f5f7;} tr:hover td { background-color: #f9f9f9; } .modulo-oscuro { background-color: #ffffff; border: 1px solid #e0e0e0; margin-bottom: 15px; border-radius: 6px; overflow: hidden;} .modulo-header { padding: 15px 20px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; color: #5d4037; background-color: #f5f5f7;} .modulo-header:hover { background-color: #eeeeee; } .modulo-body { padding: 25px; border-top: 1px solid #e0e0e0; } .dark-input-group { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; } .dark-input-group > div { flex: 1; min-width: 150px; } .widget-balance { flex: 1; background: #ffffff; padding: 25px; text-align: center; border: 1px solid #e0e0e0; min-width: 150px; border-radius: 8px;} .widget-balance h4 { margin: 0 0 10px 0; color: #616161; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; font-weight: 500; } .widget-balance p { margin: 0; font-size: 1.8rem; font-weight: 500; } .pedido-card { background: #ffffff; border: 1px solid #e0e0e0; padding: 20px; margin-bottom: 15px; border-radius: 8px;} .pedido-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 1px solid #eeeeee; padding-bottom: 15px; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;} .pedido-id { color: #8d6e63; font-size: 1.2rem; font-weight: 500; margin-bottom: 5px; display: inline-block; letter-spacing: 1px; } .pedido-items { list-style: none; padding: 0; margin: 0 0 20px 0; font-size: 0.9rem; color: #616161; line-height: 1.6; } .pedido-actions { display: flex; gap: 10px; justify-content: flex-end; flex-wrap: wrap; } .variant-row { display: flex; gap: 10px; align-items: center; margin-bottom: 15px; background: #f5f5f7; padding: 15px; border: 1px solid #e0e0e0; border-radius: 6px; flex-wrap: wrap;} .variant-row > div { flex: 1; min-width: 120px; } .mini-label { font-size: 0.7rem; color: #616161; margin-bottom: 5px; display: block; text-transform: uppercase; font-weight: 500;} .dias-checkbox-group { display: flex; gap: 15px; flex-wrap: wrap; margin-top: 10px; } .dia-checkbox { display: flex; align-items: center; gap: 8px; font-size: 0.85rem; color: #212121; text-transform: uppercase; letter-spacing: 1px;} hr { border: 0; border-top: 1px solid #eeeeee; margin: 30px 0; } .alerta-container { display: flex; gap: 20px; flex-wrap: wrap; } .alerta-col { flex: 1; min-width: 200px; background: #f5f5f7; padding: 15px; border: 1px solid #e0e0e0; border-left: 4px solid #8d6e63; border-radius: 4px;} .alerta-col h4 { margin: 0 0 10px 0; color: #5d4037; font-size: 0.8rem; text-transform: uppercase; border-bottom: 1px solid #eeeeee; padding-bottom: 8px;} .alerta-lista { list-style: none; padding: 0; margin: 0; font-size: 0.85rem; color: #616161; } .alerta-lista li { display: flex; justify-content: space-between; margin-bottom: 6px; }
+        @media (max-width: 768px) { .search-container { max-width: 100%; margin: 5px 0; } .modal-content { padding: 20px; } .panel-oscuro-container { padding: 15px; } .dark-input-group { flex-direction: column; align-items: stretch; gap: 10px; } .dark-input-group > div { width: 100%; } }
     </style>
 </head>
 <body>
@@ -285,32 +210,54 @@
         </div>
     </div>
 
-    <script>
-        // ESTADO COMPARTIDO (Debe mudarse a Backend/DB más adelante)
+    <script type="module">
+        // ===== INTEGRACIÓN FIREBASE =====
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
+            authDomain: "pedidos-dba18.firebaseapp.com",
+            projectId: "pedidos-dba18",
+            storageBucket: "pedidos-dba18.firebasestorage.app",
+            messagingSenderId: "361618837437",
+            appId: "1:361618837437:web:ec464cb07617c5bdb5ccd4"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+
+        // ESTADO GLOBAL
         let categoriasGlobales = ['General', 'Bebidas', 'Snacks', 'Packs', 'Ofertas'];
-        let categoriaActiva = '';
-        let categoriasClientes = [{ nombre: 'Consumidor Final', descuentoGlobal: 0, descuentosCat: {} }, { nombre: 'Mayorista', descuentoGlobal: 15, descuentosCat: { 'Bebidas': 25 } } ];
-        let productos = [{ id: 'demo1', nombre: 'Producto de Prueba', imagen: '', categoria: 'General', variantes: { 'var_1': { detalle: 'Única', precio: 1500, stock: 10 } } }]; 
-        let packs = []; 
-        let carritoMostrador = [];
-        let terminoBusqueda = "";
+        let categoriasClientes = [{ nombre: 'Consumidor Final', descuentoGlobal: 0, descuentosCat: {} }];
+        let productos = []; let packs = []; let carritoMostrador = []; let terminoBusqueda = "";
         let ingresosGlobales = []; let gastosGlobales = []; let pedidosGlobales = [];
         let configTienda = { logo: '', telefono: '', horaApertura: '09:00', horaCierre: '18:00', diasApertura: { 'check-lu':true, 'check-ma':true, 'check-mi':true, 'check-ju':true, 'check-vi':true }, envioDisponible: false, envioPrecio: 0 };
         let metricasChart = null;
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
-        const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
         const genIdDB = () => Math.random().toString(36).substring(2, 10); 
 
-        window.togglePanel = (id) => {
-            ['panel-inventario', 'panel-finanzas', 'panel-pedidos', 'panel-metricas', 'panel-config'].forEach(p => document.getElementById(p).classList.add('hidden'));
-            document.getElementById(id).classList.remove('hidden');
-            if (id === 'panel-metricas') window.actualizarGraficos();
-        };
-        window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
-        window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); renderizarCatalogoYStock(); };
+        // CARGAR BASE DE DATOS
+        const cargarDatosBD = async () => {
+            try {
+                const confDoc = await getDocs(collection(db, "configuracion")); confDoc.forEach(d => { if(d.id === 'tienda') configTienda = d.data(); });
+                const catDoc = await getDocs(collection(db, "categorias")); catDoc.forEach(d => { if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales; if(d.id === 'clientes') categoriasClientes = d.data().lista || categoriasClientes; });
+                const pDoc = await getDocs(collection(db, "productos")); productos = pDoc.docs.map(d => d.data());
+                const pkDoc = await getDocs(collection(db, "packs")); packs = pkDoc.docs.map(d => d.data());
+                const pedDoc = await getDocs(collection(db, "pedidos")); pedidosGlobales = pedDoc.docs.map(d => { let obj = d.data(); obj.idDoc = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
+                const ingDoc = await getDocs(collection(db, "ingresos")); ingresosGlobales = ingDoc.docs.map(d => { let obj = d.data(); if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
+                const gasDoc = await getDocs(collection(db, "gastos")); gastosGlobales = gasDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
 
-        // CONFIG Y CATEGORÍAS
+                window.triggerConfiguracion(); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); window.triggerProductos(); window.triggerGastos(); window.triggerIngresos(); window.triggerPedidos();
+            } catch(e) { console.error("Error loading DB", e); alert("Error cargando base de datos."); }
+        };
+
+        window.togglePanel = (id) => { ['panel-inventario', 'panel-finanzas', 'panel-pedidos', 'panel-metricas', 'panel-config'].forEach(p => document.getElementById(p).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if (id === 'panel-metricas') window.actualizarGraficos(); };
+        window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
+        window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); window.renderizarCatalogoYStock(); };
+
+        // CONFIG Y CATEGORÍAS (Guardando en Firebase)
         window.renderizarConfigCategorias = () => {
             const ulP = document.getElementById('lista-categorias-prod'); if(!ulP) return;
             ulP.innerHTML = ''; categoriasGlobales.forEach(c => { const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid #eeeeee;"><span style="color:#212121;">${c}</span> ${btnBorrar}</li>`; });
@@ -323,25 +270,28 @@
                 listC.innerHTML += `<div style="margin-bottom:15px; padding:10px; border:1px solid #eeeeee; border-radius:6px; background:#f5f5f7;"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span style="color:#212121; font-weight:500;">${c.nombre} <strong style="color:#5d4037;">(-${c.descuentoGlobal}% Global)</strong></span>${btnBorrar}</div>${excHTML}${c.nombre !== 'Consumidor Final' ? addExcHTML : ''}</div>`;
             });
         };
-        window.agregarCategoriaProd = () => { const val = document.getElementById('nueva-cat-prod').value.trim(); if(val && !categoriasGlobales.includes(val)) { categoriasGlobales.push(val); document.getElementById('nueva-cat-prod').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); } };
-        window.eliminarCategoriaProd = (cat) => { if(cat==='General'||cat==='Packs'||cat==='Ofertas') return; categoriasGlobales = categoriasGlobales.filter(c => c !== cat); productos.forEach(p => { if(p.categoria === cat) p.categoria = 'General'; }); categoriasClientes.forEach(cli => { if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat]; }); window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); window.triggerProductos(); };
-        window.agregarCategoriaCliente = () => { const nom = document.getElementById('nueva-cat-cli-nombre').value.trim(); const desc = parseFloat(document.getElementById('nueva-cat-cli-desc').value) || 0; if(nom && !categoriasClientes.find(c => c.nombre === nom)) { categoriasClientes.push({nombre: nom, descuentoGlobal: desc, descuentosCat: {}}); document.getElementById('nueva-cat-cli-nombre').value = ''; document.getElementById('nueva-cat-cli-desc').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); } };
-        window.eliminarCategoriaCliente = (i) => { if(i === 0) return; categoriasClientes.splice(i, 1); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); };
-        window.agregarExcepcionCliente = (i) => { const cat = document.getElementById(`exc-cat-${i}`).value; const desc = parseFloat(document.getElementById(`exc-desc-${i}`).value); if(cat && !isNaN(desc)) { categoriasClientes[i].descuentosCat[cat] = desc; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); } };
-        window.eliminarExcepcionCliente = (i, cat) => { delete categoriasClientes[i].descuentosCat[cat]; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); };
+        const guardarCategoriasFirebase = async () => { await setDoc(doc(db, "categorias", "globales"), { lista: categoriasGlobales }); await setDoc(doc(db, "categorias", "clientes"), { lista: categoriasClientes }); };
+        
+        window.agregarCategoriaProd = () => { const val = document.getElementById('nueva-cat-prod').value.trim(); if(val && !categoriasGlobales.includes(val)) { categoriasGlobales.push(val); document.getElementById('nueva-cat-prod').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); guardarCategoriasFirebase(); } };
+        window.eliminarCategoriaProd = (cat) => { if(cat==='General'||cat==='Packs'||cat==='Ofertas') return; categoriasGlobales = categoriasGlobales.filter(c => c !== cat); productos.forEach(p => { if(p.categoria === cat) { p.categoria = 'General'; setDoc(doc(db, "productos", p.id), p); } }); categoriasClientes.forEach(cli => { if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat]; }); window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); window.triggerProductos(); guardarCategoriasFirebase(); };
+        window.agregarCategoriaCliente = () => { const nom = document.getElementById('nueva-cat-cli-nombre').value.trim(); const desc = parseFloat(document.getElementById('nueva-cat-cli-desc').value) || 0; if(nom && !categoriasClientes.find(c => c.nombre === nom)) { categoriasClientes.push({nombre: nom, descuentoGlobal: desc, descuentosCat: {}}); document.getElementById('nueva-cat-cli-nombre').value = ''; document.getElementById('nueva-cat-cli-desc').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); } };
+        window.eliminarCategoriaCliente = (i) => { if(i === 0) return; categoriasClientes.splice(i, 1); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); };
+        window.agregarExcepcionCliente = (i) => { const cat = document.getElementById(`exc-cat-${i}`).value; const desc = parseFloat(document.getElementById(`exc-desc-${i}`).value); if(cat && !isNaN(desc)) { categoriasClientes[i].descuentosCat[cat] = desc; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); } };
+        window.eliminarExcepcionCliente = (i, cat) => { delete categoriasClientes[i].descuentosCat[cat]; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); };
         window.actualizarSelectCategoriasModal = (selectVal = null) => { const sel = document.getElementById('prod-categoria'); if(!sel) return; sel.innerHTML = ''; categoriasGlobales.forEach(c => { if (c !== 'Packs' && c !== 'Ofertas') sel.innerHTML += `<option value="${c}">${c}</option>`; }); if (selectVal && categoriasGlobales.includes(selectVal)) { sel.value = selectVal; } };
         window.actualizarSelectsClientes = () => { const selMostrador = document.getElementById('mostrador-tipo-cliente'); if(!selMostrador) return; const opciones = categoriasClientes.map((c, i) => `<option value="${i}">${c.nombre} (-${c.descuentoGlobal}% Global)</option>`).join(''); selMostrador.innerHTML = opciones; window.renderizarCarritoMostrador(); };
 
-        window.guardarConfiguracion = () => { const logo = document.getElementById('conf-logo').value.trim(); const telefono = document.getElementById('conf-tel').value.replace(/[^0-9]/g, ''); const diasApertura = {}; ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => diasApertura[id] = document.getElementById(id).checked); configTienda = { logo, telefono, horaApertura: document.getElementById('conf-apertura').value, horaCierre: document.getElementById('conf-cierre').value, diasApertura, envioDisponible: document.getElementById('conf-envio-disp').value === 'si', envioPrecio: parseFloat(document.getElementById('conf-envio-precio').value) || 0 }; alert("Configuración de guardada"); };
+        window.guardarConfiguracion = async () => { const logo = document.getElementById('conf-logo').value.trim(); const telefono = document.getElementById('conf-tel').value.replace(/[^0-9]/g, ''); const diasApertura = {}; ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => diasApertura[id] = document.getElementById(id).checked); configTienda = { logo, telefono, horaApertura: document.getElementById('conf-apertura').value, horaCierre: document.getElementById('conf-cierre').value, diasApertura, envioDisponible: document.getElementById('conf-envio-disp').value === 'si', envioPrecio: parseFloat(document.getElementById('conf-envio-precio').value) || 0 }; await setDoc(doc(db, "configuracion", "tienda"), configTienda); alert("Configuración guardada en Firebase"); };
         window.triggerConfiguracion = () => { document.getElementById('conf-logo').value = configTienda.logo || ''; document.getElementById('conf-tel').value = configTienda.telefono || ''; document.getElementById('conf-apertura').value = configTienda.horaApertura || '09:00'; document.getElementById('conf-cierre').value = configTienda.horaCierre || '18:00'; document.getElementById('conf-envio-disp').value = configTienda.envioDisponible ? 'si' : 'no'; document.getElementById('conf-envio-precio').value = configTienda.envioPrecio || 0; if(configTienda.diasApertura) { ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => { document.getElementById(id).checked = configTienda.diasApertura[id] || false; }); } };
 
-        // PRODUCTOS Y PACKS
+        // PRODUCTOS Y PACKS (Guardando en Firebase)
         window.verificarVigenciaOferta = (fechaLimite) => { if(!fechaLimite) return false; const hoy = new Date(); hoy.setHours(0,0,0,0); const limite = new Date(fechaLimite + 'T00:00:00'); return hoy <= limite; };
         window.calcularStockPack = (pack) => { let stocksDisponibles = []; pack.items.forEach(it => { const p = productos.find(x => x.id === it.idProd); if(p && p.variantes[it.idVar]) stocksDisponibles.push(Math.floor(p.variantes[it.idVar].stock / it.cantidad)); else stocksDisponibles.push(0); }); return stocksDisponibles.length > 0 ? Math.min(...stocksDisponibles) : 0; };
         window.agregarFilaVariante = (idVar = '', detalle = '', precio = '', stock = '', bloqueado = false) => { const cont = document.getElementById('contenedor-variantes'); const vId = idVar || 'var_' + Date.now() + Math.floor(Math.random() * 1000); const div = document.createElement('div'); div.className = 'variant-row'; div.id = `row-${vId}`; div.innerHTML = `<input type="hidden" class="v-id" value="${vId}"><div style="flex:2"><span class="mini-label">Atributo / Tamaño</span><input type="text" class="v-detalle" value="${detalle}"></div><div><span class="mini-label">Valor Venta $</span><input type="number" class="v-precio" value="${precio}"></div><div><span class="mini-label">Stock Actual</span><input type="number" class="v-stock" value="${stock}" ${bloqueado ? 'disabled' : ''}></div><button type="button" class="danger" style="margin-top: 15px; padding: 6px 10px;" onclick="this.parentElement.remove()">X</button>`; cont.appendChild(div); };
         window.abrirModal = (id = null) => { document.getElementById('contenedor-variantes').innerHTML = ''; if (id) { const p = productos.find(x => x.id === id); document.getElementById('modal-titulo').textContent = "Modificar Atributos"; document.getElementById('prod-id').value = p.id; document.getElementById('prod-nombre').value = p.nombre; document.getElementById('prod-imagen').value = p.imagen || ""; window.actualizarSelectCategoriasModal(p.categoria); Object.entries(p.variantes || {}).forEach(([vId, v]) => window.agregarFilaVariante(vId, v.detalle, v.precio, v.stock, true)); } else { document.getElementById('modal-titulo').textContent = "Alta de Producto"; document.getElementById('prod-id').value = ""; document.getElementById('prod-nombre').value = ""; document.getElementById('prod-imagen').value = ""; window.actualizarSelectCategoriasModal(); window.agregarFilaVariante('', 'Única', '', '', false); } document.getElementById('modal-producto').classList.remove('hidden'); };
         window.cerrarModal = () => document.getElementById('modal-producto').classList.add('hidden');
-        window.guardarProducto = () => {
+        
+        window.guardarProducto = async () => {
             const id = document.getElementById('prod-id').value; const nombre = document.getElementById('prod-nombre').value; const imagen = document.getElementById('prod-imagen').value; const categoriaProd = document.getElementById('prod-categoria').value || 'General';
             if (!nombre) return; const vars = {}; 
             document.querySelectorAll('#contenedor-variantes .variant-row').forEach(f => {
@@ -350,28 +300,52 @@
                 if (id) { const pAct = productos.find(p => p.id === id); if (pAct && pAct.variantes && pAct.variantes[vId]) { vars[vId].stock = pAct.variantes[vId].stock; if (pAct.variantes[vId].precioOferta) vars[vId].precioOferta = pAct.variantes[vId].precioOferta; if (pAct.variantes[vId].fechaLimiteOferta) vars[vId].fechaLimiteOferta = pAct.variantes[vId].fechaLimiteOferta; } } 
                 else { vars[vId].stock = parseInt(sInp.value) || 0; }
             });
-            if (id) { const pAct = productos.find(p => p.id === id); pAct.nombre = nombre; pAct.imagen = imagen; pAct.categoria = categoriaProd; pAct.variantes = vars; } else { productos.push({ id: genIdDB(), nombre, imagen, categoria: categoriaProd, variantes: vars }); }
+            let pObj = id ? productos.find(p => p.id === id) : { id: genIdDB() };
+            pObj.nombre = nombre; pObj.imagen = imagen; pObj.categoria = categoriaProd; pObj.variantes = vars;
+            
+            await setDoc(doc(db, "productos", pObj.id), pObj); // FIREBASE
+            if(!id) productos.push(pObj);
             window.triggerProductos(); window.cerrarModal();
         };
-        window.borrarProducto = (id) => { if(confirm("¿Seguro que deseas eliminar permanentemente este elemento?")) { productos = productos.filter(p => p.id !== id); packs = packs.filter(p => p.id !== id); carritoMostrador = carritoMostrador.filter(c => c.idProd !== id); window.renderizarCarritoMostrador(); window.triggerProductos(); } };
+
+        window.borrarProducto = async (id) => { 
+            if(confirm("¿Seguro que deseas eliminar permanentemente este elemento?")) { 
+                await deleteDoc(doc(db, "productos", id)); await deleteDoc(doc(db, "packs", id)); // Intenta borrar en ambas por si acaso
+                productos = productos.filter(p => p.id !== id); packs = packs.filter(p => p.id !== id); carritoMostrador = carritoMostrador.filter(c => c.idProd !== id); window.renderizarCarritoMostrador(); window.triggerProductos(); 
+            } 
+        };
         
         window.abrirModalStock = (id) => { const p = productos.find(x => x.id === id); document.getElementById('stock-id-prod').value = p.id; document.getElementById('stock-nombre-prod').textContent = p.nombre; document.getElementById('stock-cantidad').value = 1; document.getElementById('stock-nuevo-costo').value = ""; const sel = document.getElementById('stock-select-var'); sel.innerHTML = ''; Object.entries(p.variantes || {}).forEach(([vId, v]) => sel.innerHTML += `<option value="${vId}">${v.detalle} - Stock actual ${window.formatearNum(v.stock)}</option>`); document.getElementById('modal-stock').classList.remove('hidden'); };
         window.cerrarModalStock = () => document.getElementById('modal-stock').classList.add('hidden');
-        window.guardarNuevoStock = () => { const id = document.getElementById('stock-id-prod').value; const vId = document.getElementById('stock-select-var').value; const cant = parseInt(document.getElementById('stock-cantidad').value) || 0; const costoTotalLote = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0; if (cant <= 0 || !vId) return; const p = productos.find(x => x.id === id); p.variantes[vId].stock += cant; if(costoTotalLote > 0) { gastosGlobales.push({ id: genIdDB(), fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: costoTotalLote }); window.triggerGastos(); } window.triggerProductos(); window.cerrarModalStock(); };
+        window.guardarNuevoStock = async () => { 
+            const id = document.getElementById('stock-id-prod').value; const vId = document.getElementById('stock-select-var').value; const cant = parseInt(document.getElementById('stock-cantidad').value) || 0; const costoTotalLote = parseFloat(document.getElementById('stock-nuevo-costo').value) || 0; if (cant <= 0 || !vId) return; 
+            const p = productos.find(x => x.id === id); p.variantes[vId].stock += cant; 
+            await setDoc(doc(db, "productos", p.id), p); // FIREBASE
+            if(costoTotalLote > 0) { 
+                let g = { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: costoTotalLote };
+                const gRef = await addDoc(collection(db, "gastos"), g); g.id = gRef.id; gastosGlobales.push(g); window.triggerGastos(); 
+            } 
+            window.triggerProductos(); window.cerrarModalStock(); 
+        };
 
         window.abrirModalOferta = () => { const sel = document.getElementById('oferta-select-prod'); sel.innerHTML = ''; productos.forEach(p => { Object.entries(p.variantes).forEach(([vId, v]) => { sel.innerHTML += `<option value="${p.id}|${vId}">${p.nombre} (${v.detalle})</option>`; }); }); window.actualizarPrecioBaseOferta(); document.getElementById('oferta-precio-final').value = ''; document.getElementById('oferta-fecha-limite').value = ''; document.getElementById('modal-oferta').classList.remove('hidden'); };
         window.cerrarModalOferta = () => document.getElementById('modal-oferta').classList.add('hidden');
         window.actualizarPrecioBaseOferta = () => { const combinedId = document.getElementById('oferta-select-prod').value; if(!combinedId) return; const [pId, vId] = combinedId.split('|'); const p = productos.find(x => x.id === pId); if(p && p.variantes[vId]) { document.getElementById('oferta-precio-base').value = `$${window.formatearNum(p.variantes[vId].precio)}`; } };
-        window.guardarOferta = () => { const combinedId = document.getElementById('oferta-select-prod').value; const prFinal = parseFloat(document.getElementById('oferta-precio-final').value) || 0; const fLimite = document.getElementById('oferta-fecha-limite').value; if(!combinedId || prFinal <= 0 || !fLimite) { alert("Parámetros requeridos para la oferta incompletos."); return; } const [pId, vId] = combinedId.split('|'); const p = productos.find(x => x.id === pId); if(p && p.variantes[vId]) { p.variantes[vId].precioOferta = prFinal; p.variantes[vId].fechaLimiteOferta = fLimite; alert("Oferta asignada exitosamente."); window.triggerProductos(); window.cerrarModalOferta(); } };
+        window.guardarOferta = async () => { 
+            const combinedId = document.getElementById('oferta-select-prod').value; const prFinal = parseFloat(document.getElementById('oferta-precio-final').value) || 0; const fLimite = document.getElementById('oferta-fecha-limite').value; if(!combinedId || prFinal <= 0 || !fLimite) { alert("Parámetros requeridos para la oferta incompletos."); return; } 
+            const [pId, vId] = combinedId.split('|'); const p = productos.find(x => x.id === pId); 
+            if(p && p.variantes[vId]) { p.variantes[vId].precioOferta = prFinal; p.variantes[vId].fechaLimiteOferta = fLimite; await setDoc(doc(db, "productos", p.id), p); alert("Oferta asignada exitosamente."); window.triggerProductos(); window.cerrarModalOferta(); } 
+        };
 
         window.agregarFilaItemPack = (idProd = '', idVar = '', cantidad = 1) => { const cont = document.getElementById('contenedor-items-pack'); const rowId = 'pack_row_' + Math.random().toString(36).substring(2, 7); const div = document.createElement('div'); div.className = 'variant-row'; div.id = rowId; let optProds = ''; productos.forEach(p => { Object.entries(p.variantes).forEach(([vId, v]) => { let sel = (p.id === idProd && vId === idVar) ? 'selected' : ''; optProds += `<option value="${p.id}|${vId}" ${sel}>${p.nombre} (${v.detalle})</option>`; }); }); div.innerHTML = `<div style="flex:3"><span class="mini-label">Producto Componente</span><select class="pack-item-select">${optProds}</select></div><div style="flex:1; max-width:100px;"><span class="mini-label">Cantidad</span><input type="number" class="pack-item-cant" value="${cantidad}" min="1"></div><button type="button" class="danger" style="margin-top: 15px; padding: 6px 10px;" onclick="document.getElementById('${rowId}').remove()">X</button>`; cont.appendChild(div); };
         window.abrirModalPack = () => { document.getElementById('pack-nombre').value = ''; document.getElementById('pack-imagen').value = ''; document.getElementById('pack-precio').value = ''; document.getElementById('contenedor-items-pack').innerHTML = ''; window.agregarFilaItemPack(); document.getElementById('modal-pack').classList.remove('hidden'); };
         window.cerrarModalPack = () => document.getElementById('modal-pack').classList.add('hidden');
-        window.guardarPack = () => {
+        window.guardarPack = async () => {
             const nombre = document.getElementById('pack-nombre').value.trim(); const imagen = document.getElementById('pack-imagen').value.trim(); const precio = parseFloat(document.getElementById('pack-precio').value) || 0; const rows = document.querySelectorAll('#contenedor-items-pack .variant-row');
             if(!nombre || precio <= 0 || rows.length === 0) { alert("Escriba un nombre válido, precio e ingrese artículos."); return; }
             let itemsCombo = []; rows.forEach(r => { const combined = r.querySelector('.pack-item-select').value; const cant = parseInt(r.querySelector('.pack-item-cant').value) || 1; if(combined) { const [pId, vId] = combined.split('|'); const pRef = productos.find(x => x.id === pId); itemsCombo.push({ idProd: pId, idVar: vId, cantidad: cant, nombre: pRef ? pRef.nombre : 'Producto', detalle: pRef && pRef.variantes[vId] ? pRef.variantes[vId].detalle : '' }); } });
-            packs.push({ id: genIdDB(), nombre, imagen, precio, categoria: 'Packs', items: itemsCombo });
+            let pkObj = { id: genIdDB(), nombre, imagen, precio, categoria: 'Packs', items: itemsCombo };
+            await setDoc(doc(db, "packs", pkObj.id), pkObj); packs.push(pkObj);
             alert("Combo Pack guardado exitosamente."); window.triggerProductos(); window.cerrarModalPack();
         };
 
@@ -400,7 +374,7 @@
             else { contAlertas.style.display = 'none'; }
         }
         window.triggerProductos = () => {
-            renderizarCatalogoYStock(); 
+            window.renderizarCatalogoYStock(); 
             const sel = document.getElementById('mostrador-prod'); if(!sel) return; sel.innerHTML = '<option value="">Seleccionar...</option>';
             productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { if(v.stock>0) { let pr = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? v.precioOferta : v.precio; sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}" data-precio="${pr}" data-detalle="${v.detalle}" data-stock="${v.stock}">${p.nombre} - ${v.detalle}</option>`; } }));
             packs.forEach(pk => { let stPack = window.calcularStockPack(pk); if(stPack > 0) { sel.innerHTML += `<option value="pack_${pk.id}" data-idprod="pack_${pk.id}" data-precio="${pk.precio}" data-detalle="Combo Pack" data-stock="${stPack}">[PACK] ${pk.nombre}</option>`; } });
@@ -439,23 +413,28 @@
             if (descuentoMonto > 0) { list.innerHTML += `<li style="display:flex; justify-content:space-between; padding:8px 0; align-items:center;"><span style="color:#8d6e63; font-size:0.8rem; font-weight:500;">Total Ahorro (${perfilCli.nombre})</span><span style="color:#8d6e63; font-weight:500;">-$${window.formatearNum(descuentoMonto)}</span></li>`; }
             document.getElementById('total-mostrador').textContent = window.formatearNum(totalFinal); document.getElementById('total-mostrador').setAttribute('data-total', totalFinal);
         };
-        window.registrarVentaMostrador = () => {
+        window.registrarVentaMostrador = async () => {
             if(carritoMostrador.length === 0) return; const efe = parseFloat(document.getElementById('mostrador-efectivo').value) || 0; const trans = parseFloat(document.getElementById('mostrador-transf').value) || 0;
             const abonado = efe + trans; const totalFinal = parseFloat(document.getElementById('total-mostrador').getAttribute('data-total')) || 0; let countItems = 0; carritoMostrador.forEach(i => { countItems += i.cantidad; });
             if (abonado === 0 && totalFinal > 0) { alert("Ingresa el monto de pago (Efectivo o Transferencia)."); return; }
             const selCliente = document.getElementById('mostrador-tipo-cliente'); const clienteName = selCliente.options[selCliente.selectedIndex].text.split(' (')[0];
+            
+            // Actualizar stock en BD
             for(const item of carritoMostrador) {
-                if(!item.isPack) { const prod = productos.find(x => x.id === item.idProd); if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock -= item.cantidad; } } 
-                else { item.packRef.items.forEach(comp => { const prod = productos.find(x => x.id === comp.idProd); if(prod && prod.variantes[comp.idVar]) { prod.variantes[comp.idVar].stock -= (comp.cantidad * item.cantidad); } }); }
+                if(!item.isPack) { const prod = productos.find(x => x.id === item.idProd); if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock -= item.cantidad; setDoc(doc(db, "productos", prod.id), prod); } } 
+                else { item.packRef.items.forEach(comp => { const prod = productos.find(x => x.id === comp.idProd); if(prod && prod.variantes[comp.idVar]) { prod.variantes[comp.idVar].stock -= (comp.cantidad * item.cantidad); setDoc(doc(db, "productos", prod.id), prod); } }); }
             }
-            ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'venta_mostrador', detalle: `Venta Mostrador [${clienteName}] (${countItems} items)`, efectivo: efe, transferencia: trans, itemsCount: countItems });
+            
+            let iM = { fecha: new Date(), tipo: 'venta_mostrador', detalle: `Venta Mostrador [${clienteName}] (${countItems} items)`, efectivo: efe, transferencia: trans, itemsCount: countItems };
+            await addDoc(collection(db, "ingresos"), iM); ingresosGlobales.push(iM);
+            
             carritoMostrador = []; window.renderizarCarritoMostrador(); document.getElementById('mostrador-efectivo').value = ''; document.getElementById('mostrador-transf').value = '';
             window.triggerProductos(); window.triggerIngresos(); alert("Venta registrada y stock descontado.");
         };
 
-        window.registrarIngresoManual = () => { const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0; if (d && (e>0 || t>0)) { ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t }); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = ""; window.triggerIngresos(); } };
-        window.registrarGasto = () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { gastosGlobales.push({ id: genIdDB(), fecha: new Date(), titulo: t, importe: i }); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
-        window.borrarGasto = (id) => { gastosGlobales = gastosGlobales.filter(g => g.id !== id); window.triggerGastos(); };
+        window.registrarIngresoManual = async () => { const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0; if (d && (e>0 || t>0)) { let i = { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t }; await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = ""; window.triggerIngresos(); } };
+        window.registrarGasto = async () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { let g = { fecha: new Date(), titulo: t, importe: i }; const docRef = await addDoc(collection(db, "gastos"), g); g.id = docRef.id; gastosGlobales.push(g); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
+        window.borrarGasto = async (id) => { await deleteDoc(doc(db, "gastos", id)); gastosGlobales = gastosGlobales.filter(g => g.id !== id); window.triggerGastos(); };
         window.calcularBalanceEnVivo = () => {
             const p = document.getElementById('filtro-periodo').value; const hoy = new Date(); let dias = p==='hoy'?1:p==='semana'?7:p==='mes'?30:99999; let tIng = 0; let tGas = 0;
             ingresosGlobales.forEach(i => { if((hoy - i.fecha)/86400000 <= dias) tIng += (i.efectivo + i.transferencia); });
@@ -477,28 +456,42 @@
             const card = (p, isP) => {
                 let it = ''; p.items.forEach(i => it += `<li>${i.nombre} - ${i.detalle} x${i.cantidad} - $${window.formatearNum(i.precio * i.cantidad)}</li>`);
                 if (p.descuentoMonto > 0) it += `<li style="color:#8d6e63; font-weight:500;">Descuento Aplicado (${p.tipoCliente}) - -$${window.formatearNum(p.descuentoMonto)}</li>`; if (p.costoEnvio) it += `<li style="color:#9e9e9e;">Envío - $${window.formatearNum(p.costoEnvio)}</li>`;
-                const bC = isP ? `<button class="danger" style="border: 1px solid #ef4444; color: #ef4444;" onclick="window.cancelarPedido('${p.id}', '${p.telefono}')">Cancelar</button>` : ''; const bP = p.estadoPago ? `<span style="color:#9e9e9e; font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.id}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">Registrar Pago</button>`; const bE = isP ? `<button onclick="window.marcarEntregado('${p.id}', '${p.telefono}')">Entregado</button>` : `<span style="color:#9e9e9e; font-size:0.8rem;">FINALIZADO</span>`;
+                const bC = isP ? `<button class="danger" style="border: 1px solid #ef4444; color: #ef4444;" onclick="window.cancelarPedido('${p.idDoc}', '${p.telefono}')">Cancelar</button>` : ''; const bP = p.estadoPago ? `<span style="color:#9e9e9e; font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.idDoc}', ${p.total}, '${p.metodoPago}', '${p.idCorto}')">Registrar Pago</button>`; const bE = isP ? `<button onclick="window.marcarEntregado('${p.idDoc}', '${p.telefono}')">Entregado</button>` : `<span style="color:#9e9e9e; font-size:0.8rem;">FINALIZADO</span>`;
                 return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto}</span><br><span style="font-size:0.75rem; color:#9e9e9e; text-transform:uppercase;">${p.fecha.toLocaleString()}</span></div><span style="font-size:1.1rem; font-weight:600; color:#5d4037;">$${window.formatearNum(p.total)}</span></div><p style="margin:0 0 5px 0; color:#616161; font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:#212121; font-weight:500;">${p.nombreCliente} ${p.apellidoCliente} ${p.tipoCliente?`(${p.tipoCliente})`:''}</span></p><p style="margin:0 0 5px 0; color:#616161; font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${p.telefono.replace(/[^0-9]/g,'')}" target="_blank" style="color:#5d4037; font-weight:500; text-decoration:none;">${p.telefono}</a></p><p style="margin:0 0 20px 0; color:#616161; font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:#212121; font-weight:500;">${p.metodoEntrega}</span> ${p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p><ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bC} ${bP} ${bE}</div></div>`;
             };
             pend.forEach(p => lP.innerHTML += card(p, true)); entr.forEach(p => lH.innerHTML += card(p, false));
         };
-        window.marcarPagado = (id, t, m, c) => { const p = pedidosGlobales.find(x => x.id === id); if(p) { p.estadoPago = true; ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m==='Transferencia'?t:0 }); window.triggerPedidos(); window.triggerIngresos(); } };
-        window.marcarEntregado = (id, telefono) => {
-            const p = pedidosGlobales.find(x => x.id === id);
+        window.marcarPagado = async (idDoc, t, m, c) => { 
+            const p = pedidosGlobales.find(x => x.idDoc === idDoc);
+            if(p) { 
+                await updateDoc(doc(db, "pedidos", idDoc), { estadoPago: true });
+                p.estadoPago = true; 
+                let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m==='Transferencia'?t:0 };
+                await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); window.triggerPedidos(); window.triggerIngresos(); 
+            } 
+        };
+        window.marcarEntregado = async (idDoc, telefono) => {
+            const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) {
-                if(!p.estadoPago) { ingresosGlobales.push({ id: genIdDB(), fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 }); p.estadoPago = true; window.triggerIngresos(); }
+                if(!p.estadoPago) { 
+                    let i = { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 };
+                    await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); 
+                    p.estadoPago = true; window.triggerIngresos(); 
+                }
+                await updateDoc(doc(db, "pedidos", idDoc), { estadoEntrega: true, estadoPago: true });
                 p.estadoEntrega = true; window.triggerPedidos();
                 if (telefono) { let numLimpio = telefono.replace(/[^0-9]/g, ''); window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent("Su pedido ha sido entregado, muchas gracias por comprar con nosotros.")}`, '_blank'); }
             }
         };
-        window.cancelarPedido = (id, telefono) => {
+        window.cancelarPedido = async (idDoc, telefono) => {
             if(!confirm("¿Cancelar este pedido y reponer el stock?")) return;
-            const p = pedidosGlobales.find(x => x.id === id); if(!p) return;
+            const p = pedidosGlobales.find(x => x.idDoc === idDoc); if(!p) return;
             for (const item of p.items) {
-                if(!item.isPack) { if(item.idProd && item.idVar) { const prod = productos.find(x => x.id === item.idProd); if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock += item.cantidad; } } } 
-                else { const pk = packs.find(x => x.id === item.idProd.replace('pack_','')); if(pk) { pk.items.forEach(comp => { const prod = productos.find(x => x.id === comp.idProd); if(prod && prod.variantes[comp.idVar]) prod.variantes[comp.idVar].stock += (comp.cantidad * item.cantidad); }); } }
+                if(!item.isPack) { if(item.idProd && item.idVar) { const prod = productos.find(x => x.id === item.idProd); if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock += item.cantidad; await setDoc(doc(db, "productos", prod.id), prod); } } } 
+                else { const pk = packs.find(x => x.id === item.idProd.replace('pack_','')); if(pk) { pk.items.forEach(comp => { const prod = productos.find(x => x.id === comp.idProd); if(prod && prod.variantes[comp.idVar]) { prod.variantes[comp.idVar].stock += (comp.cantidad * item.cantidad); setDoc(doc(db, "productos", prod.id), prod); }}); } }
             }
-            pedidosGlobales = pedidosGlobales.filter(x => x.id !== id); window.triggerProductos(); window.triggerPedidos();
+            await deleteDoc(doc(db, "pedidos", idDoc));
+            pedidosGlobales = pedidosGlobales.filter(x => x.idDoc !== idDoc); window.triggerProductos(); window.triggerPedidos();
         };
         window.triggerPedidos = () => { window.renderizarPedidos(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
 
@@ -535,15 +528,7 @@
             document.getElementById('metricas-data-list').innerHTML = hayDatos ? listHTML : 'No hay datos para mostrar en este periodo.';
         }
 
-        window.onload = () => {
-            window.triggerConfiguracion();
-            window.renderizarConfigCategorias();
-            window.actualizarSelectsClientes();
-            window.triggerProductos();
-            window.triggerGastos();
-            window.triggerIngresos();
-            window.triggerPedidos();
-        };
+        window.onload = cargarDatosBD;
     </script>
 </body>
 </html>
