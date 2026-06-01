@@ -88,9 +88,44 @@
         .alerta-lista li { display: flex; justify-content: space-between; margin-bottom: 6px; }
         
         @media (max-width: 768px) { .search-container { max-width: 100%; margin: 5px 0; } .modal-content { padding: 20px; } .panel-oscuro-container { padding: 15px; } .dark-input-group { flex-direction: column; align-items: stretch; gap: 10px; } .dark-input-group > div { width: 100%; } }
+
+        /* ===== PANTALLA DE CARGA ===== */
+        #pantalla-carga {
+            position: fixed; inset: 0;
+            background-color: var(--bg-color);
+            display: flex; justify-content: center; align-items: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+        .logo-wrapper {
+            position: relative;
+            width: 150px; height: 150px;
+        }
+        .logo-base, .logo-fill {
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: contain;
+            filter: grayscale(100%);
+        }
+        .logo-base { opacity: 0.15; }
+        .logo-fill {
+            clip-path: inset(100% 0 0 0);
+            animation: cargaLogo 2s ease-in-out forwards;
+        }
+        @keyframes cargaLogo {
+            0% { clip-path: inset(100% 0 0 0); }
+            100% { clip-path: inset(0 0 0 0); }
+        }
     </style>
 </head>
 <body>
+
+    <div id="pantalla-carga">
+        <div class="logo-wrapper">
+            <img src="https://lh3.googleusercontent.com/gg-dl/AFfU-fKGhu_GFapJuA6lMDIntzldFUKs0WUYGAZivVdZYtoV_S5lOYPDBq-ozd0GtYiEtUgA3LjrxtMdJ3zj0UBIyaB9Hw0Rer1D0WQUeTVoWDrACCquguIf5_XUkWvSXlA1EQGPQBnYsWseVAMl-tFqlOtIGeQoJD1M_-3prp-BYzaE_-A4=s1024-rj" class="logo-base" alt="Logo">
+            <img src="https://lh3.googleusercontent.com/gg-dl/AFfU-fKGhu_GFapJuA6lMDIntzldFUKs0WUYGAZivVdZYtoV_S5lOYPDBq-ozd0GtYiEtUgA3LjrxtMdJ3zj0UBIyaB9Hw0Rer1D0WQUeTVoWDrACCquguIf5_XUkWvSXlA1EQGPQBnYsWseVAMl-tFqlOtIGeQoJD1M_-3prp-BYzaE_-A4=s1024-rj" class="logo-fill" alt="Logo Llenado">
+        </div>
+    </div>
 
     <div id="vista-dueno" class="container">
         <h2 style="margin-top: 0; margin-bottom: 30px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--primary);">Administración</h2>
@@ -327,14 +362,13 @@
                 const ingDoc = await getDocs(collection(db, "ingresos")); ingresosGlobales = ingDoc.docs.map(d => { let obj = d.data(); if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
                 const gasDoc = await getDocs(collection(db, "gastos")); gastosGlobales = gasDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
 
-                // Escucha en tiempo real de Pedidos (Aplica el descuento de stock automático)
+                // Escucha en tiempo real de Pedidos
                 onSnapshot(collection(db, "pedidos"), (snapshot) => {
                     snapshot.docChanges().forEach(async (change) => {
                         let p = change.doc.data(); p.idDoc = change.doc.id;
                         if(p.fecha && p.fecha.toDate) p.fecha = p.fecha.toDate();
 
                         if (change.type === "added") {
-                            // Si el pedido entra y no se descontó el stock, lo procesa el panel.
                             if (!p.stockDescontado) {
                                 for (const item of p.items) {
                                     if (!item.isPack) { 
@@ -376,7 +410,18 @@
                 });
 
                 window.triggerConfiguracion(); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); window.triggerProductos(); window.triggerGastos(); window.triggerIngresos();
-            } catch(e) { console.error("Error loading DB", e); alert("Error cargando base de datos."); }
+                
+                // Ocultar pantalla de carga con un pequeño retraso
+                setTimeout(() => {
+                    const loader = document.getElementById('pantalla-carga');
+                    if (loader) {
+                        loader.style.opacity = '0';
+                        setTimeout(() => loader.style.visibility = 'hidden', 500); // Dar tiempo a que termine la transición opacity
+                    }
+                }, 2000); // Retardo asegurando que la animación del logo se complete y los datos se carguen bien
+            } catch(e) { 
+                console.error("Error loading DB", e); alert("Error cargando base de datos."); 
+            }
         };
 
         window.togglePanel = (id) => { ['panel-inventario', 'panel-finanzas', 'panel-pedidos', 'panel-metricas', 'panel-config'].forEach(p => document.getElementById(p).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if (id === 'panel-metricas') window.actualizarGraficos(); };
@@ -586,18 +631,18 @@
             };
             pend.forEach(p => lP.innerHTML += card(p, true)); entr.forEach(p => lH.innerHTML += card(p, false));
         };
+        
         window.marcarPagado = async (idDoc, t, m, c) => { 
             const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) { 
                 await updateDoc(doc(db, "pedidos", idDoc), { estadoPago: true });
                 p.estadoPago = true; 
                 
-                // Verificación de seguridad para evitar duplicados
                 const yaCobrado = ingresosGlobales.some(ing => ing.detalle.includes(`Liquidación #${c}`));
                 
                 if(!yaCobrado) {
                     let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m!=='Efectivo'?t:0 };
-                    ingresosGlobales.push(i); // Se inserta inmediatamente de forma local
+                    ingresosGlobales.push(i); 
                     await addDoc(collection(db, "ingresos"), i); 
                     window.triggerIngresos(); 
                 }
@@ -608,12 +653,11 @@
         window.marcarEntregado = async (idDoc, font) => {
             const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) {
-                // Verificación de seguridad para anular el Autocobro si ya se pagó manual
                 const yaCobrado = ingresosGlobales.some(ing => ing.detalle.includes(`Liquidación #${p.idCorto}`));
                 
                 if(!p.estadoPago && !yaCobrado) { 
                     let i = { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago !== 'Efectivo' ? p.total : 0 };
-                    ingresosGlobales.push(i); // Se inserta inmediatamente de forma local
+                    ingresosGlobales.push(i); 
                     await addDoc(collection(db, "ingresos"), i); 
                     window.triggerIngresos(); 
                 }
@@ -623,18 +667,17 @@
                 p.estadoPago = true; 
                 window.triggerPedidos();
                 
-                // Mensaje de WhatsApp actualizado
                 if (font) { 
                     let numLimpio = font.replace(/[^0-9]/g, ''); 
                     window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent("Gracias por comprar con nosotros, su pedido ha sido entregado.")}`, '_blank'); 
                 }
             }
         };
+
         window.cancelarPedido = async (idDoc, font) => {
             if(!confirm("¿Cancelar este pedido y reponer el stock?")) return;
             const p = pedidosGlobales.find(x => x.idDoc === idDoc); if(!p) return;
             
-            // Reponer stock si fue descontado previamente
             if (p.stockDescontado !== false) {
                 for (const item of p.items) {
                     if(!item.isPack) { 
@@ -681,7 +724,7 @@
             pedidosGlobales.forEach(p => {
                 if(!p.fecha) return; let time = p.fecha.getTime(); let cobrado = p.estadoPago === true; let monto = p.total || 0; let cantItems = p.items ? p.items.reduce((s, it) => s + (it.cantidad || 1), 0) : 0; 
                 let pagoEfvo = p.metodoPago === 'Efectivo' ? monto : 0; 
-                let pagoTrans = p.metodoPago !== 'Efectivo' ? monto : 0; // Garantiza capturar MercadoPago u otros metodos alternativos
+                let pagoTrans = p.metodoPago !== 'Efectivo' ? monto : 0;
                 
                 if (categoria === 'efectivo' && cobrado) addToBucket(time, pagoEfvo, 1); if (categoria === 'transferencia' && cobrado) addToBucket(time, pagoTrans, 1); if (categoria === 'retiros' && p.metodoEntrega === 'Retiro') addToBucket(time, 1, 0); if (categoria === 'envios' && p.metodoEntrega === 'Envio') addToBucket(time, 1, 0); if (categoria === 'productos' && cobrado) addToBucket(time, cantItems, 0); if (categoria === 'ventas_web' && cobrado) addToBucket(time, monto, 1); if ((categoria === 'neto' || categoria === 'bruto') && cobrado) addToBucket(time, monto, 1);
             });
