@@ -8,12 +8,12 @@
     <style>
         /* ===== ESTILOS ELEGANTES - TEMA CLARO ===== */
         :root {
-            --primary: #5d4037; 
-            --primary-hover: #4e342e; 
-            --accent: #8d6e63; 
-            --bg-color: #f5f5f7; 
+            --primary: #262626; 
+            --primary-hover: #000000; 
+            --accent: #595959; 
+            --bg-color: #ffffff; 
             --card-bg: #ffffff; 
-            --card-hover: #f9f9f9; 
+            --card-hover: #f5f5f5; 
             --border: #e0e0e0; 
             --border-light: #eeeeee; 
             --text-main: #212121; 
@@ -759,7 +759,7 @@
             if (categoria === 'gastos' || categoria === 'neto') { gastosGlobales.forEach(g => { if(!g.fecha) return; let time = g.fecha.getTime(); let monto = g.importe || 0; if (categoria === 'gastos') addToBucket(time, monto, 1); if (categoria === 'neto') addToBucket(time, -monto, 0); }); }
             let isMoney = ['efectivo', 'transferencia', 'ventas_web', 'ventas_fisicas', 'neto', 'bruto', 'gastos'].includes(categoria); let labelBar = isMoney ? "Monto Total" : "Cantidad Total"; let labelLine = isMoney ? "Operaciones Generadas" : "Ventas"; const etiquetas = cestas.map(c => c.label); const ctx = ctxCanvas.getContext('2d');
             if (metricasChart) { metricasChart.destroy(); } Chart.defaults.color = '#616161';
-            metricasChart = new Chart(ctx, { type: 'bar', data: { labels: etiquetas, datasets: [ { label: labelBar, data: datosBarras, backgroundColor: categoria === 'gastos' ? '#ef4444' : '#5d4037', borderRadius: 4, order: 2 }, { label: labelLine, data: datosLinea, type: 'line', borderColor: '#8d6e63', backgroundColor: 'rgba(141, 110, 99, 0.1)', borderWidth: 3, fill: true, tension: 0.3, order: 1 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: "'Helvetica Neue', sans-serif" } } }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; let value = context.parsed.y; if (label) { label += ': '; } if (isMoney && context.datasetIndex === 0) { label += '$' + value.toLocaleString('es-AR'); } else { label += value; } return label; } } } }, scales: { y: { beginAtZero: true, grid: { color: '#eeeeee' }, ticks: { callback: function(value) { return isMoney ? '$' + value.toLocaleString('es-AR') : value; } } }, x: { grid: { display: false } } } } });
+            metricasChart = new Chart(ctx, { type: 'bar', data: { labels: etiquetas, datasets: [ { label: labelBar, data: datosBarras, backgroundColor: categoria === 'gastos' ? '#ef4444' : '#262626', borderRadius: 4, order: 2 }, { label: labelLine, data: datosLinea, type: 'line', borderColor: '#595959', backgroundColor: 'rgba(89, 89, 89, 0.1)', borderWidth: 3, fill: true, tension: 0.3, order: 1 } ] }, options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { labels: { font: { family: "'Helvetica Neue', sans-serif" } } }, tooltip: { mode: 'index', intersect: false, callbacks: { label: function(context) { let label = context.dataset.label || ''; let value = context.parsed.y; if (label) { label += ': '; } if (isMoney && context.datasetIndex === 0) { label += '$' + value.toLocaleString('es-AR'); } else { label += value; } return label; } } } }, scales: { y: { beginAtZero: true, grid: { color: '#eeeeee' }, ticks: { callback: function(value) { return isMoney ? '$' + value.toLocaleString('es-AR') : value; } } }, x: { grid: { display: false } } } } });
             
             let listHTML = '<ul style="list-style:none; padding:0; margin:0;">'; let hayDatos = false;
             for(let i = 0; i < etiquetas.length; i++) { if (datosBarras[i] !== 0 || datosLinea[i] !== 0) { hayDatos = true; listHTML += `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main); font-weight:500;">${etiquetas[i]}</span><span style="color:var(--text-muted);">${isMoney ? '$'+window.formatearNum(datosBarras[i]) : datosBarras[i]} ${labelBar.toLowerCase()} | ${datosLinea[i]} ${labelLine.toLowerCase()}</span></li>`; } } listHTML += '</ul>';
