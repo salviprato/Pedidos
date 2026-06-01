@@ -591,21 +591,43 @@
             if(p) { 
                 await updateDoc(doc(db, "pedidos", idDoc), { estadoPago: true });
                 p.estadoPago = true; 
-                let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m!=='Efectivo'?t:0 };
-                await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); window.triggerPedidos(); window.triggerIngresos(); 
+                
+                // Verificación de seguridad para evitar duplicados
+                const yaCobrado = ingresosGlobales.some(ing => ing.detalle.includes(`Liquidación #${c}`));
+                
+                if(!yaCobrado) {
+                    let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m!=='Efectivo'?t:0 };
+                    ingresosGlobales.push(i); // Se inserta inmediatamente de forma local
+                    await addDoc(collection(db, "ingresos"), i); 
+                    window.triggerIngresos(); 
+                }
+                window.triggerPedidos();
             } 
         };
+
         window.marcarEntregado = async (idDoc, font) => {
             const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) {
-                if(!p.estadoPago) { 
+                // Verificación de seguridad para anular el Autocobro si ya se pagó manual
+                const yaCobrado = ingresosGlobales.some(ing => ing.detalle.includes(`Liquidación #${p.idCorto}`));
+                
+                if(!p.estadoPago && !yaCobrado) { 
                     let i = { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago !== 'Efectivo' ? p.total : 0 };
-                    await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); 
-                    p.estadoPago = true; window.triggerIngresos(); 
+                    ingresosGlobales.push(i); // Se inserta inmediatamente de forma local
+                    await addDoc(collection(db, "ingresos"), i); 
+                    window.triggerIngresos(); 
                 }
+                
                 await updateDoc(doc(db, "pedidos", idDoc), { estadoEntrega: true, estadoPago: true });
-                p.estadoEntrega = true; window.triggerPedidos();
-                if (font) { let numLimpio = font.replace(/[^0-9]/g, ''); window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent("Su pedido ha sido entregado, muchas gracias por comprar con nosotros.")}`, '_blank'); }
+                p.estadoEntrega = true; 
+                p.estadoPago = true; 
+                window.triggerPedidos();
+                
+                // Mensaje de WhatsApp actualizado
+                if (font) { 
+                    let numLimpio = font.replace(/[^0-9]/g, ''); 
+                    window.open(`https://wa.me/${numLimpio}?text=${encodeURIComponent("Gracias por comprar con nosotros, su pedido ha sido entregado.")}`, '_blank'); 
+                }
             }
         };
         window.cancelarPedido = async (idDoc, font) => {
