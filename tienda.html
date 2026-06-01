@@ -162,7 +162,7 @@
                 <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Código de Identificación</p>
                 <div id="exito-id" style="font-size: 2.5rem; font-weight: 500; color: var(--primary); margin-bottom: 30px;">#XYZ1</div>
                 <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 30px;">Notifique al local para coordinar la entrega y el pago del pedido.</p>
-                <button onclick="window.enviarWhatsapp()" style="width: 100%; padding: 15px; font-size: 0.9rem;">Contactar Asesor</button>
+                <button onclick="window.enviarWhatsapp()" style="width: 100%; padding: 15px; font-size: 0.9rem;">Contactar al local</button>
                 <button class="secondary" style="width: 100%; margin-top: 15px; padding: 15px;" onclick="window.cerrarCarritoExito()">Finalizar</button>
             </div>
         </div>
@@ -197,6 +197,7 @@
         let terminoBusqueda = "";
         let configTienda = { logo: '', telefono: '', horaApertura: '09:00', horaCierre: '18:00', diasApertura: { 'check-lu':true, 'check-ma':true, 'check-mi':true, 'check-ju':true, 'check-vi':true }, envioDisponible: false, envioPrecio: 0 };
         let authMode = 'login'; 
+        let ultimoPedidoConf = null; // ACTUALIZADO: Variable para guardar los datos del pedido y enviarlos a WhatsApp
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
@@ -378,10 +379,21 @@
             ts.textContent = window.formatearNum(total); ts.setAttribute('data-descuentomonto', descuentoMonto);
         };
 
+        // ACTUALIZADO: Función de WhatsApp ahora incluye el código y los detalles del pedido
         window.enviarWhatsapp = () => {
             if(!configTienda.telefono) { alert("El local aún no configuró su número de contacto."); return; }
             const numeroLimpio = configTienda.telefono.replace(/[^0-9]/g, '');
+            
             let texto = `Hola! Acabo de completar mi pedido en el sitio web. Por favor coordinemos el pago y la entrega.`;
+            
+            if (ultimoPedidoConf) {
+                texto = `Hola! Acabo de generar el pedido *#${ultimoPedidoConf.idCorto}*.\n\n*Resumen del pedido:*\n`;
+                ultimoPedidoConf.items.forEach(i => {
+                    texto += `- ${i.cantidad}x ${i.nombre} (${i.detalle}): $${window.formatearNum(i.precio * i.cantidad)}\n`;
+                });
+                texto += `\n*Total a pagar: $${window.formatearNum(ultimoPedidoConf.total)}*\n\nPor favor coordinemos el pago y la entrega.`;
+            }
+            
             window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent(texto)}`, '_blank');
         };
 
@@ -413,6 +425,34 @@
                 };
 
                 await addDoc(collection(db, "pedidos"), nuevoPedido);
+                
+                ultimoPedidoConf = nuevoPedido; // Guardamos el pedido recién creado
+
+                // ACTUALIZADO: Restar el stock comprado de la base de datos de Firebase y de la vista local
+                for (let item of iM) {
+                    if (!item.isPack) {
+                        const prodLocal = productos.find(x => x.id === item.idProd);
+                        if (prodLocal && prodLocal.variantes[item.idVar]) {
+                            prodLocal.variantes[item.idVar].stock = Math.max(0, prodLocal.variantes[item.idVar].stock - item.cantidad);
+                            await setDoc(doc(db, "productos", item.idProd), { variantes: prodLocal.variantes }, { merge: true });
+                        }
+                    } else {
+                        const pkId = item.idProd.replace('pack_', '');
+                        const pkLocal = packs.find(x => x.id === pkId);
+                        if (pkLocal) {
+                            for (let pkItem of pkLocal.items) {
+                                const prodLocal = productos.find(x => x.id === pkItem.idProd);
+                                if (prodLocal && prodLocal.variantes[pkItem.idVar]) {
+                                    prodLocal.variantes[pkItem.idVar].stock = Math.max(0, prodLocal.variantes[pkItem.idVar].stock - (pkItem.cantidad * item.cantidad));
+                                    await setDoc(doc(db, "productos", pkItem.idProd), { variantes: prodLocal.variantes }, { merge: true });
+                                }
+                            }
+                        }
+                    }
+                }
+
+                // ACTUALIZADO: Vuelve a dibujar el catálogo para reflejar los nuevos stocks automáticamente
+                window.renderizarCatalogoYStock();
                 
                 document.getElementById('exito-id').textContent = `#${idC}`;
                 document.getElementById('carrito-vista-lista').classList.add('hidden'); document.getElementById('carrito-vista-exito').classList.remove('hidden');
