@@ -38,8 +38,19 @@
         .panel-oscuro-container { background-color: var(--card-bg); padding: 30px; border: 1px solid var(--border); margin-bottom: 20px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.02);} 
         
         input, select { width: 100%; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 4px; font-family: inherit; } 
+        
+        /* CORRECCIÓN: Evitar que el autocompletado del navegador cambie el color de fondo a celeste/amarillo */
+        input:-webkit-autofill,
+        input:-webkit-autofill:hover, 
+        input:-webkit-autofill:focus, 
+        input:-webkit-autofill:active {
+            -webkit-box-shadow: 0 0 0 30px var(--card-bg) inset !important;
+            -webkit-text-fill-color: var(--text-main) !important;
+            transition: background-color 5000s ease-in-out 0s;
+        }
+
         .search-container { display: flex; align-items: center; background: var(--card-bg); border: 1px solid var(--border); padding: 2px 15px; width: 100%; max-width: 300px; border-radius: 20px; } 
-        .search-container input { border: none; padding: 8px; box-shadow: none; outline:none; } 
+        .search-container input { border: none; padding: 8px; box-shadow: none; outline:none; background: transparent; } 
         
         .modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: flex; justify-content: center; align-items: center; z-index: 1000; padding: 15px;} 
         .modal-content { background: var(--card-bg); padding: 40px; width: 100%; max-width: 550px; max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 40px rgba(0,0,0,0.1); } 
@@ -89,17 +100,27 @@
         
         @media (max-width: 768px) { .search-container { max-width: 100%; margin: 5px 0; } .modal-content { padding: 20px; } .panel-oscuro-container { padding: 15px; } .dark-input-group { flex-direction: column; align-items: stretch; gap: 10px; } .dark-input-group > div { width: 100%; } }
 
-        /* ===== PANTALLA DE CARGA ===== */
+        /* ===== PANTALLA DE CARGA CORREGIDA ===== */
         #pantalla-carga {
             position: fixed; inset: 0;
+            width: 100vw; height: 100vh;
             background-color: var(--bg-color);
             display: flex; justify-content: center; align-items: center;
-            z-index: 99999;
+            z-index: 999999;
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
         .logo-wrapper {
             position: relative;
             width: 150px; height: 150px;
+        }
+        /* Texto de respaldo por si la imagen se rompe */
+        .logo-wrapper::before {
+            content: "CARGANDO...";
+            position: absolute;
+            top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: var(--primary);
+            font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;
+            z-index: -1;
         }
         .logo-base, .logo-fill {
             position: absolute; top: 0; left: 0;
@@ -122,8 +143,8 @@
 
     <div id="pantalla-carga">
         <div class="logo-wrapper">
-            <img src="https://lh3.googleusercontent.com/gg-dl/AFfU-fKGhu_GFapJuA6lMDIntzldFUKs0WUYGAZivVdZYtoV_S5lOYPDBq-ozd0GtYiEtUgA3LjrxtMdJ3zj0UBIyaB9Hw0Rer1D0WQUeTVoWDrACCquguIf5_XUkWvSXlA1EQGPQBnYsWseVAMl-tFqlOtIGeQoJD1M_-3prp-BYzaE_-A4=s1024-rj" class="logo-base" alt="Logo">
-            <img src="https://lh3.googleusercontent.com/gg-dl/AFfU-fKGhu_GFapJuA6lMDIntzldFUKs0WUYGAZivVdZYtoV_S5lOYPDBq-ozd0GtYiEtUgA3LjrxtMdJ3zj0UBIyaB9Hw0Rer1D0WQUeTVoWDrACCquguIf5_XUkWvSXlA1EQGPQBnYsWseVAMl-tFqlOtIGeQoJD1M_-3prp-BYzaE_-A4=s1024-rj" class="logo-fill" alt="Logo Llenado">
+            <img src="URL_DE_TU_LOGO.png" class="logo-base" alt="" onerror="this.style.display='none'">
+            <img src="URL_DE_TU_LOGO.png" class="logo-fill" alt="" onerror="this.style.display='none'">
         </div>
     </div>
 
@@ -153,7 +174,7 @@
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
                 <h3 style="margin: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 1rem; color: var(--text-main);">Catálogo de Productos</h3>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; max-width: 650px; justify-content: flex-end; align-items: center;">
-                    <div class="search-container" style="flex: 1;"><input type="text" class="input-busqueda" placeholder="Buscar..." onkeyup="window.buscarProductos(this.value)"></div>
+                    <div class="search-container" style="flex: 1;"><input type="text" autocomplete="off" name="no-autofill" class="input-busqueda" placeholder="Buscar..." onkeyup="window.buscarProductos(this.value)"></div>
                     <div style="display: flex; gap: 8px;">
                         <button onclick="window.abrirModal()">Crear Producto</button>
                         <button onclick="window.abrirModalOferta()" class="secondary" style="border-color: var(--accent); color: var(--primary);">Crear Oferta</button>
@@ -211,12 +232,12 @@
                         <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
                         <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
                         <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
-                        <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" id="mostrador-transf" placeholder="Transf. $"></div></div>
+                        <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" autocomplete="off" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" autocomplete="off" id="mostrador-transf" placeholder="Transf. $"></div></div>
                         <button onclick="window.registrarVentaMostrador()" style="width:100%; margin-top: 10px;">Registrar Venta</button>
                     </div>
                     <div style="border: 1px solid var(--border); padding: 20px; background: var(--card-bg); border-radius:6px;">
                         <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:15px; font-weight:600;">Ingreso Extraordinario</label>
-                        <div class="dark-input-group"><div style="flex: 2;"><input type="text" id="ingreso-manual-detalle" placeholder="Concepto..."></div><div><input type="number" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div><div><input type="number" id="ingreso-manual-transf" placeholder="Transf. $"></div></div>
+                        <div class="dark-input-group"><div style="flex: 2;"><input type="text" autocomplete="off" id="ingreso-manual-detalle" placeholder="Concepto..."></div><div><input type="number" autocomplete="off" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div><div><input type="number" autocomplete="off" id="ingreso-manual-transf" placeholder="Transf. $"></div></div>
                         <button class="secondary" onclick="window.registrarIngresoManual()" style="width:100%; margin-top: 10px;">Registrar</button>
                     </div>
                 </div>
@@ -224,7 +245,7 @@
             <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')"><span>Registrar Egresos</span></div>
                 <div id="body-gastos" class="modulo-body hidden">
-                    <div class="dark-input-group"><div><label>Concepto</label><input type="text" id="gasto-titulo"></div><div><label>Monto $</label><input type="number" id="gasto-importe"></div></div>
+                    <div class="dark-input-group"><div><label>Concepto</label><input type="text" autocomplete="off" id="gasto-titulo"></div><div><label>Monto $</label><input type="number" autocomplete="off" id="gasto-importe"></div></div>
                     <button onclick="window.registrarGasto()" style="width:100%;">Registrar Egreso</button>
                     <div class="table-responsive"><table style="margin-top: 30px;"><thead><tr><th>Detalle</th><th>Importe</th><th>Acción</th></tr></thead><tbody id="tabla-gastos"></tbody></table></div>
                 </div>
@@ -247,8 +268,8 @@
                 <div class="modulo-oscuro">
                     <div class="modulo-body">
                         <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Contacto y Logística</h4>
-                        <div class="form-group"><label>URL Logo</label><input type="text" id="conf-logo"></div>
-                        <div class="form-group"><label>Teléfono (WhatsApp)</label><input type="text" id="conf-tel"></div>
+                        <div class="form-group"><label>URL Logo</label><input type="text" autocomplete="off" id="conf-logo"></div>
+                        <div class="form-group"><label>Teléfono (WhatsApp)</label><input type="text" autocomplete="off" id="conf-tel"></div>
                         <div class="dark-input-group"><div><label>Envíos</label><select id="conf-envio-disp"><option value="si">Habilitado</option><option value="no">Deshabilitado</option></select></div><div><label>Tarifa $</label><input type="number" id="conf-envio-precio"></div></div>
                         <hr>
                         <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Horarios Operativos</h4>
@@ -260,11 +281,11 @@
                 <div class="modulo-oscuro">
                     <div class="modulo-body">
                         <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Categorías de Productos</h4>
-                        <div class="dark-input-group" style="margin-bottom: 10px;"><div style="flex: 2;"><input type="text" id="nueva-cat-prod" placeholder="Nueva categoría..."></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarCategoriaProd()">Agregar</button></div></div>
+                        <div class="dark-input-group" style="margin-bottom: 10px;"><div style="flex: 2;"><input type="text" autocomplete="off" id="nueva-cat-prod" placeholder="Nueva categoría..."></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarCategoriaProd()">Agregar</button></div></div>
                         <ul id="lista-categorias-prod" style="list-style:none; padding:0; margin-bottom:30px; font-size:0.85rem;"></ul>
                         <hr>
                         <h4 style="margin: 0 0 15px 0; color: var(--primary); font-size: 0.85rem; text-transform: uppercase;">Descuentos x Cliente</h4>
-                        <div class="dark-input-group" style="margin-bottom: 10px;"><div style="flex:2;"><input type="text" id="nueva-cat-cli-nombre" placeholder="Perfil"></div><div style="flex:1;"><input type="number" id="nueva-cat-cli-desc" placeholder="%"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarCategoriaCliente()">Agregar</button></div></div>
+                        <div class="dark-input-group" style="margin-bottom: 10px;"><div style="flex:2;"><input type="text" autocomplete="off" id="nueva-cat-cli-nombre" placeholder="Perfil"></div><div style="flex:1;"><input type="number" id="nueva-cat-cli-desc" placeholder="%"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarCategoriaCliente()">Agregar</button></div></div>
                         <div id="lista-categorias-cli" style="font-size:0.85rem;"></div>
                     </div>
                 </div>
@@ -276,9 +297,9 @@
         <div class="modal-content">
             <h3 id="modal-titulo">Ficha de Producto</h3>
             <input type="hidden" id="prod-id">
-            <div class="form-group"><label>Denominación Base</label><input type="text" id="prod-nombre"></div>
+            <div class="form-group"><label>Denominación Base</label><input type="text" autocomplete="off" id="prod-nombre"></div>
             <div class="form-group"><label>Categoría</label><select id="prod-categoria"></select></div>
-            <div class="form-group"><label>URL Imagen</label><input type="text" id="prod-imagen" placeholder="https://..."></div>
+            <div class="form-group"><label>URL Imagen</label><input type="text" autocomplete="off" id="prod-imagen" placeholder="https://..."></div>
             <hr>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;"><label style="margin:0;">Variantes y Precios</label><button type="button" class="secondary" onclick="window.agregarFilaVariante()">Agregar Variante</button></div>
             <div id="contenedor-variantes"></div>
@@ -300,8 +321,8 @@
     <div id="modal-pack" class="modal-overlay hidden">
         <div class="modal-content">
             <h3>Configurar Pack Promocional</h3>
-            <div class="form-group"><label>Nombre del Pack</label><input type="text" id="pack-nombre"></div>
-            <div class="form-group"><label>URL Imagen</label><input type="text" id="pack-imagen"></div>
+            <div class="form-group"><label>Nombre del Pack</label><input type="text" autocomplete="off" id="pack-nombre"></div>
+            <div class="form-group"><label>URL Imagen</label><input type="text" autocomplete="off" id="pack-imagen"></div>
             <div class="form-group"><label>Precio de Venta ($)</label><input type="number" id="pack-precio"></div>
             <hr>
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;"><label style="font-weight: 600; font-size: 0.8rem; text-transform: uppercase;">Componentes</label><button type="button" class="secondary" onclick="window.agregarFilaItemPack()">Añadir</button></div>
@@ -411,16 +432,17 @@
 
                 window.triggerConfiguracion(); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); window.triggerProductos(); window.triggerGastos(); window.triggerIngresos();
                 
-                // Ocultar pantalla de carga con un pequeño retraso
+            } catch(e) { 
+                console.error("Error loading DB", e); alert("Error cargando base de datos."); 
+            } finally {
+                // CORRECCIÓN: El ocultamiento se hace en un finally() para asegurar que la pantalla siempre desaparezca, incluso si hay un error en Firebase.
                 setTimeout(() => {
                     const loader = document.getElementById('pantalla-carga');
                     if (loader) {
                         loader.style.opacity = '0';
-                        setTimeout(() => loader.style.visibility = 'hidden', 500); // Dar tiempo a que termine la transición opacity
+                        setTimeout(() => loader.style.visibility = 'hidden', 500);
                     }
-                }, 2000); // Retardo asegurando que la animación del logo se complete y los datos se carguen bien
-            } catch(e) { 
-                console.error("Error loading DB", e); alert("Error cargando base de datos."); 
+                }, 2000); 
             }
         };
 
