@@ -290,7 +290,7 @@
     <script type="module">
         // ===== INTEGRACIÓN FIREBASE =====
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
@@ -324,11 +324,58 @@
                 const pDoc = await getDocs(collection(db, "productos")); productos = pDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
                 const pkDoc = await getDocs(collection(db, "packs")); packs = pkDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
                 
-                const pedDoc = await getDocs(collection(db, "pedidos")); pedidosGlobales = pedDoc.docs.map(d => { let obj = d.data(); obj.idDoc = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
                 const ingDoc = await getDocs(collection(db, "ingresos")); ingresosGlobales = ingDoc.docs.map(d => { let obj = d.data(); if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
                 const gasDoc = await getDocs(collection(db, "gastos")); gastosGlobales = gasDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
 
-                window.triggerConfiguracion(); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); window.triggerProductos(); window.triggerGastos(); window.triggerIngresos(); window.triggerPedidos();
+                // Escucha en tiempo real de Pedidos (Aplica el descuento de stock automático)
+                onSnapshot(collection(db, "pedidos"), (snapshot) => {
+                    snapshot.docChanges().forEach(async (change) => {
+                        let p = change.doc.data(); p.idDoc = change.doc.id;
+                        if(p.fecha && p.fecha.toDate) p.fecha = p.fecha.toDate();
+
+                        if (change.type === "added") {
+                            // Si el pedido entra y no se descontó el stock, lo procesa el panel.
+                            if (!p.stockDescontado) {
+                                for (const item of p.items) {
+                                    if (!item.isPack) { 
+                                        const prod = productos.find(x => x.id === item.idProd); 
+                                        if(prod && prod.variantes && prod.variantes[item.idVar]) { 
+                                            prod.variantes[item.idVar].stock -= item.cantidad; 
+                                            await setDoc(doc(db, "productos", prod.id), prod); 
+                                        } 
+                                    } else { 
+                                        let pkId = item.idProd.replace('pack_', '');
+                                        const pk = packs.find(x => x.id === pkId); 
+                                        if(pk) { 
+                                            for (const comp of pk.items) { 
+                                                const prod = productos.find(x => x.id === comp.idProd); 
+                                                if(prod && prod.variantes && prod.variantes[comp.idVar]) { 
+                                                    prod.variantes[comp.idVar].stock -= (comp.cantidad * item.cantidad); 
+                                                    await setDoc(doc(db, "productos", prod.id), prod); 
+                                                }
+                                            } 
+                                        } 
+                                    }
+                                }
+                                await updateDoc(doc(db, "pedidos", p.idDoc), { stockDescontado: true });
+                                p.stockDescontado = true;
+                                window.triggerProductos();
+                            }
+                            const exist = pedidosGlobales.findIndex(x => x.idDoc === p.idDoc);
+                            if(exist === -1) pedidosGlobales.push(p);
+                        }
+                        if (change.type === "modified") {
+                            const idx = pedidosGlobales.findIndex(x => x.idDoc === p.idDoc);
+                            if(idx !== -1) pedidosGlobales[idx] = p;
+                        }
+                        if (change.type === "removed") {
+                            pedidosGlobales = pedidosGlobales.filter(x => x.idDoc !== p.idDoc);
+                        }
+                    });
+                    window.triggerPedidos();
+                });
+
+                window.triggerConfiguracion(); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); window.triggerProductos(); window.triggerGastos(); window.triggerIngresos();
             } catch(e) { console.error("Error loading DB", e); alert("Error cargando base de datos."); }
         };
 
@@ -352,7 +399,7 @@
         const guardarCategoriasFirebase = async () => { await setDoc(doc(db, "categorias", "globales"), { lista: categoriasGlobales }); await setDoc(doc(db, "categorias", "clientes"), { lista: categoriasClientes }); };
         
         window.agregarCategoriaProd = () => { const val = document.getElementById('nueva-cat-prod').value.trim(); if(val && !categoriasGlobales.includes(val)) { categoriasGlobales.push(val); document.getElementById('nueva-cat-prod').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); guardarCategoriasFirebase(); } };
-        window.eliminarCategoriaProd = (cat) => { if(cat==='General'||cat==='Packs'||cat==='Ofertas') return; categoriasGlobales = categoriasGlobales.filter(c => c !== cat); productos.forEach(p => { if(p.categoria === cat) { p.categoria = 'General'; setDoc(doc(db, "productos", p.id), p); } }); categoriasClientes.forEach(cli => { if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat]; }); window.renderizarConfigCategorias(); window.actualizarSelectiasModal(); window.triggerProductos(); guardarCategoriasFirebase(); };
+        window.eliminarCategoriaProd = (cat) => { if(cat==='General'||cat==='Packs'||cat==='Ofertas') return; categoriasGlobales = categoriasGlobales.filter(c => c !== cat); productos.forEach(p => { if(p.categoria === cat) { p.categoria = 'General'; setDoc(doc(db, "productos", p.id), p); } }); categoriasClientes.forEach(cli => { if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat]; }); window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); window.triggerProductos(); guardarCategoriasFirebase(); };
         window.agregarCategoriaCliente = () => { const nom = document.getElementById('nueva-cat-cli-nombre').value.trim(); const desc = parseFloat(document.getElementById('nueva-cat-cli-desc').value) || 0; if(nom && !categoriasClientes.find(c => c.nombre === nom)) { categoriasClientes.push({nombre: nom, descuentoGlobal: desc, descuentosCat: {}}); document.getElementById('nueva-cat-cli-nombre').value = ''; document.getElementById('nueva-cat-cli-desc').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); } };
         window.eliminarCategoriaCliente = (i) => { if(i === 0) return; categoriasClientes.splice(i, 1); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); };
         window.agregarExcepcionCliente = (i) => { const cat = document.getElementById(`exc-cat-${i}`).value; const desc = parseFloat(document.getElementById(`exc-desc-${i}`).value); if(cat && !isNaN(desc)) { categoriasClientes[i].descuentosCat[cat] = desc; window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); guardarCategoriasFirebase(); } };
@@ -544,7 +591,7 @@
             if(p) { 
                 await updateDoc(doc(db, "pedidos", idDoc), { estadoPago: true });
                 p.estadoPago = true; 
-                let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m==='Transferencia'?t:0 };
+                let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m!=='Efectivo'?t:0 };
                 await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); window.triggerPedidos(); window.triggerIngresos(); 
             } 
         };
@@ -552,7 +599,7 @@
             const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) {
                 if(!p.estadoPago) { 
-                    let i = { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago === 'Transferencia' ? p.total : 0 };
+                    let i = { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago !== 'Efectivo' ? p.total : 0 };
                     await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); 
                     p.estadoPago = true; window.triggerIngresos(); 
                 }
@@ -564,12 +611,35 @@
         window.cancelarPedido = async (idDoc, font) => {
             if(!confirm("¿Cancelar este pedido y reponer el stock?")) return;
             const p = pedidosGlobales.find(x => x.idDoc === idDoc); if(!p) return;
-            for (const item of p.items) {
-                if(!item.isPack) { if(item.idProd && item.idVar) { const prod = productos.find(x => x.id === item.idProd); if(prod && prod.variantes[item.idVar]) { prod.variantes[item.idVar].stock += item.cantidad; await setDoc(doc(db, "productos", prod.id), prod); } } } 
-                else { const pk = packs.find(x => x.id === item.idProd.replace('pack_','')); if(pk) { pk.items.forEach(comp => { const prod = productos.find(x => x.id === comp.idProd); if(prod && prod.variantes[comp.idVar]) { prod.variantes[comp.idVar].stock += (comp.cantidad * item.cantidad); setDoc(doc(db, "productos", prod.id), prod); }}); } }
+            
+            // Reponer stock si fue descontado previamente
+            if (p.stockDescontado !== false) {
+                for (const item of p.items) {
+                    if(!item.isPack) { 
+                        if(item.idProd && item.idVar) { 
+                            const prod = productos.find(x => x.id === item.idProd); 
+                            if(prod && prod.variantes && prod.variantes[item.idVar]) { 
+                                prod.variantes[item.idVar].stock += item.cantidad; 
+                                await setDoc(doc(db, "productos", prod.id), prod); 
+                            } 
+                        } 
+                    } else { 
+                        const pk = packs.find(x => x.id === item.idProd.replace('pack_','')); 
+                        if(pk) { 
+                            for (const comp of pk.items) { 
+                                const prod = productos.find(x => x.id === comp.idProd); 
+                                if(prod && prod.variantes && prod.variantes[comp.idVar]) { 
+                                    prod.variantes[comp.idVar].stock += (comp.cantidad * item.cantidad); 
+                                    await setDoc(doc(db, "productos", prod.id), prod); 
+                                }
+                            } 
+                        } 
+                    }
+                }
             }
+            
             await deleteDoc(doc(db, "pedidos", idDoc));
-            pedidosGlobales = pedidosGlobales.filter(x => x.idDoc !== idDoc); window.triggerProductos(); window.triggerPedidos();
+            window.triggerProductos(); 
         };
         window.triggerPedidos = () => { window.renderizarPedidos(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
 
@@ -577,7 +647,7 @@
             let cestas = []; let hoy = new Date(); hoy.setHours(0,0,0,0);
             if(periodo === '7d') { for(let i=6; i>=0; i--) { let d = new Date(hoy); d.setDate(d.getDate() - i); cestas.push({ label: `${d.getDate()}/${d.getMonth()+1}`, start: d.getTime(), end: d.getTime() + 86400000 }); } } 
             else if(periodo === '1m') { for(let i=3; i>=0; i--) { let end = new Date(hoy); end.setDate(end.getDate() - (i*7)); let start = new Date(end); start.setDate(start.getDate() - 6); cestas.push({ label: `Sem ${start.getDate()}/${start.getMonth()+1}`, start: start.getTime(), end: end.getTime() + 86400000 }); } } 
-            else if(periodo === '3m' || periodo === '6m' || periodo === '1y') { let meses = periodo === '3m' ? 3 : (periodo === '6m' ? 6 : 12); for(let i=meses-1; i>=0; i--) { let d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1); let n = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]; let end = new Date(hoy.getFullYear(), hoy.getMonth() - i + 1, 0); cestas.push({ label: `${n[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`, start: d.getTime(), end: d.getTime() + 86400000 }); } }
+            else if(periodo === '3m' || periodo === '6m' || periodo === '1y') { let meses = periodo === '3m' ? 3 : (periodo === '6m' ? 6 : 12); for(let i=meses-1; i>=0; i--) { let d = new Date(hoy.getFullYear(), hoy.getMonth() - i, 1); let n = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"]; let end = new Date(hoy.getFullYear(), hoy.getMonth() - i + 1, 0); cestas.push({ label: `${n[d.getMonth()]} ${d.getFullYear().toString().substring(2)}`, start: d.getTime(), end: end.getTime() + 86400000 }); } }
             return cestas;
         }
 
@@ -587,7 +657,10 @@
             const addToBucket = (time, valueBar, valueLine) => { for(let i=0; i<cestas.length; i++) { if(time >= cestas[i].start && time < cestas[i].end) { datosBarras[i] += valueBar; datosLinea[i] += valueLine; break; } } };
             
             pedidosGlobales.forEach(p => {
-                if(!p.fecha) return; let time = p.fecha.getTime(); let cobrado = p.estadoPago === true; let monto = p.total || 0; let cantItems = p.items ? p.items.reduce((s, it) => s + (it.cantidad || 1), 0) : 0; let pagoEfvo = p.metodoPago === 'Efectivo' ? monto : 0; let pagoTrans = p.metodoPago === 'Transferencia' ? monto : 0;
+                if(!p.fecha) return; let time = p.fecha.getTime(); let cobrado = p.estadoPago === true; let monto = p.total || 0; let cantItems = p.items ? p.items.reduce((s, it) => s + (it.cantidad || 1), 0) : 0; 
+                let pagoEfvo = p.metodoPago === 'Efectivo' ? monto : 0; 
+                let pagoTrans = p.metodoPago !== 'Efectivo' ? monto : 0; // Garantiza capturar MercadoPago u otros metodos alternativos
+                
                 if (categoria === 'efectivo' && cobrado) addToBucket(time, pagoEfvo, 1); if (categoria === 'transferencia' && cobrado) addToBucket(time, pagoTrans, 1); if (categoria === 'retiros' && p.metodoEntrega === 'Retiro') addToBucket(time, 1, 0); if (categoria === 'envios' && p.metodoEntrega === 'Envio') addToBucket(time, 1, 0); if (categoria === 'productos' && cobrado) addToBucket(time, cantItems, 0); if (categoria === 'ventas_web' && cobrado) addToBucket(time, monto, 1); if ((categoria === 'neto' || categoria === 'bruto') && cobrado) addToBucket(time, monto, 1);
             });
 
