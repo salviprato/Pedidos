@@ -427,9 +427,9 @@
                             // Cargamos la base de datos de su negocio
                             cargarDatosBD();
                         } else {
-                            // Si se registró pero aún no lo aprobaste manualmente:
-                            alert("Tu cuenta está registrada correctamente, pero aún está pendiente de aprobación por el administrador central.");
-                            signOut(auth); // Lo deslogueamos para que vuelva a ver la pantalla de login
+                            // Mostrar el cartel estético con el texto solicitado
+                            window.mostrarAlertaUI("Ya te has registrado, en breves tendrás acceso al panel.");
+                            signOut(auth); 
                         }
                     } else {
                         alert("Error: No se encontraron datos de perfil para este usuario.");
