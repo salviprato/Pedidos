@@ -448,17 +448,13 @@
 
         // CONFIG Y CATEGORÍAS
         window.renderizarConfigCategorias = () => {
-            const ulP = document.getElementById('lista-categorias-prod'); if(!ulP) return;
-            ulP.innerHTML = ''; categoriasGlobales.forEach(c => { const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`; });
-            const listC = document.getElementById('lista-categorias-cli'); listC.innerHTML = '';
-            categoriasClientes.forEach((c, i) => {
-                const btnBorrar = c.nombre !== 'Consumidor Final' ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaCliente(${i})">X</button>` : '';
-                let excHTML = ''; Object.entries(c.descuentosCat).forEach(([cat, desc]) => { excHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 4px 0 4px 15px; font-size:0.75rem; color:var(--text-muted);"><span>↳ '${cat}': <strong style="color:var(--accent);">-${desc}%</strong></span><button class="danger" style="padding:2px 6px; font-size:0.6rem; border:none;" onclick="window.eliminarExcepcionCliente(${i}, '${cat}')">x</button></div>`; });
-                let selCat = `<select id="exc-cat-${i}" style="padding:4px; font-size:0.7rem;">`; categoriasGlobales.forEach(cg => selCat += `<option value="${cg}">${cg}</option>`); selCat += `</select>`;
-                const addExcHTML = `<div style="display:flex; gap:5px; margin-top:5px; padding-left:15px; align-items:center;">${selCat}<input type="number" id="exc-desc-${i}" placeholder="%" style="width:55px; padding:4px; font-size:0.7rem;"><button class="secondary" style="padding:4px 8px; font-size:0.7rem;" onclick="window.agregarExcepcionCliente(${i})">+</button></div>`;
-                listC.innerHTML += `<div style="margin-bottom:15px; padding:10px; border:1px solid var(--border-light); border-radius:6px; background:var(--bg-color);"><div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:5px;"><span style="color:var(--text-main); font-weight:500;">${c.nombre} <strong style="color:var(--primary);">(-${c.descuentoGlobal}% Global)</strong></span>${btnBorrar}</div>${excHTML}${c.nombre !== 'Consumidor Final' ? addExcHTML : ''}</div>`;
-            });
-        };
+    const ulP = document.getElementById('lista-categorias-prod'); if(!ulP) return;
+    ulP.innerHTML = ''; 
+    categoriasGlobales.forEach(c => { 
+        const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; 
+        ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`; 
+    });
+};
         const guardarCategoriasFirebase = async () => { await setDoc(doc(db, "categorias", "globales"), { lista: categoriasGlobales }); };
         
         window.agregarCategoriaProd = () => { const val = document.getElementById('nueva-cat-prod').value.trim(); if(val && !categoriasGlobales.includes(val)) { categoriasGlobales.push(val); document.getElementById('nueva-cat-prod').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); guardarCategoriasFirebase(); } };
