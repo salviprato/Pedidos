@@ -351,6 +351,22 @@
         </div>
     </div>
 
+    <!-- MODAL DE ALERTA PERSONALIZADO -->
+    <div id="modal-alerta" class="modal-overlay hidden" style="z-index: 1000000;">
+        <div class="modal-content" style="max-width: 400px; text-align: center; padding: 40px 30px;">
+            <!-- Icono opcional para darle un toque más pro -->
+            <div style="font-size: 3rem; margin-bottom: 15px;">⏳</div>
+            
+            <h3 style="color: var(--primary); margin-bottom: 20px; border-bottom: none; padding: 0;">Aviso del Sistema</h3>
+            
+            <p id="modal-alerta-texto" style="color: var(--text-main); font-size: 1rem; line-height: 1.5; margin-bottom: 30px;">
+                <!-- Aquí se inyectará el texto -->
+            </p>
+            
+            <button onclick="document.getElementById('modal-alerta').classList.add('hidden')" style="width: 100%; padding: 12px; font-size: 0.9rem;">Entendido</button>
+        </div>
+    </div>
+    
     <script type="module">
         // ===== INTEGRACIÓN FIREBASE ACTUALIZADA (MULTI-TENANT) =====
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
