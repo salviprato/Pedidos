@@ -419,18 +419,84 @@
             }
         });
 
+       // ===== CONTROL DE LOGIN / REGISTRO MULTI-TENANT =====
+        let modoLogin = true;
+
+        window.alternarModoAuth = (event) => {
+            if(event) event.preventDefault();
+            modoLogin = !modoLogin;
+
+            const titulo = document.getElementById('auth-titulo');
+            const grupoNegocio = document.getElementById('grupo-registro-negocio');
+            const btnPrincipal = document.getElementById('btn-auth-principal');
+            const textAlternar = document.getElementById('text-alternar');
+            const linkAlternar = document.getElementById('link-alternar');
+
+            if (modoLogin) {
+                titulo.textContent = "Acceso Negocios";
+                grupoNegocio.classList.add('hidden');
+                btnPrincipal.textContent = "Ingresar al Panel";
+                textAlternar.textContent = "¿No tienes una cuenta?";
+                linkAlternar.textContent = "Regístrate aquí";
+            } else {
+                titulo.textContent = "Crear Cuenta Nueva";
+                grupoNegocio.classList.remove('hidden');
+                btnPrincipal.textContent = "Registrarme y Crear Tienda";
+                textAlternar.textContent = "¿Ya tienes cuenta?";
+                linkAlternar.textContent = "Inicia sesión";
+            }
+        };
+
+        window.manejarAuth = () => {
+            if (modoLogin) {
+                window.iniciarSesion();
+            } else {
+                window.registrarNegocioNuevo();
+            }
+        };
+
         window.iniciarSesion = () => {
-            const email = document.getElementById('login-email').value;
+            const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value;
-            if(!email || !pass) return;
+            if(!email || !pass) return alert("Completa todos los campos");
+            
             signInWithEmailAndPassword(auth, email, pass).catch(error => {
                 alert("Error al iniciar sesión: " + error.message);
             });
         };
 
-        window.cerrarSesion = () => {
-            if(confirm("¿Seguro que deseas salir?")) {
-                signOut(auth).then(() => window.location.reload());
+        window.registrarNegocioNuevo = async () => {
+            const nombreNegocio = document.getElementById('login-negocio').value.trim();
+            const email = document.getElementById('login-email').value.trim();
+            const pass = document.getElementById('login-pass').value;
+
+            if(!nombreNegocio || !email || !pass) {
+                return alert("Por favor, completa todos los campos para el registro.");
+            }
+            if(pass.length < 6) {
+                return alert("La contraseña debe tener al menos 6 caracteres.");
+            }
+
+            try {
+                const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+                const user = userCredential.user;
+                const nuevoNegocioId = genIdDB();
+
+                await setDoc(doc(db, "negocios", nuevoNegocioId), {
+                    nombre: nombreNegocio,
+                    creadoEl: new Date()
+                });
+
+                await setDoc(doc(db, "usuarios", user.uid), {
+                    email: email,
+                    negocioId: nuevoNegocioId,
+                    rol: "admin"
+                });
+
+                alert("¡Cuenta y negocio creados con éxito!");
+            } catch (error) {
+                console.error("Error en el registro:", error);
+                alert("No se pudo completar el registro: " + error.message);
             }
         };
 
