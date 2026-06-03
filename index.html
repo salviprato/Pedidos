@@ -226,7 +226,7 @@
                     <div style="border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; background: var(--card-bg); border-radius:6px;">
                         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap: wrap; gap: 10px;">
                             <label style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">Venta de Mostrador</label>
-                            <div style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
+                            <div class="hidden" style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
                         </div>
                         <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
                         <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
