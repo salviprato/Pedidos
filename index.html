@@ -9,8 +9,8 @@
         /* ===== ESTILOS ELEGANTES - TEMA CLARO ===== */
         :root {
             --primary: #5d4037; 
-    --primary-hover: #4e342e; 
-    --accent: #8d6e63; 
+            --primary-hover: #4e342e; 
+            --accent: #8d6e63; 
             --bg-color: #ffffff; 
             --card-bg: #ffffff; 
             --card-hover: #f5f5f5; 
@@ -39,11 +39,7 @@
         
         input, select { width: 100%; background: var(--card-bg); border: 1px solid var(--border); color: var(--text-main); padding: 10px; border-radius: 4px; font-family: inherit; } 
         
-        /* CORRECCIÓN: Evitar que el autocompletado del navegador cambie el color de fondo a celeste/amarillo */
-        input:-webkit-autofill,
-        input:-webkit-autofill:hover, 
-        input:-webkit-autofill:focus, 
-        input:-webkit-autofill:active {
+        input:-webkit-autofill, input:-webkit-autofill:hover, input:-webkit-autofill:focus, input:-webkit-autofill:active {
             -webkit-box-shadow: 0 0 0 30px var(--card-bg) inset !important;
             -webkit-text-fill-color: var(--text-main) !important;
             transition: background-color 5000s ease-in-out 0s;
@@ -100,41 +96,26 @@
         
         @media (max-width: 768px) { .search-container { max-width: 100%; margin: 5px 0; } .modal-content { padding: 20px; } .panel-oscuro-container { padding: 15px; } .dark-input-group { flex-direction: column; align-items: stretch; gap: 10px; } .dark-input-group > div { width: 100%; } }
 
-        /* ===== PANTALLA DE CARGA CORREGIDA ===== */
+        /* PANTALLA DE CARGA */
         #pantalla-carga {
-            position: fixed; inset: 0;
-            width: 100vw; height: 100vh;
-            background-color: var(--bg-color);
-            display: flex; justify-content: center; align-items: center;
-            z-index: 999999;
+            position: fixed; inset: 0; width: 100vw; height: 100vh; background-color: var(--bg-color);
+            display: flex; justify-content: center; align-items: center; z-index: 999999;
             transition: opacity 0.5s ease, visibility 0.5s ease;
         }
-        .logo-wrapper {
-            position: relative;
-            width: 400px; height: 400px;
-        }
-        /* Texto de respaldo por si la imagen se rompe */
+        .logo-wrapper { position: relative; width: 400px; height: 400px; }
         .logo-wrapper::before {
-            content: "CARGANDO...";
-            position: absolute;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: var(--primary);
-            font-size: 1.2rem; font-weight: bold; letter-spacing: 2px;
-            z-index: -1;
+            content: "CARGANDO..."; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            color: var(--primary); font-size: 1.2rem; font-weight: bold; letter-spacing: 2px; z-index: -1;
         }
-        .logo-base, .logo-fill {
-            position: absolute; top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: contain;
-        }
+        .logo-base, .logo-fill { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: contain; }
         .logo-base { opacity: 0.15; }
-        .logo-fill {
-            clip-path: inset(100% 0 0 0);
-            animation: cargaLogo 2s ease-in-out forwards;
-        }
-        @keyframes cargaLogo {
-            0% { clip-path: inset(100% 0 0 0); }
-            100% { clip-path: inset(0 0 0 0); }
+        .logo-fill { clip-path: inset(100% 0 0 0); animation: cargaLogo 2s ease-in-out forwards; }
+        @keyframes cargaLogo { 0% { clip-path: inset(100% 0 0 0); } 100% { clip-path: inset(0 0 0 0); } }
+
+        /* LOGIN FORM */
+        #login-container {
+            max-width: 400px; margin: 100px auto; padding: 40px; background: var(--card-bg);
+            border: 1px solid var(--border); border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
     </style>
 </head>
@@ -147,8 +128,27 @@
         </div>
     </div>
 
-    <div id="vista-dueno" class="container">
-        <h2 style="margin-top: 0; margin-bottom: 30px; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--primary);">Administración</h2>
+    <div id="login-container" class="hidden">
+        <h2 style="text-align:center; color: var(--primary); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 500;">Acceso Negocios</h2>
+        <div class="form-group">
+            <label>Correo Electrónico</label>
+            <input type="email" id="login-email" placeholder="admin@negocio.com">
+        </div>
+        <div class="form-group">
+            <label>Contraseña</label>
+            <input type="password" id="login-pass" placeholder="******">
+        </div>
+        <button onclick="window.iniciarSesion()" style="width:100%; padding: 15px;">Ingresar al Panel</button>
+    </div>
+
+    <div id="vista-dueno" class="container hidden">
+        
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 style="margin: 0; font-weight: 500; letter-spacing: 2px; text-transform: uppercase; font-size: 1.2rem; color: var(--primary);">
+                Panel <span id="nombre-negocio-display" style="color: var(--accent); font-size: 0.9rem;"></span>
+            </h2>
+            <button class="danger" onclick="window.cerrarSesion()">Cerrar Sesión</button>
+        </div>
         
         <div style="display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; border-bottom: 1px solid var(--border-light); padding-bottom: 20px;">
             <button class="secondary" onclick="window.togglePanel('panel-inventario')">Inventario</button>
@@ -340,9 +340,10 @@
     </div>
 
     <script type="module">
-        // ===== INTEGRACIÓN FIREBASE =====
+        // ===== INTEGRACIÓN FIREBASE ACTUALIZADA (MULTI-TENANT) =====
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getFirestore, collection, getDocs, getDoc, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+        import { getAuth, signInWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
@@ -355,8 +356,10 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
+        const auth = getAuth(app);
 
         // ESTADO GLOBAL
+        let negocioIdActual = null; // <- LA VARIABLE MÁS IMPORTANTE AHORA
         let categoriasGlobales = ['General', 'Bebidas', 'Snacks', 'Packs', 'Ofertas'];
         let categoriasClientes = [{ nombre: 'Consumidor Final', descuentoGlobal: 0, descuentosCat: {} }];
         let productos = []; let packs = []; let carritoMostrador = []; let terminoBusqueda = "";
@@ -367,20 +370,89 @@
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const genIdDB = () => Math.random().toString(36).substring(2, 10); 
 
-        // CARGAR BASE DE DATOS
+        // ===== LÓGICA DE AUTENTICACIÓN =====
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                try {
+                    // 1. Buscar a qué negocio pertenece este usuario logueado
+                    const userRef = doc(db, "usuarios", user.uid);
+                    const userSnap = await getDoc(userRef);
+                    
+                    if (userSnap.exists() && userSnap.data().negocioId) {
+                        negocioIdActual = userSnap.data().negocioId;
+                        document.getElementById('nombre-negocio-display').textContent = `(ID: ${negocioIdActual})`;
+                        
+                        document.getElementById('login-container').classList.add('hidden');
+                        document.getElementById('vista-dueno').classList.remove('hidden');
+                        
+                        // 2. Solo después de confirmar el negocio, cargamos la BD
+                        cargarDatosBD();
+                    } else {
+                        alert("Error: Este usuario no tiene un 'negocioId' asignado en la colección 'usuarios'.");
+                        signOut(auth);
+                    }
+                } catch(e) {
+                    console.error("Error al verificar usuario:", e);
+                }
+            } else {
+                // Usuario no logueado: mostrar login, ocultar todo lo demás
+                document.getElementById('login-container').classList.remove('hidden');
+                document.getElementById('vista-dueno').classList.add('hidden');
+                
+                const loader = document.getElementById('pantalla-carga');
+                if (loader) {
+                    loader.style.opacity = '0';
+                    setTimeout(() => loader.style.visibility = 'hidden', 500);
+                }
+            }
+        });
+
+        window.iniciarSesion = () => {
+            const email = document.getElementById('login-email').value;
+            const pass = document.getElementById('login-pass').value;
+            if(!email || !pass) return;
+            signInWithEmailAndPassword(auth, email, pass).catch(error => {
+                alert("Error al iniciar sesión: " + error.message);
+            });
+        };
+
+        window.cerrarSesion = () => {
+            if(confirm("¿Seguro que deseas salir?")) {
+                signOut(auth).then(() => window.location.reload());
+            }
+        };
+
+
+        // ===== CARGAR BASE DE DATOS (FILTRADA POR NEGOCIO) =====
         const cargarDatosBD = async () => {
             try {
-                const confDoc = await getDocs(collection(db, "configuracion")); confDoc.forEach(d => { if(d.id === 'tienda') configTienda = d.data(); });
-                const catDoc = await getDocs(collection(db, "categorias")); catDoc.forEach(d => { if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales; });
+                // Config y Categorías ahora son documentos únicos POR NEGOCIO
+                const confDoc = await getDoc(doc(db, "configuracion", negocioIdActual)); 
+                if(confDoc.exists()) configTienda = confDoc.data();
                 
-                const pDoc = await getDocs(collection(db, "productos")); productos = pDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
-                const pkDoc = await getDocs(collection(db, "packs")); packs = pkDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
+                const catDoc = await getDoc(doc(db, "categorias", negocioIdActual)); 
+                if(catDoc.exists()) categoriasGlobales = catDoc.data().lista || categoriasGlobales;
                 
-                const ingDoc = await getDocs(collection(db, "ingresos")); ingresosGlobales = ingDoc.docs.map(d => { let obj = d.data(); if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
-                const gasDoc = await getDocs(collection(db, "gastos")); gastosGlobales = gasDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
+                // Las consultas a colecciones ahora llevan el filtro WHERE
+                const qP = query(collection(db, "productos"), where("negocioId", "==", negocioIdActual));
+                const pDoc = await getDocs(qP); 
+                productos = pDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
+                
+                const qPk = query(collection(db, "packs"), where("negocioId", "==", negocioIdActual));
+                const pkDoc = await getDocs(qPk); 
+                packs = pkDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
+                
+                const qIng = query(collection(db, "ingresos"), where("negocioId", "==", negocioIdActual));
+                const ingDoc = await getDocs(qIng); 
+                ingresosGlobales = ingDoc.docs.map(d => { let obj = d.data(); if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
+                
+                const qGas = query(collection(db, "gastos"), where("negocioId", "==", negocioIdActual));
+                const gasDoc = await getDocs(qGas); 
+                gastosGlobales = gasDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
 
-                // Escucha en tiempo real de Pedidos
-                onSnapshot(collection(db, "pedidos"), (snapshot) => {
+                // Escucha en tiempo real de Pedidos, también filtrado
+                const qPed = query(collection(db, "pedidos"), where("negocioId", "==", negocioIdActual));
+                onSnapshot(qPed, (snapshot) => {
                     snapshot.docChanges().forEach(async (change) => {
                         let p = change.doc.data(); p.idDoc = change.doc.id;
                         if(p.fecha && p.fecha.toDate) p.fecha = p.fecha.toDate();
@@ -431,14 +503,13 @@
             } catch(e) { 
                 console.error("Error loading DB", e); alert("Error cargando base de datos."); 
             } finally {
-                // CORRECCIÓN: El ocultamiento se hace en un finally() para asegurar que la pantalla siempre desaparezca, incluso si hay un error en Firebase.
                 setTimeout(() => {
                     const loader = document.getElementById('pantalla-carga');
                     if (loader) {
                         loader.style.opacity = '0';
                         setTimeout(() => loader.style.visibility = 'hidden', 500);
                     }
-                }, 2000); 
+                }, 1000); 
             }
         };
 
@@ -448,21 +519,28 @@
 
         // CONFIG Y CATEGORÍAS
         window.renderizarConfigCategorias = () => {
-    const ulP = document.getElementById('lista-categorias-prod'); if(!ulP) return;
-    ulP.innerHTML = ''; 
-    categoriasGlobales.forEach(c => { 
-        const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; 
-        ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`; 
-    });
-};
-        const guardarCategoriasFirebase = async () => { await setDoc(doc(db, "categorias", "globales"), { lista: categoriasGlobales }); };
+            const ulP = document.getElementById('lista-categorias-prod'); if(!ulP) return;
+            ulP.innerHTML = ''; 
+            categoriasGlobales.forEach(c => { 
+                const btnBorrar = (c !== 'General' && c !== 'Packs' && c !== 'Ofertas') ? `<button class="danger" style="padding:2px 8px; font-size:0.7rem;" onclick="window.eliminarCategoriaProd('${c}')">X</button>` : ''; 
+                ulP.innerHTML += `<li style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding-bottom:8px; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main);">${c}</span> ${btnBorrar}</li>`; 
+            });
+        };
+        // Se guarda en un documento con el ID del negocio
+        const guardarCategoriasFirebase = async () => { await setDoc(doc(db, "categorias", negocioIdActual), { lista: categoriasGlobales, negocioId: negocioIdActual }); };
         
         window.agregarCategoriaProd = () => { const val = document.getElementById('nueva-cat-prod').value.trim(); if(val && !categoriasGlobales.includes(val)) { categoriasGlobales.push(val); document.getElementById('nueva-cat-prod').value = ''; window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); guardarCategoriasFirebase(); } };
         window.eliminarCategoriaProd = (cat) => { if(cat==='General'||cat==='Packs'||cat==='Ofertas') return; categoriasGlobales = categoriasGlobales.filter(c => c !== cat); productos.forEach(p => { if(p.categoria === cat) { p.categoria = 'General'; setDoc(doc(db, "productos", p.id), p); } }); categoriasClientes.forEach(cli => { if(cli.descuentosCat[cat] !== undefined) delete cli.descuentosCat[cat]; }); window.renderizarConfigCategorias(); window.actualizarSelectCategoriasModal(); window.triggerProductos(); guardarCategoriasFirebase(); };
         window.actualizarSelectCategoriasModal = (selectVal = null) => { const sel = document.getElementById('prod-categoria'); if(!sel) return; sel.innerHTML = ''; categoriasGlobales.forEach(c => { if (c !== 'Packs' && c !== 'Ofertas') sel.innerHTML += `<option value="${c}">${c}</option>`; }); if (selectVal && categoriasGlobales.includes(selectVal)) { sel.value = selectVal; } };
         window.actualizarSelectsClientes = () => { const selMostrador = document.getElementById('mostrador-tipo-cliente'); if(!selMostrador) return; const opciones = categoriasClientes.map((c, i) => `<option value="${i}">${c.nombre} (-${c.descuentoGlobal}% Global)</option>`).join(''); selMostrador.innerHTML = opciones; window.renderizarCarritoMostrador(); };
 
-        window.guardarConfiguracion = async () => { const logo = document.getElementById('conf-logo').value.trim(); const telefono = document.getElementById('conf-tel').value.replace(/[^0-9]/g, ''); const diasApertura = {}; ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => diasApertura[id] = document.getElementById(id).checked); configTienda = { logo, telefono, horaApertura: document.getElementById('conf-apertura').value, horaCierre: document.getElementById('conf-cierre').value, diasApertura, envioDisponible: document.getElementById('conf-envio-disp').value === 'si', envioPrecio: parseFloat(document.getElementById('conf-envio-precio').value) || 0 }; await setDoc(doc(db, "configuracion", "tienda"), configTienda); alert("Configuración guardada en Firebase"); };
+        window.guardarConfiguracion = async () => { 
+            const logo = document.getElementById('conf-logo').value.trim(); const telefono = document.getElementById('conf-tel').value.replace(/[^0-9]/g, ''); const diasApertura = {}; ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => diasApertura[id] = document.getElementById(id).checked); 
+            configTienda = { logo, telefono, horaApertura: document.getElementById('conf-apertura').value, horaCierre: document.getElementById('conf-cierre').value, diasApertura, envioDisponible: document.getElementById('conf-envio-disp').value === 'si', envioPrecio: parseFloat(document.getElementById('conf-envio-precio').value) || 0, negocioId: negocioIdActual }; // <- Inyección de ID
+            await setDoc(doc(db, "configuracion", negocioIdActual), configTienda); 
+            alert("Configuración guardada en Firebase"); 
+        };
+        
         window.triggerConfiguracion = () => { document.getElementById('conf-logo').value = configTienda.logo || ''; document.getElementById('conf-tel').value = configTienda.telefono || ''; document.getElementById('conf-apertura').value = configTienda.horaApertura || '09:00'; document.getElementById('conf-cierre').value = configTienda.horaCierre || '18:00'; document.getElementById('conf-envio-disp').value = configTienda.envioDisponible ? 'si' : 'no'; document.getElementById('conf-envio-precio').value = configTienda.envioPrecio || 0; if(configTienda.diasApertura) { ['check-lu', 'check-ma', 'check-mi', 'check-ju', 'check-vi', 'check-sa', 'check-do'].forEach(id => { document.getElementById(id).checked = configTienda.diasApertura[id] || false; }); } };
 
         // PRODUCTOS Y PACKS
@@ -483,6 +561,7 @@
             });
             let pObj = id ? productos.find(p => p.id === id) : { id: genIdDB() };
             pObj.nombre = nombre; pObj.imagen = imagen; pObj.categoria = categoriaProd; pObj.variantes = vars;
+            pObj.negocioId = negocioIdActual; // <- Inyección de ID
             
             await setDoc(doc(db, "productos", pObj.id), pObj); 
             if(!id) productos.push(pObj);
@@ -503,7 +582,7 @@
             const p = productos.find(x => x.id === id); p.variantes[vId].stock += cant; 
             await setDoc(doc(db, "productos", p.id), p); 
             if(costoTotalLote > 0) { 
-                let g = { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: costoTotalLote };
+                let g = { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: costoTotalLote, negocioId: negocioIdActual }; // <- Inyección
                 const gRef = await addDoc(collection(db, "gastos"), g); g.id = gRef.id; gastosGlobales.push(g); window.triggerGastos(); 
             } 
             window.triggerProductos(); window.cerrarModalStock(); 
@@ -525,7 +604,7 @@
             const nombre = document.getElementById('pack-nombre').value.trim(); const imagen = document.getElementById('pack-imagen').value.trim(); const precio = parseFloat(document.getElementById('pack-precio').value) || 0; const rows = document.querySelectorAll('#contenedor-items-pack .variant-row');
             if(!nombre || precio <= 0 || rows.length === 0) { alert("Escriba un nombre válido, precio e ingrese artículos."); return; }
             let itemsCombo = []; rows.forEach(r => { const combined = r.querySelector('.pack-item-select').value; const cant = parseInt(r.querySelector('.pack-item-cant').value) || 1; if(combined) { const [pId, vId] = combined.split('|'); const pRef = productos.find(x => x.id === pId); itemsCombo.push({ idProd: pId, idVar: vId, cantidad: cant, nombre: pRef ? pRef.nombre : 'Producto', detalle: pRef && pRef.variantes[vId] ? pRef.variantes[vId].detalle : '' }); } });
-            let pkObj = { id: genIdDB(), nombre, imagen, precio, categoria: 'Packs', items: itemsCombo };
+            let pkObj = { id: genIdDB(), nombre, imagen, precio, categoria: 'Packs', items: itemsCombo, negocioId: negocioIdActual }; // <- Inyección
             await setDoc(doc(db, "packs", pkObj.id), pkObj); packs.push(pkObj);
             alert("Combo Pack guardado exitosamente."); window.triggerProductos(); window.cerrarModalPack();
         };
@@ -605,15 +684,15 @@
                 else { item.packRef.items.forEach(comp => { const prod = productos.find(x => x.id === comp.idProd); if(prod && prod.variantes[comp.idVar]) { prod.variantes[comp.idVar].stock -= (comp.cantidad * item.cantidad); setDoc(doc(db, "productos", prod.id), prod); } }); }
             }
             
-            let iM = { fecha: new Date(), tipo: 'venta_mostrador', detalle: `Venta Mostrador [${clienteName}] (${countItems} items)`, efectivo: efe, transferencia: trans, itemsCount: countItems };
+            let iM = { fecha: new Date(), tipo: 'venta_mostrador', detalle: `Venta Mostrador [${clienteName}] (${countItems} items)`, efectivo: efe, transferencia: trans, itemsCount: countItems, negocioId: negocioIdActual };
             await addDoc(collection(db, "ingresos"), iM); ingresosGlobales.push(iM);
             
             carritoMostrador = []; window.renderizarCarritoMostrador(); document.getElementById('mostrador-efectivo').value = ''; document.getElementById('mostrador-transf').value = '';
             window.triggerProductos(); window.triggerIngresos(); alert("Venta registrada y stock descontado.");
         };
 
-        window.registrarIngresoManual = async () => { const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0; if (d && (e>0 || t>0)) { let i = { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t }; await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = ""; window.triggerIngresos(); } };
-        window.registrarGasto = async () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { let g = { fecha: new Date(), titulo: t, importe: i }; const docRef = await addDoc(collection(db, "gastos"), g); g.id = docRef.id; gastosGlobales.push(g); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
+        window.registrarIngresoManual = async () => { const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0; if (d && (e>0 || t>0)) { let i = { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t, negocioId: negocioIdActual }; await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = ""; window.triggerIngresos(); } };
+        window.registrarGasto = async () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { let g = { fecha: new Date(), titulo: t, importe: i, negocioId: negocioIdActual }; const docRef = await addDoc(collection(db, "gastos"), g); g.id = docRef.id; gastosGlobales.push(g); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
         window.borrarGasto = async (id) => { await deleteDoc(doc(db, "gastos", id)); gastosGlobales = gastosGlobales.filter(g => g.id !== id); window.triggerGastos(); };
         window.calcularBalanceEnVivo = () => {
             const p = document.getElementById('filtro-periodo').value; const hoy = new Date(); let dias = p==='hoy'?1:p==='semana'?7:p==='mes'?30:99999; let tIng = 0; let tGas = 0;
@@ -651,7 +730,7 @@
                 const yaCobrado = ingresosGlobales.some(ing => ing.detalle.includes(`Liquidación #${c}`));
                 
                 if(!yaCobrado) {
-                    let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m!=='Efectivo'?t:0 };
+                    let i = { fecha: new Date(), tipo: 'pago', detalle: `Liquidación #${c}`, efectivo: m==='Efectivo'?t:0, transferencia: m!=='Efectivo'?t:0, negocioId: negocioIdActual };
                     ingresosGlobales.push(i); 
                     await addDoc(collection(db, "ingresos"), i); 
                     window.triggerIngresos(); 
@@ -666,7 +745,7 @@
                 const yaCobrado = ingresosGlobales.some(ing => ing.detalle.includes(`Liquidación #${p.idCorto}`));
                 
                 if(!p.estadoPago && !yaCobrado) { 
-                    let i = { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago !== 'Efectivo' ? p.total : 0 };
+                    let i = { fecha: new Date(), tipo: 'pago_auto', detalle: `Liquidación #${p.idCorto} Autocobro`, efectivo: p.metodoPago === 'Efectivo' ? p.total : 0, transferencia: p.metodoPago !== 'Efectivo' ? p.total : 0, negocioId: negocioIdActual };
                     ingresosGlobales.push(i); 
                     await addDoc(collection(db, "ingresos"), i); 
                     window.triggerIngresos(); 
@@ -753,8 +832,6 @@
             for(let i = 0; i < etiquetas.length; i++) { if (datosBarras[i] !== 0 || datosLinea[i] !== 0) { hayDatos = true; listHTML += `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main); font-weight:500;">${etiquetas[i]}</span><span style="color:var(--text-muted);">${isMoney ? '$'+window.formatearNum(datosBarras[i]) : datosBarras[i]} ${labelBar.toLowerCase()} | ${datosLinea[i]} ${labelLine.toLowerCase()}</span></li>`; } } listHTML += '</ul>';
             document.getElementById('metricas-data-list').innerHTML = hayDatos ? listHTML : 'No hay datos para mostrar en este periodo.';
         }
-
-        window.onload = cargarDatosBD;
     </script>
 </body>
 </html>
