@@ -398,6 +398,12 @@
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const genIdDB = () => Math.random().toString(36).substring(2, 10); 
 
+        // Función para mostrar alertas estéticas
+        window.mostrarAlertaUI = (mensaje) => {
+            document.getElementById('modal-alerta-texto').textContent = mensaje;
+            document.getElementById('modal-alerta').classList.remove('hidden');
+        };
+        
         // ===== LÓGICA DE AUTENTICACIÓN =====
        // ===== LÓGICA DE AUTENTICACIÓN VERIFICANDO ROL =====
         onAuthStateChanged(auth, async (user) => {
