@@ -281,8 +281,7 @@
 
                 const catSnap = await getDocs(collection(db, "categorias"));
                 catSnap.forEach(d => { 
-                    if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales;
-                    if(d.id === 'clientes') categoriasClientes = d.data().lista || categoriasClientes;
+                   if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales;
                 });
 
                 const prodSnap = await getDocs(collection(db, "productos"));
