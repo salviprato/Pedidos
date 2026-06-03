@@ -383,24 +383,34 @@
         const genIdDB = () => Math.random().toString(36).substring(2, 10); 
 
         // ===== LÓGICA DE AUTENTICACIÓN =====
+       // ===== LÓGICA DE AUTENTICACIÓN VERIFICANDO ROL =====
         onAuthStateChanged(auth, async (user) => {
             if (user) {
                 try {
-                    // 1. Buscar a qué negocio pertenece este usuario logueado
+                    // 1. Buscar el documento del usuario en Firestore
                     const userRef = doc(db, "usuarios", user.uid);
                     const userSnap = await getDoc(userRef);
                     
-                    if (userSnap.exists() && userSnap.data().negocioId) {
-                        negocioIdActual = userSnap.data().negocioId;
-                        document.getElementById('nombre-negocio-display').textContent = `(ID: ${negocioIdActual})`;
-                        
-                        document.getElementById('login-container').classList.add('hidden');
-                        document.getElementById('vista-dueno').classList.remove('hidden');
-                        
-                        // 2. Solo después de confirmar el negocio, cargamos la BD
-                        cargarDatosBD();
+                    if (userSnap.exists()) {
+                        const datosUsuario = userSnap.data();
+
+                        // 2. VERIFICACIÓN CRÍTICA: ¿Ya es administrador aprobado?
+                        if (datosUsuario.rol === "admin") {
+                            negocioIdActual = datosUsuario.negocioId;
+                            document.getElementById('nombre-negocio-display').textContent = `(ID: ${negocioIdActual})`;
+                            
+                            document.getElementById('login-container').classList.add('hidden');
+                            document.getElementById('vista-dueno').classList.remove('hidden');
+                            
+                            // Cargamos la base de datos de su negocio
+                            cargarDatosBD();
+                        } else {
+                            // Si se registró pero aún no lo aprobaste manualmente:
+                            alert("Tu cuenta está registrada correctamente, pero aún está pendiente de aprobación por el administrador central.");
+                            signOut(auth); // Lo deslogueamos para que vuelva a ver la pantalla de login
+                        }
                     } else {
-                        alert("Error: Este usuario no tiene un 'negocioId' asignado en la colección 'usuarios'.");
+                        alert("Error: No se encontraron datos de perfil para este usuario.");
                         signOut(auth);
                     }
                 } catch(e) {
