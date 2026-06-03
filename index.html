@@ -129,7 +129,13 @@
     </div>
 
     <div id="login-container" class="hidden">
-        <h2 style="text-align:center; color: var(--primary); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 500;">Acceso Negocios</h2>
+        <h2 id="auth-titulo" style="text-align:center; color: var(--primary); margin-top: 0; text-transform: uppercase; letter-spacing: 2px; font-weight: 500;">Acceso Negocios</h2>
+        
+        <div id="grupo-registro-negocio" class="form-group hidden">
+            <label>Nombre de tu Negocio</label>
+            <input type="text" id="login-negocio" placeholder="Ej: Mi Tienda Virtual">
+        </div>
+
         <div class="form-group">
             <label>Correo Electrónico</label>
             <input type="email" id="login-email" placeholder="admin@negocio.com">
@@ -138,7 +144,13 @@
             <label>Contraseña</label>
             <input type="password" id="login-pass" placeholder="******">
         </div>
-        <button onclick="window.iniciarSesion()" style="width:100%; padding: 15px;">Ingresar al Panel</button>
+        
+        <button id="btn-auth-principal" onclick="window.manejarAuth()" style="width:100%; padding: 15px;">Ingresar al Panel</button>
+        
+        <p style="text-align: center; margin-top: 20px; font-size: 0.85rem; color: var(--text-muted);">
+            <span id="text-alternar">¿No tienes una cuenta?</span>
+            <a href="#" id="link-alternar" onclick="window.alternarModoAuth(event)" style="color: var(--primary); font-weight: bold; text-decoration: none;">Regístrate aquí</a>
+        </p>
     </div>
 
     <div id="vista-dueno" class="container hidden">
