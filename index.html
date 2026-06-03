@@ -371,7 +371,7 @@
         const cargarDatosBD = async () => {
             try {
                 const confDoc = await getDocs(collection(db, "configuracion")); confDoc.forEach(d => { if(d.id === 'tienda') configTienda = d.data(); });
-                const catDoc = await getDocs(collection(db, "categorias")); catDoc.forEach(d => { if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales; if(d.id === 'clientes') categoriasClientes = d.data().lista || categoriasClientes; });
+                const catDoc = await getDocs(collection(db, "categorias")); catDoc.forEach(d => { if(d.id === 'globales') categoriasGlobales = d.data().lista || categoriasGlobales; });
                 
                 const pDoc = await getDocs(collection(db, "productos")); productos = pDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
                 const pkDoc = await getDocs(collection(db, "packs")); packs = pkDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
