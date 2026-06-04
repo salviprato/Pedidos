@@ -928,23 +928,19 @@
             return cestas;
         }
 
-        window.cerrarSesion = function() {
-    // 1. Ocultamos el panel actual (vista-dueno) agregando la clase 'hidden'
+            window.cerrarSesion = function() {
+    // 1. Ocultamos el panel actual (vista-dueno)
     const vistaDueno = document.getElementById('vista-dueno');
     if (vistaDueno) {
         vistaDueno.classList.add('hidden');
     }
 
-    // 2. Mostramos el panel de inicio de sesión
-    // Nota: Cambia 'vista-login' por el ID real del div de tu inicio de sesión
-    const vistaLogin = document.getElementById('vista-login');
-    if (vistaLogin) {
-        vistaLogin.classList.remove('hidden');
+    // 2. Mostramos el panel de inicio de sesión usando tu ID real
+    const loginContainer = document.getElementById('login-container');
+    if (loginContainer) {
+        loginContainer.classList.remove('hidden');
     }
 
-    // 3. Opcional: Limpiar datos de la sesión (si usas localStorage)
-    // localStorage.removeItem('usuarioActual'); 
-    
     console.log("Sesión cerrada exitosamente");
 };
         
