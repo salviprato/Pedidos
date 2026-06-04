@@ -928,22 +928,6 @@
             return cestas;
         }
 
-            window.cerrarSesion = function() {
-    // 1. Ocultamos el panel actual (vista-dueno)
-    const vistaDueno = document.getElementById('vista-dueno');
-    if (vistaDueno) {
-        vistaDueno.classList.add('hidden');
-    }
-
-    // 2. Mostramos el panel de inicio de sesión usando tu ID real
-    const loginContainer = document.getElementById('login-container');
-    if (loginContainer) {
-        loginContainer.classList.remove('hidden');
-    }
-
-    console.log("Sesión cerrada exitosamente");
-};
-        
         window.actualizarGraficos = function() {
             const ctxCanvas = document.getElementById('graficoMetricas'); if(!ctxCanvas) return;
             const periodo = document.getElementById('select-periodo-metricas').value; const categoria = document.getElementById('select-categoria-metricas').value; let cestas = obtenerCestasPeriodo(periodo); let datosBarras = cestas.map(() => 0); let datosLinea = cestas.map(() => 0);
