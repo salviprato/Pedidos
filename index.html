@@ -490,28 +490,26 @@
         let metricasChart = null;
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
-        window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
 
-/* ===== FUNCIÓN GLOBAL PARA FORMATEAR FECHAS ===== */
-window.fechaCorta = (fecha) => {
-    if (!fecha) return 'Sin registro';
+        /* ===== FUNCIÓN GLOBAL PARA FORMATEAR FECHAS ===== */
+        window.fechaCorta = (fecha) => {
+            if (!fecha) return 'Sin registro';
 
-    const d = fecha instanceof Date
-        ? fecha
-        : (fecha.toDate ? fecha.toDate() : new Date(fecha));
+            const d = fecha instanceof Date
+                ? fecha
+                : (fecha.toDate ? fecha.toDate() : new Date(fecha));
 
-    if (isNaN(d.getTime())) return 'Sin registro';
+            if (isNaN(d.getTime())) return 'Sin registro';
 
-    return d.toLocaleString('es-AR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: '2-digit',
-        hour: '2-digit',
-        minute: '2-digit'
-    });
-};
+            return d.toLocaleString('es-AR', {
+                day: '2-digit',
+                month: '2-digit',
+                year: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        };
 
-const genIdDB = () => Math.random().toString(36).substring(2, 10);
         const genIdDB = () => Math.random().toString(36).substring(2, 10); 
         const ocultarPantallaCarga = () => {
             const loader = document.getElementById('pantalla-carga');
