@@ -66,6 +66,15 @@
         .modulo-header { padding: 15px 20px; font-weight: 500; display: flex; justify-content: space-between; align-items: center; cursor: pointer; text-transform: uppercase; font-size: 0.85rem; letter-spacing: 1px; color: var(--primary); background-color: var(--bg-color);} 
         .modulo-header:hover { background-color: var(--border-light); } 
         .modulo-body { padding: 25px; border-top: 1px solid var(--border); } 
+
+        .finance-actions-box {
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 18px;
+            margin-top: 15px;
+            background: var(--card-bg);
+        }
+        .finance-actions-box .modulo-oscuro:last-child { margin-bottom: 0; }
         
         .dark-input-group { display: flex; gap: 15px; margin-bottom: 20px; align-items: flex-end; flex-wrap: wrap; } 
         .dark-input-group > div { flex: 1; min-width: 150px; } 
@@ -228,11 +237,12 @@
                     </div>
                 </div>
             </div>
-            <div class="modulo-oscuro">
+            <div class="finance-actions-box">
+                <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-transacciones')"><span>Libro Diario</span></div>
                 <div id="body-transacciones" class="modulo-body table-responsive"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Detalle</th><th>Monto</th></tr></thead><tbody id="tabla-transacciones"></tbody></table></div>
             </div>
-            <div class="modulo-oscuro">
+                <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>Ventas Físicas e Ingresos</span></div>
                 <div id="body-ingresos" class="modulo-body hidden">
                     <div style="border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; background: var(--card-bg); border-radius:6px;">
@@ -253,13 +263,14 @@
                     </div>
                 </div>
             </div>
-            <div class="modulo-oscuro">
+                <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')"><span>Registrar Egresos</span></div>
                 <div id="body-gastos" class="modulo-body hidden">
                     <div class="dark-input-group"><div><label>Concepto</label><input type="text" autocomplete="off" id="gasto-titulo"></div><div><label>Monto $</label><input type="number" autocomplete="off" id="gasto-importe"></div></div>
                     <button onclick="window.registrarGasto()" style="width:100%;">Registrar Egreso</button>
                     <div class="table-responsive"><table style="margin-top: 30px;"><thead><tr><th>Detalle</th><th>Importe</th><th>Acción</th></tr></thead><tbody id="tabla-gastos"></tbody></table></div>
                 </div>
+            </div>
             </div>
         </div>
 
@@ -371,7 +382,7 @@
         // ===== INTEGRACIÓN FIREBASE ACTUALIZADA (MULTI-TENANT) =====
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
         import { getFirestore, collection, getDocs, getDoc, doc, setDoc, addDoc, updateDoc, deleteDoc, onSnapshot, query, where } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-       import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+       import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut, setPersistence, inMemoryPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyDJLS0xvRkdEMGQUPy3a8y76beb0LVukpw",
@@ -385,6 +396,10 @@
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
         const auth = getAuth(app);
+
+        // Fuerza login nuevo cada vez que se abre/recarga la página.
+        await setPersistence(auth, inMemoryPersistence);
+        await signOut(auth);
 
         // ESTADO GLOBAL
         let negocioIdActual = null; // <- LA VARIABLE MÁS IMPORTANTE AHORA
@@ -402,6 +417,27 @@
         window.mostrarAlertaUI = (mensaje) => {
             document.getElementById('modal-alerta-texto').textContent = mensaje;
             document.getElementById('modal-alerta').classList.remove('hidden');
+        };
+
+        window.cerrarSesion = async () => {
+            try {
+                negocioIdActual = null;
+                productos = [];
+                packs = [];
+                carritoMostrador = [];
+                ingresosGlobales = [];
+                gastosGlobales = [];
+                pedidosGlobales = [];
+
+                document.getElementById('vista-dueno').classList.add('hidden');
+                document.getElementById('login-container').classList.remove('hidden');
+                document.getElementById('login-pass').value = '';
+
+                await signOut(auth);
+            } catch (error) {
+                console.error('Error al cerrar sesión:', error);
+                alert('No se pudo cerrar sesión: ' + error.message);
+            }
         };
         
         // ===== LÓGICA DE AUTENTICACIÓN =====
