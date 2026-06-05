@@ -589,6 +589,81 @@
             ts.textContent = window.formatearNum(total); ts.setAttribute('data-descuentomonto', descuentoMonto);
         };
 
+
+        window.validarStockAntesDeConfirmar = async (itemsPedido) => {
+            const faltantes = [];
+            const productosActualizados = new Map();
+
+            const obtenerProductoActualizado = async (idProd) => {
+                if(productosActualizados.has(idProd)) return productosActualizados.get(idProd);
+
+                const snap = await getDoc(doc(db, "productos", idProd));
+                if(!snap.exists()) {
+                    productosActualizados.set(idProd, null);
+                    return null;
+                }
+
+                const producto = snap.data();
+                producto.id = snap.id;
+                productosActualizados.set(idProd, producto);
+                return producto;
+            };
+
+            for (const item of itemsPedido) {
+                if (!item.isPack) {
+                    const prodActual = await obtenerProductoActualizado(item.idProd);
+                    const varianteActual = prodActual && prodActual.variantes ? prodActual.variantes[item.idVar] : null;
+                    const stockActual = varianteActual ? parseInt(varianteActual.stock) || 0 : 0;
+
+                    if (!varianteActual || stockActual < item.cantidad) {
+                        faltantes.push({
+                            nombre: `${item.nombre} (${item.detalle})`,
+                            pedido: item.cantidad,
+                            disponible: stockActual
+                        });
+                    }
+                } else {
+                    const pkId = item.idProd.replace('pack_', '');
+                    const packActual = packs.find(x => x.id === pkId);
+
+                    if (!packActual || !packActual.items || packActual.items.length === 0) {
+                        faltantes.push({
+                            nombre: `${item.nombre} (${item.detalle})`,
+                            pedido: item.cantidad,
+                            disponible: 0
+                        });
+                        continue;
+                    }
+
+                    let combosDisponibles = Infinity;
+                    for (const pkItem of packActual.items) {
+                        const prodActual = await obtenerProductoActualizado(pkItem.idProd);
+                        const varianteActual = prodActual && prodActual.variantes ? prodActual.variantes[pkItem.idVar] : null;
+                        const stockActual = varianteActual ? parseInt(varianteActual.stock) || 0 : 0;
+                        const posiblesCombos = Math.floor(stockActual / pkItem.cantidad);
+                        combosDisponibles = Math.min(combosDisponibles, posiblesCombos);
+                    }
+
+                    if (!Number.isFinite(combosDisponibles)) combosDisponibles = 0;
+                    if (combosDisponibles < item.cantidad) {
+                        faltantes.push({
+                            nombre: `${item.nombre} (${item.detalle})`,
+                            pedido: item.cantidad,
+                            disponible: combosDisponibles
+                        });
+                    }
+                }
+            }
+
+            if (faltantes.length > 0) {
+                const detalle = faltantes.map(f => `• ${f.nombre}\n  Pedido: ${f.pedido} | Disponible: ${f.disponible}`).join('\n\n');
+                alert(`No se puede confirmar el pedido porque no hay stock suficiente:\n\n${detalle}\n\nModificá las cantidades del carrito para continuar.`);
+                return false;
+            }
+
+            return true;
+        };
+
         window.enviarWhatsapp = () => {
             if(!configTienda.telefono) { alert("El local aún no configuró su número de contacto."); return; }
             const numeroLimpio = configTienda.telefono.replace(/[^0-9]/g, '');
@@ -632,6 +707,9 @@
                 const iM = []; const cV = {}; let subtotalBruto = 0;
                 carrito.forEach(i => { const u=i.idProd+'_'+i.idVar; if(!cV[u]) cV[u]={...i,c:0}; cV[u].c++; subtotalBruto += i.precio; });
                 Object.values(cV).forEach(i => iM.push({ idProd: i.idProd, idVar: i.idVar, nombre:i.nombre, detalle:i.detalle, precio:i.precio, cantidad:i.c, isPack: i.isPack || false }));
+
+                const stockOK = await window.validarStockAntesDeConfirmar(iM);
+                if(!stockOK) return;
                 
                 let cEnv = (mE==='Envio'&&configTienda.envioDisponible) ? configTienda.envioPrecio : 0;
                 let descuentoMonto = parseFloat(document.getElementById('total-carrito').getAttribute('data-descuentomonto')) || 0;
@@ -680,10 +758,12 @@
                 document.getElementById('resumen-confirmacion').innerHTML = window.generarResumenConfirmacionHTML(nuevoPedido);
                 document.getElementById('carrito-vista-lista').classList.add('hidden'); document.getElementById('carrito-vista-exito').classList.remove('hidden');
                 document.getElementById('checkout-nombre').value = ""; document.getElementById('checkout-apellido').value = ""; document.getElementById('checkout-telefono').value = ""; document.getElementById('checkout-direccion').value = "";
+                carrito = [];
+                actualizarBadge();
             } catch (e) { 
                 console.error(e); 
                 alert("Hubo un error al procesar el pedido.");
-            } finally { document.getElementById('btn-comprar').disabled = false; window.vaciarCarrito(); }
+            } finally { document.getElementById('btn-comprar').disabled = false; }
         };
 
         window.onload = cargarDatosBD;
