@@ -498,9 +498,11 @@
         const db = getFirestore(app);
         const auth = getAuth(app);
 
-        // Fuerza login nuevo cada vez que se abre/recarga la página.
-        await setPersistence(auth, inMemoryPersistence);
-        await signOut(auth);
+        // Persistencia en memoria sin bloquear la carga del panel.
+        // Antes estaba con await + signOut al inicio y podía dejar la pantalla trabada en el loader.
+        setPersistence(auth, inMemoryPersistence).catch(error => {
+            console.error('No se pudo configurar la persistencia de sesión:', error);
+        });
 
         // ESTADO GLOBAL
         let negocioIdActual = null; // <- LA VARIABLE MÁS IMPORTANTE AHORA
@@ -513,6 +515,26 @@
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const genIdDB = () => Math.random().toString(36).substring(2, 10); 
+        const ocultarPantallaCarga = () => {
+            const loader = document.getElementById('pantalla-carga');
+            if (loader) {
+                loader.style.opacity = '0';
+                setTimeout(() => loader.style.visibility = 'hidden', 500);
+            }
+        };
+        window.ocultarPantallaCarga = ocultarPantallaCarga;
+
+        // Seguridad extra: si Firebase tarda o falla, no dejamos la pantalla congelada.
+        setTimeout(() => {
+            const login = document.getElementById('login-container');
+            const panel = document.getElementById('vista-dueno');
+            const loader = document.getElementById('pantalla-carga');
+            if (loader && loader.style.visibility !== 'hidden' && login && panel.classList.contains('hidden')) {
+                login.classList.remove('hidden');
+                ocultarPantallaCarga();
+            }
+        }, 6000);
+
 
         let cajaDiaria = null;
 
@@ -720,17 +742,17 @@
                     }
                 } catch(e) {
                     console.error("Error al verificar usuario:", e);
+                    window.mostrarAlertaUI("Error al verificar el usuario. Volvé a iniciar sesión.");
+                    document.getElementById('login-container').classList.remove('hidden');
+                    document.getElementById('vista-dueno').classList.add('hidden');
+                    ocultarPantallaCarga();
                 }
             } else {
                 // Usuario no logueado: mostrar login, ocultar todo lo demás
                 document.getElementById('login-container').classList.remove('hidden');
                 document.getElementById('vista-dueno').classList.add('hidden');
                 
-                const loader = document.getElementById('pantalla-carga');
-                if (loader) {
-                    loader.style.opacity = '0';
-                    setTimeout(() => loader.style.visibility = 'hidden', 500);
-                }
+                ocultarPantallaCarga();
             }
         });
 
@@ -903,11 +925,7 @@
                 console.error("Error loading DB", e); alert("Error cargando base de datos."); 
             } finally {
                 setTimeout(() => {
-                    const loader = document.getElementById('pantalla-carga');
-                    if (loader) {
-                        loader.style.opacity = '0';
-                        setTimeout(() => loader.style.visibility = 'hidden', 500);
-                    }
+                    ocultarPantallaCarga();
                 }, 1000); 
             }
         };
@@ -1316,5 +1334,20 @@
             document.getElementById('metricas-data-list').innerHTML = hayDatos ? listHTML : 'No hay datos para mostrar en este periodo.';
         }
     </script>
+
+    <script>
+        // Fallback anti-loader: evita que la pantalla quede congelada si algún script externo tarda o falla.
+        setTimeout(function() {
+            var loader = document.getElementById('pantalla-carga');
+            var login = document.getElementById('login-container');
+            var panel = document.getElementById('vista-dueno');
+            if (loader && loader.style.visibility !== 'hidden') {
+                if (login && panel && panel.classList.contains('hidden')) login.classList.remove('hidden');
+                loader.style.opacity = '0';
+                setTimeout(function(){ loader.style.visibility = 'hidden'; }, 500);
+            }
+        }, 8000);
+    </script>
+
 </body>
 </html>
