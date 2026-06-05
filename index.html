@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
     <style>
         /* ===== ESTILOS ELEGANTES - TEMA CLARO ===== */
         :root {
@@ -175,6 +176,7 @@
             <button class="secondary" onclick="window.togglePanel('panel-inventario')">Inventario</button>
             <button class="secondary" onclick="window.togglePanel('panel-pedidos')">Pedidos</button>
             <button class="secondary" onclick="window.togglePanel('panel-finanzas')">Finanzas</button>
+            <button class="secondary" onclick="window.togglePanel('panel-movimientos')">Movimientos</button>
             <button class="secondary" onclick="window.togglePanel('panel-metricas')">Métricas</button>
             <button class="secondary" onclick="window.togglePanel('panel-config')">Configuración</button>
         </div>
@@ -237,40 +239,61 @@
                     </div>
                 </div>
             </div>
-            <div class="finance-actions-box">
-                <div class="modulo-oscuro">
+            <div class="modulo-oscuro">
                 <div class="modulo-header" onclick="window.toggleAcordeon('body-transacciones')"><span>Libro Diario</span></div>
-                <div id="body-transacciones" class="modulo-body table-responsive"><table><thead><tr><th>Fecha</th><th>Concepto</th><th>Detalle</th><th>Monto</th></tr></thead><tbody id="tabla-transacciones"></tbody></table></div>
+                <div id="body-transacciones" class="modulo-body table-responsive">
+                    <table>
+                        <thead><tr><th>Fecha</th><th>Concepto</th><th>Detalle</th><th>Monto</th></tr></thead>
+                        <tbody id="tabla-transacciones"></tbody>
+                    </table>
+                </div>
             </div>
+
+            <div class="modulo-oscuro">
+                <div class="modulo-header" onclick="window.toggleAcordeon('body-exportar-excel')"><span>Exportar movimientos a Excel</span></div>
+                <div id="body-exportar-excel" class="modulo-body">
+                    <div class="dark-input-group">
+                        <div><label>Fecha inicial</label><input type="date" id="excel-fecha-inicio"></div>
+                        <div><label>Fecha final</label><input type="date" id="excel-fecha-fin"></div>
+                        <div><button onclick="window.exportarMovimientosExcel()" style="width:100%;">Exportar Excel</button></div>
+                    </div>
+                    <p style="margin:0; color:var(--text-muted); font-size:0.85rem;">Exporta ingresos y egresos del rango seleccionado, incluyendo efectivo, transferencia y total.</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="panel-movimientos" class="panel-oscuro-container hidden">
+            <h3 style="margin: 0 0 25px 0; font-weight: 500; text-transform: uppercase; font-size: 1rem;">Movimientos</h3>
+            <div style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; background: var(--card-bg);">
                 <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>Ventas Físicas e Ingresos</span></div>
-                <div id="body-ingresos" class="modulo-body hidden">
-                    <div style="border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; background: var(--card-bg); border-radius:6px;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap: wrap; gap: 10px;">
-                            <label style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">Venta de Mostrador</label>
-                            <div class="hidden" style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
+                    <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>Ventas Físicas e Ingresos</span></div>
+                    <div id="body-ingresos" class="modulo-body hidden">
+                        <div style="border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; background: var(--card-bg); border-radius:6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap: wrap; gap: 10px;">
+                                <label style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">Venta de Mostrador</label>
+                                <div class="hidden" style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
+                            </div>
+                            <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
+                            <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
+                            <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
+                            <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" autocomplete="off" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" autocomplete="off" id="mostrador-transf" placeholder="Transf. $"></div></div>
+                            <button onclick="window.registrarVentaMostrador()" style="width:100%; margin-top: 10px;">Registrar Venta</button>
                         </div>
-                        <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
-                        <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
-                        <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
-                        <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" autocomplete="off" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" autocomplete="off" id="mostrador-transf" placeholder="Transf. $"></div></div>
-                        <button onclick="window.registrarVentaMostrador()" style="width:100%; margin-top: 10px;">Registrar Venta</button>
-                    </div>
-                    <div style="border: 1px solid var(--border); padding: 20px; background: var(--card-bg); border-radius:6px;">
-                        <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:15px; font-weight:600;">Ingreso Extraordinario</label>
-                        <div class="dark-input-group"><div style="flex: 2;"><input type="text" autocomplete="off" id="ingreso-manual-detalle" placeholder="Concepto..."></div><div><input type="number" autocomplete="off" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div><div><input type="number" autocomplete="off" id="ingreso-manual-transf" placeholder="Transf. $"></div></div>
-                        <button class="secondary" onclick="window.registrarIngresoManual()" style="width:100%; margin-top: 10px;">Registrar</button>
+                        <div style="border: 1px solid var(--border); padding: 20px; background: var(--card-bg); border-radius:6px;">
+                            <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:15px; font-weight:600;">Ingreso Extraordinario</label>
+                            <div class="dark-input-group"><div style="flex: 2;"><input type="text" autocomplete="off" id="ingreso-manual-detalle" placeholder="Concepto..."></div><div><input type="number" autocomplete="off" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div><div><input type="number" autocomplete="off" id="ingreso-manual-transf" placeholder="Transf. $"></div></div>
+                            <button class="secondary" onclick="window.registrarIngresoManual()" style="width:100%; margin-top: 10px;">Registrar</button>
+                        </div>
                     </div>
                 </div>
-            </div>
                 <div class="modulo-oscuro">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')"><span>Registrar Egresos</span></div>
-                <div id="body-gastos" class="modulo-body hidden">
-                    <div class="dark-input-group"><div><label>Concepto</label><input type="text" autocomplete="off" id="gasto-titulo"></div><div><label>Monto $</label><input type="number" autocomplete="off" id="gasto-importe"></div></div>
-                    <button onclick="window.registrarGasto()" style="width:100%;">Registrar Egreso</button>
-                    <div class="table-responsive"><table style="margin-top: 30px;"><thead><tr><th>Detalle</th><th>Importe</th><th>Acción</th></tr></thead><tbody id="tabla-gastos"></tbody></table></div>
+                    <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')"><span>Registrar Egresos</span></div>
+                    <div id="body-gastos" class="modulo-body hidden">
+                        <div class="dark-input-group"><div><label>Concepto</label><input type="text" autocomplete="off" id="gasto-titulo"></div><div><label>Monto $</label><input type="number" autocomplete="off" id="gasto-importe"></div></div>
+                        <button onclick="window.registrarGasto()" style="width:100%;">Registrar Egreso</button>
+                        <div class="table-responsive"><table style="margin-top: 30px;"><thead><tr><th>Detalle</th><th>Importe</th><th>Acción</th></tr></thead><tbody id="tabla-gastos"></tbody></table></div>
+                    </div>
                 </div>
-            </div>
             </div>
         </div>
 
@@ -672,7 +695,7 @@
             }
         };
 
-        window.togglePanel = (id) => { ['panel-inventario', 'panel-finanzas', 'panel-pedidos', 'panel-metricas', 'panel-config'].forEach(p => document.getElementById(p).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if (id === 'panel-metricas') window.actualizarGraficos(); };
+        window.togglePanel = (id) => { ['panel-inventario', 'panel-finanzas', 'panel-movimientos', 'panel-pedidos', 'panel-metricas', 'panel-config'].forEach(p => document.getElementById(p).classList.add('hidden')); document.getElementById(id).classList.remove('hidden'); if (id === 'panel-metricas') window.actualizarGraficos(); };
         window.toggleAcordeon = (id) => document.getElementById(id).classList.toggle('hidden');
         window.buscarProductos = (texto) => { terminoBusqueda = texto.toLowerCase(); document.querySelectorAll('.input-busqueda').forEach(i => i.value = texto); window.renderizarCatalogoYStock(); };
 
@@ -864,6 +887,84 @@
             let tr = []; ingresosGlobales.forEach(i => tr.push({ id: i.id, f: i.fecha, t: 'Ingreso', d: i.detalle, m: i.efectivo + i.transferencia })); gastosGlobales.forEach(g => tr.push({ id: g.id, f: g.fecha, t: 'Egreso', d: g.titulo+(g.descripcion?` - ${g.descripcion}`:''), m: g.importe })); tr.sort((a,b) => b.f - a.f); const tb = document.getElementById('tabla-transacciones'); if(!tb) return; tb.innerHTML = '';
             tr.forEach(x => { const c = x.t === 'Ingreso' ? 'var(--text-main)' : 'var(--text-muted)'; tb.innerHTML += `<tr><td style="color:var(--text-dark);">${x.f.toLocaleString('es-ES',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'})}</td><td style="color:${c}; text-transform:uppercase; font-size:0.7rem;">${x.t}</td><td style="color:var(--text-muted);">${x.d}</td><td style="color:${c}; font-weight:500;">$${window.formatearNum(x.m)}</td></tr>`; });
         };
+        window.exportarMovimientosExcel = () => {
+            const inicioVal = document.getElementById('excel-fecha-inicio').value;
+            const finVal = document.getElementById('excel-fecha-fin').value;
+
+            if (!inicioVal || !finVal) {
+                alert('Seleccioná la fecha inicial y la fecha final.');
+                return;
+            }
+
+            const inicio = new Date(inicioVal + 'T00:00:00');
+            const fin = new Date(finVal + 'T23:59:59');
+
+            if (inicio > fin) {
+                alert('La fecha inicial no puede ser posterior a la fecha final.');
+                return;
+            }
+
+            const movimientos = [];
+
+            ingresosGlobales.forEach(i => {
+                const fecha = i.fecha instanceof Date ? i.fecha : new Date(i.fecha);
+                if (fecha >= inicio && fecha <= fin) {
+                    const efectivo = Number(i.efectivo) || 0;
+                    const transferencia = Number(i.transferencia) || 0;
+                    movimientos.push({
+                        Fecha: fecha.toLocaleDateString('es-AR'),
+                        Hora: fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+                        Tipo: 'Ingreso',
+                        Concepto: i.tipo === 'mostrador' ? 'Venta física' : 'Ingreso extraordinario',
+                        Detalle: i.detalle || '',
+                        Efectivo: efectivo,
+                        Transferencia: transferencia,
+                        Total: efectivo + transferencia
+                    });
+                }
+            });
+
+            gastosGlobales.forEach(g => {
+                const fecha = g.fecha instanceof Date ? g.fecha : new Date(g.fecha);
+                if (fecha >= inicio && fecha <= fin) {
+                    const importe = Number(g.importe) || 0;
+                    movimientos.push({
+                        Fecha: fecha.toLocaleDateString('es-AR'),
+                        Hora: fecha.toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' }),
+                        Tipo: 'Egreso',
+                        Concepto: g.titulo || 'Egreso',
+                        Detalle: g.descripcion || '',
+                        Efectivo: '',
+                        Transferencia: '',
+                        Total: -importe
+                    });
+                }
+            });
+
+            movimientos.sort((a, b) => {
+                const fa = a.Fecha.split('/').reverse().join('-') + ' ' + a.Hora;
+                const fb = b.Fecha.split('/').reverse().join('-') + ' ' + b.Hora;
+                return fa.localeCompare(fb);
+            });
+
+            if (movimientos.length === 0) {
+                alert('No hay movimientos monetarios en ese período.');
+                return;
+            }
+
+            const totalIngresos = movimientos.filter(m => m.Tipo === 'Ingreso').reduce((acc, m) => acc + Number(m.Total || 0), 0);
+            const totalEgresos = movimientos.filter(m => m.Tipo === 'Egreso').reduce((acc, m) => acc + Math.abs(Number(m.Total || 0)), 0);
+            movimientos.push({});
+            movimientos.push({ Fecha: 'TOTAL INGRESOS', Total: totalIngresos });
+            movimientos.push({ Fecha: 'TOTAL EGRESOS', Total: -totalEgresos });
+            movimientos.push({ Fecha: 'GANANCIA NETA', Total: totalIngresos - totalEgresos });
+
+            const ws = XLSX.utils.json_to_sheet(movimientos);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Movimientos');
+            XLSX.writeFile(wb, `movimientos_${inicioVal}_a_${finVal}.xlsx`);
+        };
+
         window.triggerGastos = () => { gastosGlobales.sort((a,b) => b.fecha - a.fecha); const t = document.getElementById('tabla-gastos'); if(t) {t.innerHTML = ''; gastosGlobales.forEach(g => { t.innerHTML += `<tr><td><span style="color:var(--text-main); text-transform:uppercase; font-size:0.8rem;">${g.titulo}</span></td><td style="color:var(--text-muted);">$${window.formatearNum(g.importe)}</td><td><button class="danger" style="padding: 4px 8px; border-radius: 4px;" onclick="window.borrarGasto('${g.id}')">X</button></td></tr>`; });} window.calcularBalanceEnVivo(); window.renderizarTransacciones(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
         window.triggerIngresos = () => { ingresosGlobales.sort((a,b) => b.fecha - a.fecha); window.calcularBalanceEnVivo(); window.renderizarTransacciones(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
 
