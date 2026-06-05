@@ -590,9 +590,13 @@
 
         // Función para mostrar alertas estéticas
         window.mostrarAlertaUI = (mensaje) => {
-            document.getElementById('modal-alerta-texto').textContent = mensaje;
-            document.getElementById('modal-alerta').classList.remove('hidden');
+            const modal = document.getElementById('modal-alerta');
+            const texto = document.getElementById('modal-alerta-texto');
+            if (texto) texto.textContent = mensaje;
+            if (modal) modal.classList.remove('hidden');
         };
+        // Reemplaza las alertas nativas del navegador por el modal con el estilo de la web.
+        window.alert = (mensaje) => window.mostrarAlertaUI(String(mensaje));
 
         window.cerrarSesion = async () => {
             try {
@@ -615,6 +619,16 @@
             }
         };
         
+        let modoLogin = true;
+        let panelFuncionesListas = false;
+        const esperarPanelListo = () => new Promise(resolve => {
+            if (panelFuncionesListas) return resolve();
+            const int = setInterval(() => {
+                if (panelFuncionesListas) { clearInterval(int); resolve(); }
+            }, 50);
+            setTimeout(() => { clearInterval(int); resolve(); }, 5000);
+        });
+
         // ===== LÓGICA DE AUTENTICACIÓN =====
        // ===== LÓGICA DE AUTENTICACIÓN VERIFICANDO ROL =====
         onAuthStateChanged(auth, async (user) => {
@@ -635,7 +649,8 @@
                             document.getElementById('login-container').classList.add('hidden');
                             document.getElementById('vista-dueno').classList.remove('hidden');
                             
-                            // Cargamos la base de datos de su negocio
+                            // Cargamos la base de datos de su negocio cuando todas las funciones del panel ya existen
+                            await esperarPanelListo();
                             cargarDatosBD();
                         } else {
                             // Mostrar el cartel estético con el texto solicitado
@@ -665,7 +680,6 @@
         });
 
        // ===== CONTROL DE LOGIN / REGISTRO MULTI-TENANT =====
-        let modoLogin = true;
 
         window.alternarModoAuth = (event) => {
             if(event) event.preventDefault();
@@ -832,7 +846,7 @@
                 window.triggerConfiguracion(); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); window.triggerProductos(); window.triggerGastos(); window.triggerIngresos(); window.actualizarNotificaciones();
                 
             } catch(e) { 
-                console.error("Error loading DB", e); alert("Error cargando base de datos."); 
+                console.error("Error loading DB", e); window.mostrarAlertaUI("Error cargando base de datos: " + (e && e.message ? e.message : e)); 
             } finally {
                 setTimeout(() => {
                     ocultarPantallaCarga();
@@ -1237,7 +1251,9 @@
             for(let i = 0; i < etiquetas.length; i++) { if (datosBarras[i] !== 0 || datosLinea[i] !== 0) { hayDatos = true; listHTML += `<li style="display:flex; justify-content:space-between; padding:10px 0; border-bottom:1px solid var(--border-light);"><span style="color:var(--text-main); font-weight:500;">${etiquetas[i]}</span><span style="color:var(--text-muted);">${isMoney ? '$'+window.formatearNum(datosBarras[i]) : datosBarras[i]} ${labelBar.toLowerCase()} | ${datosLinea[i]} ${labelLine.toLowerCase()}</span></li>`; } } listHTML += '</ul>';
             document.getElementById('metricas-data-list').innerHTML = hayDatos ? listHTML : 'No hay datos para mostrar en este periodo.';
         }
-    </script>
+    
+        panelFuncionesListas = true;
+</script>
 
     <script>
         // Fallback anti-loader: evita que la pantalla quede congelada si algún script externo tarda o falla.
