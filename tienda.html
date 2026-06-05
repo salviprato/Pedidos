@@ -25,16 +25,7 @@
         .hidden { display: none !important; } 
         
         button { background-color: var(--primary); color: #ffffff; border: none; padding: 10px 18px; border-radius: 4px; cursor: pointer; font-weight: 500; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s; } 
-        button:hover { background-color: var(--primary-hover); }
-        /* Efecto al presionar cualquier botón */
-button:active,
-.btn-categoria:active,
-.btn-carrito-nav:active,
-.btn-flotante-wsp:active {
-    background-color: var(--bg-color) !important;
-    color: var(--primary) !important;
-    transform: scale(0.97);
-}
+        button:hover { background-color: var(--primary-hover); } 
         button:disabled { background-color: var(--border); color: var(--text-dark); cursor: not-allowed; } 
         button.secondary { background-color: transparent; border: 1px solid var(--border); color: var(--text-main); } 
         button.secondary:hover { background-color: var(--card-hover); } 
@@ -85,6 +76,69 @@ button:active,
         
         .badge-promo { position: absolute; top: 10px; left: 10px; background: #ef4444; color: white; padding: 4px 8px; font-size: 0.65rem; font-weight: 600; text-transform: uppercase; border-radius: 4px; letter-spacing: 1px; z-index: 10;} 
         .badge-pack { background: #3b82f6; }
+
+
+        /* ===== MEJORAS CARRITO / UX ===== */
+        #toast-agregado {
+            position: fixed;
+            left: 50%;
+            bottom: 25px;
+            transform: translateX(-50%) translateY(20px);
+            background: var(--primary);
+            color: #fff;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.18);
+            z-index: 999999;
+            opacity: 0;
+            pointer-events: none;
+            transition: all 0.3s ease;
+            text-align: center;
+            max-width: calc(100vw - 40px);
+        }
+        #toast-agregado.show {
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+        .control-cantidad-carrito {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 999px;
+            padding: 3px;
+        }
+        .control-cantidad-carrito button {
+            width: 28px;
+            height: 28px;
+            padding: 0;
+            border-radius: 50%;
+            font-size: 0.9rem;
+            line-height: 1;
+        }
+        .control-cantidad-carrito span {
+            min-width: 24px;
+            text-align: center;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--text-main);
+        }
+        .resumen-confirmacion {
+            background: var(--bg-color);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            text-align: left;
+            font-size: 0.85rem;
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+        .resumen-confirmacion strong { color: var(--text-main); }
         
         @media (max-width: 768px) { 
             .header-tienda { flex-direction: column; text-align: center; gap: 15px; } 
@@ -142,6 +196,8 @@ button:active,
         </div>
     </div>
 
+    <div id="toast-agregado">Producto agregado al carrito</div>
+
     <div id="vista-comprador" class="container">
         
         <div id="logo-container" class="hidden"><img id="logo-display" src="" alt="Logo de la Tienda"></div>
@@ -186,7 +242,7 @@ button:active,
                     <div class="form-group" id="caja-direccion" style="display: none;"><label>Dirección Completa</label><input type="text" id="checkout-direccion"><span id="aviso-envio" style="color: var(--accent); font-size: 0.8rem; display: block; margin-top: 8px;"></span></div>
                 </div>
                 <div class="modal-actions">
-                    <button class="secondary" onclick="window.cerrarCarrito()">Volver</button>
+                    <button class="secondary" onclick="window.cerrarCarrito()">Seguir comprando</button>
                     <button onclick="window.vaciarCarrito()" class="danger" id="btn-vaciar">Vaciar</button>
                     <button onclick="window.finalizarCompra()" id="btn-comprar" disabled>Confirmar</button>
                 </div>
@@ -195,6 +251,7 @@ button:active,
                 <h3>Orden Generada</h3>
                 <p style="font-size: 0.85rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px;">Código de Identificación</p>
                 <div id="exito-id" style="font-size: 2.5rem; font-weight: 500; color: var(--primary); margin-bottom: 30px;">#XYZ1</div>
+                <div id="resumen-confirmacion" class="resumen-confirmacion"></div>
                 <p style="color: var(--text-muted); font-size: 0.9rem; line-height: 1.6; margin-bottom: 30px;">Notifique al local para coordinar la entrega y el pago del pedido.</p>
                 <button onclick="window.enviarWhatsapp()" style="width: 100%; padding: 15px; font-size: 0.9rem;">Contactar al local</button>
                 <button class="secondary" style="width: 100%; margin-top: 15px; padding: 15px;" onclick="window.cerrarCarritoExito()">Finalizar</button>
@@ -232,6 +289,61 @@ button:active,
 
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
         const generarIdCorto = () => Math.random().toString(36).substring(2, 6).toUpperCase();
+
+
+        window.mostrarToast = (mensaje) => {
+            const toast = document.getElementById('toast-agregado');
+            if(!toast) return;
+            toast.textContent = mensaje;
+            toast.classList.add('show');
+            clearTimeout(window.toastTimer);
+            window.toastTimer = setTimeout(() => toast.classList.remove('show'), 1800);
+        };
+
+        window.contarEnCarrito = (idProd, idVar) => carrito.filter(i => i.idProd === idProd && i.idVar === idVar).length;
+
+        window.obtenerStockDisponibleItem = (item) => {
+            if(!item) return 0;
+            if(item.isPack) return window.calcularStockPack(item.packRef);
+            const prod = productos.find(x => x.id === item.idProd);
+            return prod && prod.variantes[item.idVar] ? parseInt(prod.variantes[item.idVar].stock) || 0 : 0;
+        };
+
+        window.aumentarCantidadCarrito = (idx) => {
+            const item = carrito[idx];
+            if(!item) return;
+            const stockMax = window.obtenerStockDisponibleItem(item);
+            const actual = window.contarEnCarrito(item.idProd, item.idVar);
+            if(actual >= stockMax) {
+                window.mostrarToast(`No hay más stock disponible. Máximo: ${window.formatearNum(stockMax)}`);
+                return;
+            }
+            carrito.push({...item});
+            actualizarBadge();
+            window.renderizarCarrito();
+        };
+
+        window.disminuirCantidadCarrito = (idx) => {
+            const item = carrito[idx];
+            if(!item) return;
+            const pos = carrito.findIndex(i => i.idProd === item.idProd && i.idVar === item.idVar);
+            if(pos >= 0) carrito.splice(pos, 1);
+            actualizarBadge();
+            window.renderizarCarrito();
+        };
+
+        window.generarResumenConfirmacionHTML = (pedido) => {
+            if(!pedido) return '';
+            const itemsHTML = pedido.items.map(i => `• ${i.cantidad}x ${i.nombre} (${i.detalle}) - $${window.formatearNum(i.precio * i.cantidad)}`).join('<br>');
+            return `
+                <strong>Cliente:</strong> ${pedido.nombreCliente} ${pedido.apellidoCliente}<br>
+                <strong>Teléfono:</strong> ${pedido.telefono}<br>
+                <strong>Entrega:</strong> ${pedido.metodoEntrega} - ${pedido.direccion}<br>
+                <strong>Pago:</strong> ${pedido.metodoPago}<br>
+                <strong>Pedido:</strong><br>${itemsHTML}<br>
+                <strong>Total final:</strong> $${window.formatearNum(pedido.total)}
+            `;
+        };
 
         // 1. OBTENER EL ID DEL NEGOCIO DESDE LA URL
         const urlParams = new URLSearchParams(window.location.search);
@@ -376,17 +488,59 @@ button:active,
 
         window.agregarAlCarrito = (id) => {
             if(id.startsWith('pack_')) {
-                let pkId = id.replace('pack_', ''); const pk = packs.find(x => x.id === pkId); const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
-                let stockMax = window.calcularStockPack(pk); let actualInCart = carrito.filter(i => i.idProd === id).length;
-                if(actualInCart + c > stockMax) { alert("Límite de stock alcanzado."); return; }
+                let pkId = id.replace('pack_', '');
+                const pk = packs.find(x => x.id === pkId);
+                if(!pk) { window.mostrarToast("No se encontró el pack seleccionado."); return; }
+
+                const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
+                const stockMax = window.calcularStockPack(pk);
+                const actualInCart = window.contarEnCarrito(id, 'pack');
+
+                if(stockMax <= 0) {
+                    window.mostrarToast("Este combo está agotado.");
+                    return;
+                }
+                if(c < 1) {
+                    window.mostrarToast("La cantidad mínima es 1.");
+                    return;
+                }
+                if(actualInCart + c > stockMax) {
+                    window.mostrarToast(`Stock insuficiente. Disponible: ${window.formatearNum(stockMax - actualInCart)} combo(s).`);
+                    return;
+                }
+
                 for(let i=0; i<c; i++) carrito.push({ idProd: id, idVar: 'pack', nombre: pk.nombre, detalle: 'Combo Promocional', precio: pk.precio, isPack: true, packRef: pk });
+                window.mostrarToast(`${pk.nombre} agregado al carrito`);
             } else {
-                const p = productos.find(x => x.id === id); const vId = document.getElementById(`sel-var-${id}`).value; const v = p.variantes[vId]; const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
+                const p = productos.find(x => x.id === id);
+                if(!p) { window.mostrarToast("No se encontró el producto seleccionado."); return; }
+
+                const vId = document.getElementById(`sel-var-${id}`).value;
+                const v = p.variantes[vId];
+                const c = parseInt(document.getElementById(`cant-${id}`).value) || 1;
+                const actualInCart = window.contarEnCarrito(id, vId);
+                const stockMax = parseInt(v.stock) || 0;
                 let prFinal = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? v.precioOferta : v.precio;
-                if (carrito.filter(i => i.idProd === id && i.idVar === vId).length + c > v.stock) return;
+
+                if(stockMax <= 0) {
+                    window.mostrarToast("Este producto está agotado.");
+                    return;
+                }
+                if(c < 1) {
+                    window.mostrarToast("La cantidad mínima es 1.");
+                    return;
+                }
+                if(actualInCart + c > stockMax) {
+                    window.mostrarToast(`Stock insuficiente. Disponible: ${window.formatearNum(stockMax - actualInCart)} unidad(es).`);
+                    return;
+                }
+
                 for(let i=0; i<c; i++) carrito.push({ idProd: id, idVar: vId, nombre: p.nombre, detalle: v.detalle, precio: prFinal, isPack: false });
+                window.mostrarToast(`${p.nombre} agregado al carrito`);
             }
-            actualizarBadge(); window.renderizarCarrito(); document.getElementById(`cant-${id}`).value = 1;
+            actualizarBadge();
+            window.renderizarCarrito();
+            document.getElementById(`cant-${id}`).value = 1;
         };
         window.quitarDelCarrito = (idx) => { carrito.splice(idx, 1); actualizarBadge(); window.renderizarCarrito(); };
         window.vaciarCarrito = () => { carrito = []; actualizarBadge(); window.renderizarCarrito(); };
@@ -410,7 +564,24 @@ button:active,
                     const descPct = (perfilCli.descuentosCat && perfilCli.descuentosCat[cat] !== undefined) ? perfilCli.descuentosCat[cat] : perfilCli.descuentoGlobal;
                     subtotalBruto += p.precio; descuentoMonto += p.precio * (descPct / 100);
                 });
-                Object.values(cV).forEach(i => { l.innerHTML += `<div class="carrito-item"><div><span style="color:var(--text-main); font-size:0.95rem; text-transform:uppercase; font-weight:500;">${i.nombre}</span><br><span style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">${i.detalle} x${i.c}</span></div><div style="display:flex; align-items:center; gap:15px;"><span style="color:var(--text-main); font-size:0.95rem; font-weight:500;">$${window.formatearNum(i.precio*i.c)}</span><button onclick="window.quitarDelCarrito(${i.idx})" class="danger" style="padding:4px 8px; border-radius:4px;">X</button></div></div>`; });
+                Object.values(cV).forEach(i => {
+                    l.innerHTML += `
+                        <div class="carrito-item">
+                            <div>
+                                <span style="color:var(--text-main); font-size:0.95rem; text-transform:uppercase; font-weight:500;">${i.nombre}</span><br>
+                                <span style="color:var(--text-muted); font-size:0.75rem; text-transform:uppercase;">${i.detalle}</span>
+                            </div>
+                            <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap; justify-content:flex-end;">
+                                <div class="control-cantidad-carrito">
+                                    <button type="button" onclick="window.disminuirCantidadCarrito(${i.idx})">−</button>
+                                    <span>${i.c}</span>
+                                    <button type="button" onclick="window.aumentarCantidadCarrito(${i.idx})">+</button>
+                                </div>
+                                <span style="color:var(--text-main); font-size:0.95rem; font-weight:500; min-width:80px; text-align:right;">$${window.formatearNum(i.precio*i.c)}</span>
+                                <button onclick="window.quitarDelCarrito(${i.idx})" class="danger" style="padding:4px 8px; border-radius:4px;">X</button>
+                            </div>
+                        </div>`;
+                });
             } 
             let total = subtotalBruto - descuentoMonto;
             if (descuentoMonto > 0) { l.innerHTML += `<div style="display:flex; justify-content:space-between; align-items:center; padding: 10px 0;"><span style="color:var(--accent); font-size:0.85rem; font-weight:500;">Ahorro Cliente (${perfilCli.nombre})</span><span style="color:var(--accent); font-weight:600;">-$${window.formatearNum(descuentoMonto)}</span></div>`; }
@@ -422,14 +593,27 @@ button:active,
             if(!configTienda.telefono) { alert("El local aún no configuró su número de contacto."); return; }
             const numeroLimpio = configTienda.telefono.replace(/[^0-9]/g, '');
             
-            let texto = `Hola! Acabo de completar mi pedido en el sitio web. Por favor coordinemos el pago y la entrega.`;
+            let texto = `Hola! Me comunico desde la tienda en línea.`;
             
             if (ultimoPedidoConf) {
-                texto = `Hola! Acabo de generar el pedido *#${ultimoPedidoConf.idCorto}*.\n\n*Resumen del pedido:*\n`;
+                texto = `Hola! Acabo de generar el pedido *#${ultimoPedidoConf.idCorto}*.\n\n`;
+                texto += `*Datos del cliente*\n`;
+                texto += `Nombre: ${ultimoPedidoConf.nombreCliente} ${ultimoPedidoConf.apellidoCliente}\n`;
+                texto += `Teléfono: ${ultimoPedidoConf.telefono}\n\n`;
+                texto += `*Entrega*\n`;
+                texto += `Modalidad: ${ultimoPedidoConf.metodoEntrega}\n`;
+                texto += `Dirección/Retiro: ${ultimoPedidoConf.direccion}\n\n`;
+                texto += `*Pago*\n`;
+                texto += `Método: ${ultimoPedidoConf.metodoPago}\n`;
+                if(ultimoPedidoConf.tipoCliente) texto += `Tipo de cliente: ${ultimoPedidoConf.tipoCliente}\n`;
+                if(ultimoPedidoConf.descuentoMonto > 0) texto += `Descuento aplicado: -$${window.formatearNum(ultimoPedidoConf.descuentoMonto)}\n`;
+                if(ultimoPedidoConf.costoEnvio > 0) texto += `Costo de envío: $${window.formatearNum(ultimoPedidoConf.costoEnvio)}\n`;
+                texto += `\n*Resumen del pedido*\n`;
                 ultimoPedidoConf.items.forEach(i => {
                     texto += `- ${i.cantidad}x ${i.nombre} (${i.detalle}): $${window.formatearNum(i.precio * i.cantidad)}\n`;
                 });
-                texto += `\n*Total a pagar: $${window.formatearNum(ultimoPedidoConf.total)}*\n\nPor favor coordinemos el pago y la entrega.`;
+                texto += `\n*Total final: $${window.formatearNum(ultimoPedidoConf.total)}*\n\n`;
+                texto += `Por favor coordinemos la confirmación, el pago y la entrega.`;
             }
             
             window.open(`https://wa.me/${numeroLimpio}?text=${encodeURIComponent(texto)}`, '_blank');
@@ -493,6 +677,7 @@ button:active,
                 window.renderizarCatalogoYStock();
                 
                 document.getElementById('exito-id').textContent = `#${idC}`;
+                document.getElementById('resumen-confirmacion').innerHTML = window.generarResumenConfirmacionHTML(nuevoPedido);
                 document.getElementById('carrito-vista-lista').classList.add('hidden'); document.getElementById('carrito-vista-exito').classList.remove('hidden');
                 document.getElementById('checkout-nombre').value = ""; document.getElementById('checkout-apellido').value = ""; document.getElementById('checkout-telefono').value = ""; document.getElementById('checkout-direccion').value = "";
             } catch (e) { 
