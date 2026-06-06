@@ -643,6 +643,7 @@
         };
         
         let modoLogin = true;
+        let registroEnCurso = false;
         let panelFuncionesListas = false;
         const esperarPanelListo = () => new Promise(resolve => {
             if (panelFuncionesListas) return resolve();
@@ -655,6 +656,10 @@
         // ===== LÓGICA DE AUTENTICACIÓN =====
        // ===== LÓGICA DE AUTENTICACIÓN VERIFICANDO ROL =====
         onAuthStateChanged(auth, async (user) => {
+            if (user && registroEnCurso) {
+                return;
+            }
+
             if (user) {
                 try {
                     // 1. Buscar el documento del usuario en Firestore
@@ -759,6 +764,7 @@
             const nombreNegocio = document.getElementById('login-negocio').value.trim();
             const email = document.getElementById('login-email').value.trim();
             const pass = document.getElementById('login-pass').value;
+            const btn = document.getElementById('btn-auth-principal');
 
             if(!nombreNegocio || !email || !pass) {
                 return alert("Por favor, completa todos los campos para el registro.");
@@ -768,36 +774,59 @@
             }
 
             try {
-                // 1. Crear el usuario en Authentication
+                registroEnCurso = true;
+                if(btn) {
+                    btn.disabled = true;
+                    btn.textContent = "Registrando...";
+                }
+
+                // 1. Crear el usuario en Authentication.
                 const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
                 const user = userCredential.user;
                 const nuevoNegocioId = genIdDB();
 
-                // 2. Crear el documento del negocio en Firestore
-                await setDoc(doc(db, "negocios", nuevoNegocioId), {
-                    nombre: nombreNegocio,
-                    creadoEl: new Date()
-                });
-
-                // 3. Crear el usuario con rol "pendiente"
+                // 2. Crear PRIMERO el documento del usuario.
+                // Esto evita que quede un negocio creado sin usuario asociado.
                 await setDoc(doc(db, "usuarios", user.uid), {
                     email: email,
                     negocioId: nuevoNegocioId,
-                    rol: "pendiente" // <- REGISTRA COMO PENDIENTE
+                    rol: "pendiente",
+                    creadoEl: new Date()
+                });
+
+                // 3. Crear el negocio y guardar el UID dueño.
+                await setDoc(doc(db, "negocios", nuevoNegocioId), {
+                    nombre: nombreNegocio,
+                    creadoEl: new Date(),
+                    ownerUid: user.uid
                 });
 
                 alert("¡Registro exitoso! Tu solicitud fue enviada. Podrás ingresar al panel una vez que el administrador central apruebe tu cuenta.");
-                
-                // Al crearse la cuenta, Firebase inicia sesión automáticamente.
-                // Nuestro onAuthStateChanged de arriba va a detectar que el rol es "pendiente",
-                // mostrará el cartel correspondiente y lo mantendrá en la pantalla de login.
+
+                await signOut(auth);
+
+                document.getElementById('login-negocio').value = '';
+                document.getElementById('login-email').value = '';
+                document.getElementById('login-pass').value = '';
+
+                if(!modoLogin) {
+                    window.alternarModoAuth();
+                }
 
             } catch (error) {
                 console.error("Error en el registro:", error);
                 if (error.code === 'auth/email-already-in-use') {
                     alert("Este correo electrónico ya está registrado. Por favor, inicia sesión o usa uno diferente.");
+                } else if (error.code === 'permission-denied') {
+                    alert("No se pudo crear el usuario en Firestore por permisos. Revisá las reglas de la colección usuarios para permitir crear el documento con el UID del usuario autenticado.");
                 } else {
                     alert("No se pudo completar el registro: " + error.message);
+                }
+            } finally {
+                registroEnCurso = false;
+                if(btn) {
+                    btn.disabled = false;
+                    btn.textContent = modoLogin ? "Ingresar al Panel" : "Registrarme y Crear Tienda";
                 }
             }
         };
