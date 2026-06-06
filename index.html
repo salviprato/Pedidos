@@ -269,7 +269,7 @@
                         <div><label class="mini-label">Cliente / Teléfono</label><input type="text" id="filtro-pedido-cliente" placeholder="Buscar..." onkeyup="window.renderizarPedidos()"></div>
                         <div><label class="mini-label">Pago</label><select id="filtro-pedido-pago" onchange="window.renderizarPedidos()"><option value="">Todos</option><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option></select></div>
                         <div><label class="mini-label">Entrega</label><select id="filtro-pedido-entrega" onchange="window.renderizarPedidos()"><option value="">Todas</option><option value="Retiro">Retiro</option><option value="Envio">Envío</option></select></div>
-                        <div><label class="mini-label">Estado</label><select id="filtro-pedido-estado" onchange="window.renderizarPedidos()"><option value="">Todos</option><option value="pendiente">Pendiente</option><option value="confirmado">Confirmado</option><option value="preparando">Preparando</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option><option value="stock_error">Sin stock</option></select></div>
+                        <div><label class="mini-label">Estado</label><select id="filtro-pedido-estado" onchange="window.renderizarPedidos()"><option value="">Todos</option><option value="pendiente">Pendiente</option><option value="preparando">Preparando</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option><option value="stock_error">Sin stock</option></select></div>
                     </div>
                     <div id="lista-pedidos-historial"></div>
                 </div>
@@ -318,32 +318,32 @@
             <h3 style="margin: 0 0 25px 0; font-weight: 500; text-transform: uppercase; font-size: 1rem;">Movimientos</h3>
             <div style="border: 1px solid var(--border); border-radius: 8px; padding: 20px; background: var(--card-bg);">
                 <div class="modulo-oscuro">
-                    <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos')"><span>Ventas Físicas e Ingresos</span></div>
-                    <div id="body-ingresos" class="modulo-body hidden">
-                        <div style="border: 1px solid var(--border); padding: 20px; margin-bottom: 20px; background: var(--card-bg); border-radius:6px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap: wrap; gap: 10px;">
-                                <label style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">Venta de Mostrador</label>
-                                <div class="hidden" style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
-                            </div>
-                            <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
-                            <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
-                            <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
-                            <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" autocomplete="off" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" autocomplete="off" id="mostrador-transf" placeholder="Transf. $"></div></div>
-                            <button onclick="window.registrarVentaMostrador()" style="width:100%; margin-top: 10px;">Registrar Venta</button>
+                    <div class="modulo-header" onclick="window.toggleAcordeon('body-ventas-mostrador')"><span>Ventas en el Mostrador</span></div>
+                    <div id="body-ventas-mostrador" class="modulo-body hidden">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; flex-wrap: wrap; gap: 10px;">
+                            <label style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">Venta de Mostrador</label>
+                            <div class="hidden" style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
                         </div>
-                        <div style="border: 1px solid var(--border); padding: 20px; background: var(--card-bg); border-radius:6px;">
-                            <label style="display:block; font-size:0.8rem; text-transform:uppercase; margin-bottom:15px; font-weight:600;">Ingreso Extraordinario</label>
-                            <div class="dark-input-group"><div style="flex: 2;"><input type="text" autocomplete="off" id="ingreso-manual-detalle" placeholder="Concepto..."></div><div><input type="number" autocomplete="off" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div><div><input type="number" autocomplete="off" id="ingreso-manual-transf" placeholder="Transf. $"></div></div>
-                            <button class="secondary" onclick="window.registrarIngresoManual()" style="width:100%; margin-top: 10px;">Registrar</button>
-                        </div>
+                        <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
+                        <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
+                        <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
+                        <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" autocomplete="off" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" autocomplete="off" id="mostrador-transf" placeholder="Transf. $"></div></div>
+                        <button onclick="window.registrarVentaMostrador()" style="width:100%; margin-top: 10px;">Registrar Venta</button>
                     </div>
                 </div>
                 <div class="modulo-oscuro">
-                    <div class="modulo-header" onclick="window.toggleAcordeon('body-gastos')"><span>Registrar Egresos</span></div>
-                    <div id="body-gastos" class="modulo-body hidden">
+                    <div class="modulo-header" onclick="window.toggleAcordeon('body-egresos-extraordinarios')"><span>Egresos Extraordinarios</span></div>
+                    <div id="body-egresos-extraordinarios" class="modulo-body hidden">
                         <div class="dark-input-group"><div><label>Concepto</label><input type="text" autocomplete="off" id="gasto-titulo"></div><div><label>Monto $</label><input type="number" autocomplete="off" id="gasto-importe"></div></div>
                         <button onclick="window.registrarGasto()" style="width:100%;">Registrar Egreso</button>
                         <div class="table-responsive"><table style="margin-top: 30px;"><thead><tr><th>Detalle</th><th>Importe</th><th>Acción</th></tr></thead><tbody id="tabla-gastos"></tbody></table></div>
+                    </div>
+                </div>
+                <div class="modulo-oscuro">
+                    <div class="modulo-header" onclick="window.toggleAcordeon('body-ingresos-extraordinarios')"><span>Ingresos Extraordinarios</span></div>
+                    <div id="body-ingresos-extraordinarios" class="modulo-body hidden">
+                        <div class="dark-input-group"><div style="flex: 2;"><label>Concepto</label><input type="text" autocomplete="off" id="ingreso-manual-detalle" placeholder="Concepto..."></div><div><label>Efectivo $</label><input type="number" autocomplete="off" id="ingreso-manual-efectivo" placeholder="Efectivo $"></div><div><label>Transferencia $</label><input type="number" autocomplete="off" id="ingreso-manual-transf" placeholder="Transf. $"></div></div>
+                        <button class="secondary" onclick="window.registrarIngresoManual()" style="width:100%; margin-top: 10px;">Registrar Ingreso</button>
                     </div>
                 </div>
             </div>
@@ -533,7 +533,10 @@
 
 
         const pedirConfirmacion = (mensaje) => confirm(mensaje);
-        const normalizarEstadoPedido = (p) => p.estadoPedido || (p.estadoEntrega ? 'entregado' : 'pendiente');
+        const normalizarEstadoPedido = (p) => {
+            const estado = p.estadoPedido || (p.estadoEntrega ? 'entregado' : 'pendiente');
+            return estado === 'confirmado' ? 'pendiente' : estado;
+        };
         const totalIngreso = (i) => (Number(i.efectivo)||0) + (Number(i.transferencia)||0);
 
         window.cargarImagenArchivo = (input, idCampo, idPreview) => {
@@ -833,12 +836,17 @@
                     snapshot.docChanges().forEach(async (change) => {
                         let p = change.doc.data(); p.idDoc = change.doc.id;
                         if(p.fecha && p.fecha.toDate) p.fecha = p.fecha.toDate();
+                        if (p.estadoPedido === 'confirmado') {
+                            p.estadoPedido = 'pendiente';
+                            updateDoc(doc(db, 'pedidos', p.idDoc), { estadoPedido: 'pendiente' }).catch(console.error);
+                        }
 
                         if (change.type === "added") {
                             if (!p.stockDescontado) {
                                 const resultadoStock = await window.descontarStockItems(p.items || [], `Pedido web #${p.idCorto || p.idDoc}`);
                                 if(resultadoStock.ok) {
-                                    await updateDoc(doc(db, "pedidos", p.idDoc), { stockDescontado: true, estadoPedido: p.estadoPedido || 'pendiente' });
+                                    await updateDoc(doc(db, "pedidos", p.idDoc), { stockDescontado: true, estadoPedido: normalizarEstadoPedido(p) });
+                                    p.estadoPedido = normalizarEstadoPedido(p);
                                     p.stockDescontado = true;
                                 } else {
                                     await updateDoc(doc(db, "pedidos", p.idDoc), { stockDescontado: false, estadoPedido: 'stock_error', alertaStock: resultadoStock.errores.join(' | ') });
@@ -1136,7 +1144,7 @@
                 const estado = normalizarEstadoPedido(p);
                 const bC = isP ? `<button class="danger" style="border: 1px solid #ef4444; color: #ef4444;" onclick="window.cancelarPedido('${p.idDoc}', '${p.telefono || ''}')">Cancelar</button>` : '';
                 const bP = p.estadoPago ? `<span style="color:var(--text-dark); font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.idDoc}', ${p.total || 0}, '${p.metodoPago || ''}', '${p.idCorto || ''}')">Registrar Pago</button>`;
-                const bEstado = isP ? `<select onchange="window.cambiarEstadoPedido('${p.idDoc}', this.value)" style="width:auto; min-width:150px;"><option value="pendiente" ${estado==='pendiente'?'selected':''}>Pendiente</option><option value="confirmado" ${estado==='confirmado'?'selected':''}>Confirmado</option><option value="preparando" ${estado==='preparando'?'selected':''}>Preparando</option><option value="stock_error" ${estado==='stock_error'?'selected':''}>Sin stock</option></select>` : `<span class="estado-badge">${estado}</span>`;
+                const bEstado = isP ? `<select onchange="window.cambiarEstadoPedido('${p.idDoc}', this.value)" style="width:auto; min-width:150px;"><option value="pendiente" ${estado==='pendiente'?'selected':''}>Pendiente</option><option value="preparando" ${estado==='preparando'?'selected':''}>Preparando</option><option value="stock_error" ${estado==='stock_error'?'selected':''}>Sin stock</option></select>` : `<span class="estado-badge">${estado}</span>`;
                 const bE = isP ? `<button onclick="window.marcarEntregado('${p.idDoc}', '${p.telefono || ''}')">Entregado</button>` : `<span style="color:var(--text-dark); font-size:0.8rem;">FINALIZADO</span>`;
                 return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto || 'S/C'}</span><br><span class="estado-badge">${estado}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha ? p.fecha.toLocaleString() : ''}</span></div><span style="font-size:1.1rem; font-weight:600; color:var(--primary);">$${window.formatearNum(p.total || 0)}</span></div><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:var(--text-main); font-weight:500;">${p.nombreCliente || ''} ${p.apellidoCliente || ''} ${p.tipoCliente?`(${p.tipoCliente})`:''}</span></p><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${String(p.telefono || '').replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--primary); font-weight:500; text-decoration:none;">${p.telefono || ''}</a></p><p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main); font-weight:500;">${p.metodoEntrega || ''}</span> ${p.direccion && p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p><ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bC} ${bP} ${bEstado} ${bE}</div></div>`;
             };
@@ -1147,6 +1155,7 @@
         };
         
         window.cambiarEstadoPedido = async (idDoc, estado) => {
+            if (estado === 'confirmado') estado = 'pendiente';
             const p = pedidosGlobales.find(x => x.idDoc === idDoc); if(!p) return;
             if(estado === 'cancelado') { window.cancelarPedido(idDoc, p.telefono || ''); return; }
             await updateDoc(doc(db, 'pedidos', idDoc), { estadoPedido: estado });
