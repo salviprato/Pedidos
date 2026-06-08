@@ -759,6 +759,18 @@
         </div>
     </div>
 
+    <!-- MODAL DE CONFIRMACIÓN PERSONALIZADO -->
+    <div id="modal-confirmacion" class="modal-overlay hidden" style="z-index: 1000001;">
+        <div class="modal-content" style="max-width: 430px; text-align: center; padding: 36px 30px;">
+            <h3 id="modal-confirmacion-titulo" style="color: var(--primary); margin-bottom: 18px; border-bottom: none; padding: 0;">Confirmar acción</h3>
+            <p id="modal-confirmacion-texto" style="color: var(--text-main); font-size: 1rem; line-height: 1.5; margin-bottom: 26px;"></p>
+            <div class="modal-actions" style="justify-content: center; border-top: 1px solid var(--border-light); padding-top: 20px; margin-top: 0;">
+                <button type="button" id="btn-confirmacion-cancelar" class="secondary">Cancelar</button>
+                <button type="button" id="btn-confirmacion-aceptar">Aceptar</button>
+            </div>
+        </div>
+    </div>
+
     <!-- MODAL DE ALERTA PERSONALIZADO -->
     <div id="modal-alerta" class="modal-overlay hidden" style="z-index: 1000000;">
         <div class="modal-content" style="max-width: 400px; text-align: center; padding: 40px 30px;">
@@ -852,7 +864,61 @@
         }, 6000);
 
 
-        const pedirConfirmacion = (mensaje) => confirm(mensaje);
+        const pedirConfirmacion = (mensaje, titulo = 'Confirmar acción') => {
+            return new Promise((resolve) => {
+                let modal = document.getElementById('modal-confirmacion');
+
+                // Seguridad: si por algún motivo el HTML del modal no existe, lo creamos acá.
+                if (!modal) {
+                    modal = document.createElement('div');
+                    modal.id = 'modal-confirmacion';
+                    modal.className = 'modal-overlay hidden';
+                    modal.style.zIndex = '1000001';
+                    modal.innerHTML = `
+                        <div class="modal-content" style="max-width: 430px; text-align: center; padding: 36px 30px;">
+                            <h3 id="modal-confirmacion-titulo" style="color: var(--primary); margin-bottom: 18px; border-bottom: none; padding: 0;">Confirmar acción</h3>
+                            <p id="modal-confirmacion-texto" style="color: var(--text-main); font-size: 1rem; line-height: 1.5; margin-bottom: 26px;"></p>
+                            <div class="modal-actions" style="justify-content: center; border-top: 1px solid var(--border-light); padding-top: 20px; margin-top: 0;">
+                                <button type="button" id="btn-confirmacion-cancelar" class="secondary">Cancelar</button>
+                                <button type="button" id="btn-confirmacion-aceptar">Aceptar</button>
+                            </div>
+                        </div>`;
+                    document.body.appendChild(modal);
+                }
+
+                const tituloEl = document.getElementById('modal-confirmacion-titulo');
+                const textoEl = document.getElementById('modal-confirmacion-texto');
+                const btnAceptar = document.getElementById('btn-confirmacion-aceptar');
+                const btnCancelar = document.getElementById('btn-confirmacion-cancelar');
+
+                if (tituloEl) tituloEl.textContent = titulo;
+                if (textoEl) textoEl.textContent = mensaje;
+
+                const cerrar = (valor) => {
+                    modal.classList.add('hidden');
+                    btnAceptar.onclick = null;
+                    btnCancelar.onclick = null;
+                    document.removeEventListener('keydown', manejarEscape);
+                    resolve(valor);
+                };
+
+                const manejarEscape = (e) => {
+                    if (e.key === 'Escape') cerrar(false);
+                };
+
+                btnAceptar.onclick = () => cerrar(true);
+                btnCancelar.onclick = () => cerrar(false);
+                document.addEventListener('keydown', manejarEscape);
+                modal.classList.remove('hidden');
+            });
+        };
+        window.pedirConfirmacion = pedirConfirmacion;
+
+        // Bloquea el confirm nativo del navegador para que ninguna acción vuelva a mostrar el cuadro violeta del navegador/GitHub Pages.
+        window.confirm = (mensaje) => {
+            pedirConfirmacion(String(mensaje || '¿Confirmar acción?'));
+            return false;
+        };
         const normalizarEstadoPedido = (p) => {
             const estado = p.estadoPedido || (p.estadoEntrega ? 'entregado' : 'pendiente');
             return estado === 'confirmado' ? 'pendiente' : estado;
@@ -1394,7 +1460,7 @@
         };
 
         window.borrarProducto = async (id) => { 
-            if(pedirConfirmacion("¿Seguro que deseas eliminar permanentemente este producto o pack? Esta acción es crítica.")) { 
+            if(await pedirConfirmacion("¿Seguro que deseas eliminar permanentemente este producto o pack? Esta acción es crítica.")) { 
                 await deleteDoc(doc(db, "productos", id)); await deleteDoc(doc(db, "packs", id)); 
                 productos = productos.filter(p => p.id !== id); packs = packs.filter(p => p.id !== id); carritoMostrador = carritoMostrador.filter(c => c.idProd !== id); window.renderizarCarritoMostrador(); window.triggerProductos(); 
             } 
@@ -1533,10 +1599,10 @@
             const totalFinal = parseFloat(document.getElementById('total-mostrador').getAttribute('data-total')) || 0;
             let countItems = 0; carritoMostrador.forEach(i => { countItems += i.cantidad; });
             if (abonado === 0 && totalFinal > 0) { alert("Ingresa el monto de pago (Efectivo o Transferencia)."); return; }
-            if (Math.abs(abonado - totalFinal) > 0.01 && !pedirConfirmacion(`El total es $${window.formatearNum(totalFinal)} y el pago cargado es $${window.formatearNum(abonado)}. ¿Registrar igual?`)) return;
+            if (Math.abs(abonado - totalFinal) > 0.01 && !(await pedirConfirmacion(`El total es $${window.formatearNum(totalFinal)} y el pago cargado es $${window.formatearNum(abonado)}. ¿Registrar igual?`))) return;
             const erroresStock = window.verificarStockItems(carritoMostrador);
             if(erroresStock.length) { alert('No se puede registrar la venta por falta de stock:\n\n' + erroresStock.join('\n')); return; }
-            if(!pedirConfirmacion('¿Confirmar venta de mostrador y descontar stock?')) return;
+            if(!(await pedirConfirmacion('¿Confirmar venta de mostrador y descontar stock?'))) return;
             const selCliente = document.getElementById('mostrador-tipo-cliente');
             const clienteName = selCliente.options[selCliente.selectedIndex].text.split(' (')[0];
             const resultado = await window.descontarStockItems(carritoMostrador, 'Venta de mostrador');
@@ -1548,8 +1614,8 @@
         };
 
         window.registrarIngresoManual = async () => { const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0; if (d && (e>0 || t>0)) { let i = { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t, negocioId: negocioIdActual }; await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = ""; window.triggerIngresos(); } };
-        window.registrarGasto = async () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { if(i >= 50000 && !pedirConfirmacion(`Vas a registrar un egreso de $${window.formatearNum(i)}. ¿Confirmar?`)) return; let g = { fecha: new Date(), titulo: t, importe: i, negocioId: negocioIdActual }; const docRef = await addDoc(collection(db, "gastos"), g); g.id = docRef.id; gastosGlobales.push(g); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
-        window.borrarGasto = async (id) => { if(!pedirConfirmacion("¿Eliminar este egreso?")) return; await deleteDoc(doc(db, "gastos", id)); gastosGlobales = gastosGlobales.filter(g => g.id !== id); window.triggerGastos(); };
+        window.registrarGasto = async () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { if(i >= 50000 && !(await pedirConfirmacion(`Vas a registrar un egreso de $${window.formatearNum(i)}. ¿Confirmar?`))) return; let g = { fecha: new Date(), titulo: t, importe: i, negocioId: negocioIdActual }; const docRef = await addDoc(collection(db, "gastos"), g); g.id = docRef.id; gastosGlobales.push(g); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
+        window.borrarGasto = async (id) => { if(!(await pedirConfirmacion("¿Eliminar este egreso?"))) return; await deleteDoc(doc(db, "gastos", id)); gastosGlobales = gastosGlobales.filter(g => g.id !== id); window.triggerGastos(); };
         window.calcularBalanceEnVivo = () => {
             const p = document.getElementById('filtro-periodo').value; const hoy = new Date(); let dias = p==='hoy'?1:p==='semana'?7:p==='mes'?30:99999; let tIng = 0; let tGas = 0;
             ingresosGlobales.forEach(i => { if((hoy - i.fecha)/86400000 <= dias) tIng += (i.efectivo + i.transferencia); });
@@ -1647,7 +1713,7 @@
         window.marcarPagado = async (idDoc, t, m, c) => { 
             const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) { 
-                if(!pedirConfirmacion(`¿Registrar como pagado el pedido #${c}?`)) return;
+                if(!(await pedirConfirmacion(`¿Registrar como pagado el pedido #${c}?`))) return;
                 await updateDoc(doc(db, "pedidos", idDoc), { estadoPago: true });
                 p.estadoPago = true; 
                 
@@ -1666,7 +1732,7 @@
         window.marcarEntregado = async (idDoc, font) => {
             const p = pedidosGlobales.find(x => x.idDoc === idDoc);
             if(p) {
-                if(!pedirConfirmacion(`¿Marcar como entregado el pedido #${p.idCorto || ''}?`)) return;
+                if(!(await pedirConfirmacion(`¿Marcar como entregado el pedido #${p.idCorto || ''}?`))) return;
                 const yaCobrado = ingresosGlobales.some(ing => ing.detalle.includes(`Liquidación #${p.idCorto}`));
                 
                 if(!p.estadoPago && !yaCobrado) { 
@@ -1690,7 +1756,7 @@
         };
 
         window.cancelarPedido = async (idDoc, font) => {
-            if(!pedirConfirmacion("¿Cancelar este pedido y reponer el stock?")) return;
+            if(!(await pedirConfirmacion("¿Cancelar este pedido y reponer el stock?"))) return;
             const p = pedidosGlobales.find(x => x.idDoc === idDoc); if(!p) return;
             
             if (p.stockDescontado !== false) {
