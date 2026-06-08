@@ -130,7 +130,7 @@
         .resumen-lista b { color:var(--text-main); font-weight:500 !important; }
         .mostrador-producto-wrap { position:relative; }
         .mostrador-producto-wrap input { padding-right: 12px; }
-        .estado-badge { display:inline-block; padding:4px 8px; border-radius:999px; background:var(--border-light); color:var(--primary); font-size:0.68rem; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
+        .estado-badge { display:none !important; padding:4px 8px; border-radius:999px; background:var(--border-light); color:var(--primary); font-size:0.68rem; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
         .filtros-pedidos { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; padding:15px; border:1px solid var(--border); border-radius:8px; margin-bottom:18px; background:var(--card-bg); }
         .preview-img-admin { width:70px; height:70px; object-fit:cover; border:1px solid var(--border); border-radius:6px; display:none; margin-top:8px; }
         .stock-fecha { display:block; color:var(--text-dark); font-size:0.65rem; margin-top:2px; text-transform:none; letter-spacing:0; }
@@ -581,7 +581,6 @@
                         <div><label class="mini-label">Cliente / Teléfono</label><input type="text" id="filtro-pedido-cliente" placeholder="Buscar..." onkeyup="window.renderizarPedidos()"></div>
                         <div><label class="mini-label">Pago</label><select id="filtro-pedido-pago" onchange="window.renderizarPedidos()"><option value="">Todos</option><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option></select></div>
                         <div><label class="mini-label">Entrega</label><select id="filtro-pedido-entrega" onchange="window.renderizarPedidos()"><option value="">Todas</option><option value="Retiro">Retiro</option><option value="Envio">Envío</option></select></div>
-                        <div><label class="mini-label">Estado</label><select id="filtro-pedido-estado" onchange="window.renderizarPedidos()"><option value="">Todos</option><option value="pendiente">Pendiente</option><option value="preparando">Preparando</option><option value="entregado">Entregado</option><option value="cancelado">Cancelado</option><option value="stock_error">Sin stock</option></select></div>
                     </div>
                     <div id="lista-pedidos-historial"></div>
                 </div>
@@ -860,6 +859,65 @@
         };
         const totalIngreso = (i) => (Number(i.efectivo)||0) + (Number(i.transferencia)||0);
 
+        const obtenerNombreClientePedido = (p = {}) => {
+            const textoValido = (v) => {
+                if (v === null || v === undefined) return '';
+                if (typeof v === 'object') return '';
+                const t = String(v).trim();
+                if (!t) return '';
+                if (/^(undefined|null|sin nombre|cliente sin nombre)$/i.test(t)) return '';
+                return t;
+            };
+
+            const unirNombreApellido = (obj) => {
+                if (!obj || typeof obj !== 'object') return '';
+                return [
+                    textoValido(obj.nombreCliente || obj.clienteNombre || obj.nombre || obj.name || obj.firstName || obj.nombres),
+                    textoValido(obj.apellidoCliente || obj.clienteApellido || obj.apellido || obj.lastName || obj.apellidos)
+                ].filter(Boolean).join(' ').trim();
+            };
+
+            const candidatos = [
+                unirNombreApellido(p),
+                textoValido(p.nombreCompleto),
+                textoValido(p.nombreApellido),
+                textoValido(p.nombre_apellido),
+                textoValido(p.clienteNombreCompleto),
+                textoValido(p.clienteName),
+                textoValido(p.customerName),
+                textoValido(p.userName),
+                textoValido(p.usuarioNombre),
+                textoValido(p.displayName),
+                textoValido(p.destinatario),
+                textoValido(p.contacto),
+                textoValido(p.cliente),
+                unirNombreApellido(p.cliente),
+                unirNombreApellido(p.datosCliente),
+                unirNombreApellido(p.infoCliente),
+                unirNombreApellido(p.comprador),
+                unirNombreApellido(p.usuario),
+                unirNombreApellido(p.user),
+                unirNombreApellido(p.customer),
+                unirNombreApellido(p.datosUsuario),
+                unirNombreApellido(p.envio)
+            ];
+
+            const encontrado = candidatos.find(Boolean);
+            return encontrado || 'Cliente sin nombre';
+        };
+
+        const limpiarControlesEstadoPedido = () => {
+            document.querySelectorAll('select[onchange*="cambiarEstadoPedido"], .estado-badge').forEach(el => el.remove());
+            document.querySelectorAll('select').forEach(sel => {
+                const valores = Array.from(sel.options || []).map(o => o.value);
+                if (valores.includes('stock_error') && valores.includes('preparando')) {
+                    const contenedor = sel.closest('div');
+                    if (contenedor) contenedor.remove();
+                    else sel.remove();
+                }
+            });
+        };
+
         window.cargarImagenArchivo = (input, idCampo, idPreview) => {
             const file = input.files && input.files[0];
             if(!file) return;
@@ -953,13 +1011,13 @@
                 titulo.textContent = 'Pedidos pendientes';
                 const pendientes = pedidosGlobales.filter(p => !p.estadoEntrega && normalizarEstadoPedido(p) !== 'cancelado');
                 html = pendientes.length
-                    ? `<ul class="resumen-lista">${pendientes.map(p => `<li><b>${p.nombre || p.cliente || 'Cliente sin nombre'}</b><span>$${window.formatearNum(p.total || 0)} · ${normalizarEstadoPedido(p)}</span></li>`).join('')}</ul>`
+                    ? `<ul class="resumen-lista">${pendientes.map(p => `<li><b>${obtenerNombreClientePedido(p)}</b><span>$${window.formatearNum(p.total || 0)}</span></li>`).join('')}</ul>`
                     : '<p style="color:var(--text-muted); margin:0;">No hay pedidos pendientes.</p>';
             } else if(tipo === 'pagos') {
                 titulo.textContent = 'Pagos pendientes';
                 const pendientesPago = pedidosGlobales.filter(p => !p.estadoPago && normalizarEstadoPedido(p) !== 'cancelado');
                 html = pendientesPago.length
-                    ? `<ul class="resumen-lista">${pendientesPago.map(p => `<li><b>${p.nombre || p.cliente || 'Cliente sin nombre'}</b><span>$${window.formatearNum(p.total || 0)} pendiente</span></li>`).join('')}</ul>`
+                    ? `<ul class="resumen-lista">${pendientesPago.map(p => `<li><b>${obtenerNombreClientePedido(p)}</b><span>$${window.formatearNum(p.total || 0)}</span></li>`).join('')}</ul>`
                     : '<p style="color:var(--text-muted); margin:0;">No hay pagos pendientes.</p>';
             }
             contenido.innerHTML = html;
@@ -1514,7 +1572,7 @@
             const movimientos = [];
             ingresosGlobales.forEach(i => { if(enRango(i.fecha)) movimientos.push({ Fecha: i.fecha.toLocaleDateString('es-AR'), Hora: i.fecha.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}), Tipo:'Ingreso', Concepto:i.tipo || 'Ingreso', Detalle:i.detalle || '', Efectivo:Number(i.efectivo)||0, Transferencia:Number(i.transferencia)||0, Total:totalIngreso(i) }); });
             gastosGlobales.forEach(g => { if(enRango(g.fecha)) movimientos.push({ Fecha: g.fecha.toLocaleDateString('es-AR'), Hora: g.fecha.toLocaleTimeString('es-AR',{hour:'2-digit',minute:'2-digit'}), Tipo:'Egreso', Concepto:g.titulo || 'Egreso', Detalle:g.descripcion || '', Efectivo:'', Transferencia:'', Total:-(Number(g.importe)||0) }); });
-            const pedidos = pedidosGlobales.filter(p => p.fecha && enRango(p.fecha)).map(p => ({ Fecha:p.fecha.toLocaleDateString('es-AR'), Código:p.idCorto || '', Cliente:`${p.nombreCliente || ''} ${p.apellidoCliente || ''}`.trim(), Teléfono:p.telefono || '', Estado:normalizarEstadoPedido(p), Pago:p.estadoPago?'Cobrado':'Pendiente', Método:p.metodoPago || '', Entrega:p.metodoEntrega || '', Total:Number(p.total)||0, Stock:p.stockDescontado===false?'No descontado':'Descontado' }));
+            const pedidos = pedidosGlobales.filter(p => p.fecha && enRango(p.fecha)).map(p => ({ Fecha:p.fecha.toLocaleDateString('es-AR'), Código:p.idCorto || '', Cliente:obtenerNombreClientePedido(p), Teléfono:p.telefono || '', Estado:normalizarEstadoPedido(p), Pago:p.estadoPago?'Cobrado':'Pendiente', Método:p.metodoPago || '', Entrega:p.metodoEntrega || '', Total:Number(p.total)||0, Stock:p.stockDescontado===false?'No descontado':'Descontado' }));
             const ventas = [];
             pedidosGlobales.filter(p => p.fecha && enRango(p.fecha)).forEach(p => (p.items||[]).forEach(it => ventas.push({ Fecha:p.fecha.toLocaleDateString('es-AR'), Origen:'Web', Código:p.idCorto || '', Producto:it.nombre, Variante:it.detalle, Cantidad:it.cantidad, PrecioUnitario:it.precio, Total:(it.precio||0)*(it.cantidad||1) })));
             ingresosGlobales.filter(i => i.fecha && enRango(i.fecha) && (i.tipo === 'venta_mostrador' || i.tipo === 'venta')).forEach(i => ventas.push({ Fecha:i.fecha.toLocaleDateString('es-AR'), Origen:'Mostrador', Código:'', Producto:i.detalle || 'Venta mostrador', Variante:'', Cantidad:i.itemsCount || 1, PrecioUnitario:'', Total:totalIngreso(i) }));
@@ -1544,18 +1602,16 @@
             const clienteTxt = (document.getElementById('filtro-pedido-cliente')?.value || '').toLowerCase();
             const pagoFiltro = document.getElementById('filtro-pedido-pago')?.value || '';
             const entregaFiltro = document.getElementById('filtro-pedido-entrega')?.value || '';
-            const estadoFiltro = document.getElementById('filtro-pedido-estado')?.value || '';
             const desde = desdeVal ? new Date(desdeVal + 'T00:00:00') : null;
             const hasta = hastaVal ? new Date(hastaVal + 'T23:59:59') : null;
             const pasaFiltros = (p) => {
                 const est = normalizarEstadoPedido(p);
-                const txt = `${p.nombreCliente || ''} ${p.apellidoCliente || ''} ${p.telefono || ''} ${p.idCorto || ''}`.toLowerCase();
+                const txt = `${obtenerNombreClientePedido(p)} ${p.telefono || ''} ${p.idCorto || ''}`.toLowerCase();
                 if(desde && p.fecha < desde) return false;
                 if(hasta && p.fecha > hasta) return false;
                 if(clienteTxt && !txt.includes(clienteTxt)) return false;
                 if(pagoFiltro && p.metodoPago !== pagoFiltro) return false;
                 if(entregaFiltro && p.metodoEntrega !== entregaFiltro) return false;
-                if(estadoFiltro && est !== estadoFiltro) return false;
                 return true;
             };
             const listaCompleta = pedidosGlobales.slice().sort((a,b) => b.fecha - a.fecha);
@@ -1570,12 +1626,13 @@
                 const bC = isP ? `<button class="danger" style="border: 1px solid #ef4444; color: #ef4444;" onclick="window.cancelarPedido('${p.idDoc}', '${p.telefono || ''}')">Cancelar</button>` : '';
                 const bP = p.estadoPago ? `<span style="color:var(--text-dark); font-size:0.8rem; margin-top:10px;">COBRADO</span>` : `<button class="secondary" onclick="window.marcarPagado('${p.idDoc}', ${p.total || 0}, '${p.metodoPago || ''}', '${p.idCorto || ''}')">Registrar Pago</button>`;
                 const bE = isP ? `<button onclick="window.marcarEntregado('${p.idDoc}', '${p.telefono || ''}')">Entregado</button>` : `<span style="color:var(--text-dark); font-size:0.8rem;">FINALIZADO</span>`;
-                return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto || 'S/C'}</span><br><span class="estado-badge">${estado}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha ? p.fecha.toLocaleString() : ''}</span></div><span style="font-size:1.1rem; font-weight:600; color:var(--primary);">$${window.formatearNum(p.total || 0)}</span></div><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:var(--text-main); font-weight:500;">${p.nombreCliente || ''} ${p.apellidoCliente || ''} ${p.tipoCliente?`(${p.tipoCliente})`:''}</span></p><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${String(p.telefono || '').replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--primary); font-weight:500; text-decoration:none;">${p.telefono || ''}</a></p><p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main); font-weight:500;">${p.metodoEntrega || ''}</span> ${p.direccion && p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p><ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bC} ${bP} ${bE}</div></div>`;
+                return `<div class="pedido-card"><div class="pedido-header"><div><span class="pedido-id">#${p.idCorto || 'S/C'}</span><br><span style="font-size:0.75rem; color:var(--text-dark); text-transform:uppercase;">${p.fecha ? p.fecha.toLocaleString() : ''}</span></div><span style="font-size:1.1rem; font-weight:600; color:var(--primary);">$${window.formatearNum(p.total || 0)}</span></div><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">CLIENTE: <span style="color:var(--text-main); font-weight:500;">${obtenerNombreClientePedido(p)} ${p.tipoCliente?`(${p.tipoCliente})`:''}</span></p><p style="margin:0 0 5px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">TEL: <a href="https://wa.me/${String(p.telefono || '').replace(/[^0-9]/g,'')}" target="_blank" style="color:var(--primary); font-weight:500; text-decoration:none;">${p.telefono || ''}</a></p><p style="margin:0 0 20px 0; color:var(--text-muted); font-size:0.85rem; text-transform:uppercase;">ENTREGA: <span style="color:var(--text-main); font-weight:500;">${p.metodoEntrega || ''}</span> ${p.direccion && p.direccion!=='Retiro en local'? ' - ' + p.direccion : ''}</p><ul class="pedido-items">${it}</ul><div class="pedido-actions" style="align-items:center;">${bC} ${bP} ${bE}</div></div>`;
             };
             pend.forEach(p => lP.innerHTML += card(p, true)); entr.forEach(p => lH.innerHTML += card(p, false));
             if(!pend.length) lP.innerHTML = '<p style="color:var(--text-muted);">No hay pedidos pendientes con estos filtros.</p>';
             if(!entr.length) lH.innerHTML = '<p style="color:var(--text-muted);">No hay historial con estos filtros.</p>';
             window.actualizarNotificaciones();
+            limpiarControlesEstadoPedido();
         };
         
         window.cambiarEstadoPedido = async (idDoc, estado) => {
@@ -1667,7 +1724,7 @@
             p.estadoPedido = 'cancelado'; p.estadoEntrega = true; p.stockDescontado = false;
             window.triggerProductos(); window.triggerPedidos(); 
         };
-        window.triggerPedidos = () => { window.renderizarPedidos(); window.actualizarNotificaciones(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
+        window.triggerPedidos = () => { window.renderizarPedidos(); limpiarControlesEstadoPedido(); window.actualizarNotificaciones(); if(!document.getElementById('panel-metricas').classList.contains('hidden')) window.actualizarGraficos(); };
 
         function obtenerCestasPeriodo(periodo) {
             let cestas = []; let hoy = new Date(); hoy.setHours(0,0,0,0);
