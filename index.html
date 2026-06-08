@@ -119,9 +119,17 @@
 
         /* ===== ACTUALIZACIONES DE GESTIÓN ===== */
         .notif-bar { display:flex; gap:10px; flex-wrap:wrap; margin-bottom:20px; }
-        .notif-card { flex:1; min-width:180px; border:1px solid var(--border); border-left:4px solid var(--accent); background:var(--card-bg); padding:14px; border-radius:8px; }
+        .notif-card { flex:1; min-width:180px; border:1px solid var(--border); border-left:4px solid var(--accent); background:var(--card-bg); padding:14px; border-radius:8px; cursor:pointer; transition: all 0.25s ease; text-align:left; }
+        .notif-card:hover { background:var(--card-hover); transform: translateY(-1px); box-shadow: 0 6px 16px rgba(0,0,0,0.04); }
+        .notif-card:active { background:#ffffff !important; color:var(--primary) !important; transform: scale(0.98); }
         .notif-card strong { display:block; color:var(--primary); font-size:1.2rem; margin-bottom:4px; }
         .notif-card span { color:var(--text-muted); font-size:0.75rem; text-transform:uppercase; letter-spacing:1px; }
+        .resumen-lista { list-style:none; padding:0; margin:0; text-align:left; font-size:0.86rem; color:var(--text-muted); }
+        .resumen-lista li { display:flex; justify-content:space-between; gap:12px; padding:10px 0; border-bottom:1px solid var(--border-light); }
+        .resumen-lista li:last-child { border-bottom:0; }
+        .resumen-lista b { color:var(--text-main); font-weight:500 !important; }
+        .mostrador-producto-wrap { position:relative; }
+        .mostrador-producto-wrap input { padding-right: 12px; }
         .estado-badge { display:inline-block; padding:4px 8px; border-radius:999px; background:var(--border-light); color:var(--primary); font-size:0.68rem; text-transform:uppercase; letter-spacing:1px; font-weight:600; }
         .filtros-pedidos { display:grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap:12px; padding:15px; border:1px solid var(--border); border-radius:8px; margin-bottom:18px; background:var(--card-bg); }
         .preview-img-admin { width:70px; height:70px; object-fit:cover; border:1px solid var(--border); border-radius:6px; display:none; margin-top:8px; }
@@ -533,23 +541,12 @@
 
 
         <div id="panel-notificaciones" class="notif-bar">
-            <div class="notif-card"><strong id="notif-pedidos">0</strong><span>Pedidos pendientes</span></div>
-            <div class="notif-card"><strong id="notif-stock">0</strong><span>Alertas de stock</span></div>
-            <div class="notif-card"><strong id="notif-pagos">0</strong><span>Pagos pendientes</span></div>
+            <div class="notif-card" onclick="window.abrirResumenNotificacion('pedidos')"><strong id="notif-pedidos">0</strong><span>Pedidos pendientes</span></div>
+            <div class="notif-card" onclick="window.abrirResumenNotificacion('stock')"><strong id="notif-stock">0</strong><span>Alertas de stock</span></div>
+            <div class="notif-card" onclick="window.abrirResumenNotificacion('pagos')"><strong id="notif-pagos">0</strong><span>Pagos pendientes</span></div>
         </div>
 
         <div id="panel-inventario" class="panel-oscuro-container">
-            <div id="modulo-alertas" class="modulo-oscuro" style="display: none; border-color: var(--primary);">
-                <div class="modulo-header" onclick="window.toggleAcordeon('body-alertas')" style="background-color: var(--card-bg);">
-                    <span style="color: var(--accent);">Alertas de Inventario</span>
-                    <span id="badge-alertas" style="color: var(--primary); font-weight: bold;"></span>
-                </div>
-                <div id="body-alertas" class="modulo-body alerta-container">
-                    <div class="alerta-col"><h4>Agotados</h4><ul id="lista-alertas-agotados" class="alerta-lista"></ul></div>
-                    <div class="alerta-col"><h4>Poco Stock Menor a 6</h4><ul id="lista-alertas-bajo" class="alerta-lista"></ul></div>
-                </div>
-            </div>
-
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; flex-wrap: wrap; gap:15px;">
                 <h3 style="margin: 0; font-weight: 500; text-transform: uppercase; letter-spacing: 1px; font-size: 1rem; color: var(--text-main);">Catálogo de Productos</h3>
                 <div style="display: flex; gap: 15px; flex-wrap: wrap; width: 100%; max-width: 650px; justify-content: flex-end; align-items: center;">
@@ -639,7 +636,7 @@
                             <label style="font-size:0.8rem; text-transform:uppercase; font-weight:600;">Venta de Mostrador</label>
                             <div class="hidden" style="display:flex; align-items:center; gap:8px;"><label style="font-size:0.7rem;">Cliente / Descuento</label><select id="mostrador-tipo-cliente" style="padding: 4px; font-size:0.8rem; width: auto;" onchange="window.renderizarCarritoMostrador()"></select></div>
                         </div>
-                        <div class="dark-input-group"><div style="flex: 2;"><select id="mostrador-prod"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
+                        <div class="dark-input-group"><div style="flex: 2;" class="mostrador-producto-wrap"><input type="text" id="mostrador-prod-search" list="mostrador-prod-list" placeholder="Buscar producto por nombre..." autocomplete="off"><datalist id="mostrador-prod-list"></datalist><select id="mostrador-prod" class="hidden"><option value="">Seleccionar producto...</option></select></div><div style="flex: 1; max-width: 100px;"><input type="number" id="mostrador-cant" placeholder="Cant." value="1" min="1"></div><div><button type="button" class="secondary" style="width: 100%;" onclick="window.agregarItemMostrador()">Añadir</button></div></div>
                         <ul id="lista-mostrador" style="list-style:none; padding:0; margin: 10px 0 20px 0; font-size:0.85rem;"></ul>
                         <div style="text-align: right; font-weight: 500; margin-bottom: 15px; color: var(--primary); font-size: 1.1rem; border-bottom: 1px solid var(--border-light); padding-bottom: 10px;">Total de Venta: $<span id="total-mostrador">0</span></div>
                         <div class="dark-input-group"><div><label style="font-size:0.7rem;">Monto en Efectivo $</label><input type="number" autocomplete="off" id="mostrador-efectivo" placeholder="Efectivo $"></div><div><label style="font-size:0.7rem;">Monto Transferencia $</label><input type="number" autocomplete="off" id="mostrador-transf" placeholder="Transf. $"></div></div>
@@ -751,6 +748,15 @@
             <div class="form-group"><label>Cantidad Entrante</label><input type="number" id="stock-cantidad" min="1" value="1"></div>
             <div class="form-group"><label>Costo Total (Egreso) $</label><input type="number" id="stock-nuevo-costo"></div>
             <div class="modal-actions"><button class="secondary" onclick="window.cerrarModalStock()">Descartar</button><button onclick="window.guardarNuevoStock()">Confirmar</button></div>
+        </div>
+    </div>
+
+
+    <div id="modal-resumen-notif" class="modal-overlay hidden" style="z-index: 999999;">
+        <div class="modal-content" style="max-width: 620px;">
+            <h3 id="modal-resumen-titulo">Resumen</h3>
+            <div id="modal-resumen-contenido"></div>
+            <div class="modal-actions"><button onclick="document.getElementById('modal-resumen-notif').classList.add('hidden')">Cerrar</button></div>
         </div>
     </div>
 
@@ -924,6 +930,40 @@
             setTxt('notif-pedidos', pedidosPend);
             setTxt('notif-stock', alertasStock);
             setTxt('notif-pagos', pagosPend);
+        };
+
+        window.abrirResumenNotificacion = (tipo) => {
+            const modal = document.getElementById('modal-resumen-notif');
+            const titulo = document.getElementById('modal-resumen-titulo');
+            const contenido = document.getElementById('modal-resumen-contenido');
+            if(!modal || !titulo || !contenido) return;
+
+            let html = '';
+            if(tipo === 'stock') {
+                titulo.textContent = 'Alertas de stock';
+                const alertas = [];
+                productos.forEach(p => Object.entries(p.variantes || {}).forEach(([vId, v]) => {
+                    const stock = Number(v.stock) || 0;
+                    if(stock < 6) alertas.push({ nombre: `${p.nombre} - ${v.detalle || 'Sin variante'}`, stock });
+                }));
+                html = alertas.length
+                    ? `<ul class="resumen-lista">${alertas.map(a => `<li><b>${a.nombre}</b><span>${a.stock === 0 ? 'Agotado' : a.stock + ' disponibles'}</span></li>`).join('')}</ul>`
+                    : '<p style="color:var(--text-muted); margin:0;">No hay faltas de stock.</p>';
+            } else if(tipo === 'pedidos') {
+                titulo.textContent = 'Pedidos pendientes';
+                const pendientes = pedidosGlobales.filter(p => !p.estadoEntrega && normalizarEstadoPedido(p) !== 'cancelado');
+                html = pendientes.length
+                    ? `<ul class="resumen-lista">${pendientes.map(p => `<li><b>${p.nombre || p.cliente || 'Cliente sin nombre'}</b><span>$${window.formatearNum(p.total || 0)} · ${normalizarEstadoPedido(p)}</span></li>`).join('')}</ul>`
+                    : '<p style="color:var(--text-muted); margin:0;">No hay pedidos pendientes.</p>';
+            } else if(tipo === 'pagos') {
+                titulo.textContent = 'Pagos pendientes';
+                const pendientesPago = pedidosGlobales.filter(p => !p.estadoPago && normalizarEstadoPedido(p) !== 'cancelado');
+                html = pendientesPago.length
+                    ? `<ul class="resumen-lista">${pendientesPago.map(p => `<li><b>${p.nombre || p.cliente || 'Cliente sin nombre'}</b><span>$${window.formatearNum(p.total || 0)} pendiente</span></li>`).join('')}</ul>`
+                    : '<p style="color:var(--text-muted); margin:0;">No hay pagos pendientes.</p>';
+            }
+            contenido.innerHTML = html;
+            modal.classList.remove('hidden');
         };
 
         // Función para mostrar alertas estéticas
@@ -1356,20 +1396,45 @@
                 let estructura = '<div style="font-size:0.75rem; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">'; pk.items.forEach(it => estructura += `<div>• ${it.nombre} (${it.detalle}) x${it.cantidad}</div>`); estructura += `<div>Valor Especial Pack: <strong>$${window.formatearNum(pk.precio)}</strong></div></div>`;
                 t.innerHTML += `<tr><td><div style="display:flex; align-items:center; gap:15px;"><img src="${img}" style="width:40px; height:40px; border-radius:4px; object-fit:cover;" onerror="this.style.display='none'"><span style="color:var(--accent); text-transform:uppercase; font-size:0.8rem; letter-spacing:1px; font-weight:600;">[PACK] ${pk.nombre}</span></div></td><td style="color:var(--text-muted); font-size:0.8rem;">Packs</td><td>${estructura}</td><td style="color:var(--text-main); font-weight:500; font-size:1.1rem;">${window.formatearNum(stockCombo)}</td><td><button class="danger" style="padding:6px 12px; font-size:0.7rem;" onclick="window.borrarProducto('${pk.id}')">Eliminar Pack</button></td></tr>`;
             });
-            const contAlertas = document.getElementById('modulo-alertas');
-            if(countA > 0) { contAlertas.style.display = 'block'; document.getElementById('badge-alertas').textContent = `${countA} Avisos`; document.getElementById('lista-alertas-agotados').innerHTML = hAgot || '<li><span style="color:var(--text-dark);">Ninguno</span></li>'; document.getElementById('lista-alertas-bajo').innerHTML = hPoco || '<li><span style="color:var(--text-dark);">Ninguno</span></li>'; } 
-            else { contAlertas.style.display = 'none'; }
         }
         window.triggerProductos = () => {
             window.renderizarCatalogoYStock(); window.actualizarNotificaciones(); 
-            const sel = document.getElementById('mostrador-prod'); if(!sel) return; sel.innerHTML = '<option value="">Seleccionar...</option>';
-            productos.forEach(p => Object.entries(p.variantes).forEach(([vId, v]) => { if(v.stock>0) { let pr = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? v.precioOferta : v.precio; sel.innerHTML += `<option value="${vId}" data-idprod="${p.id}" data-precio="${pr}" data-detalle="${v.detalle}" data-stock="${v.stock}">${p.nombre} - ${v.detalle}</option>`; } }));
-            packs.forEach(pk => { let stPack = window.calcularStockPack(pk); if(stPack > 0) { sel.innerHTML += `<option value="pack_${pk.id}" data-idprod="pack_${pk.id}" data-precio="${pk.precio}" data-detalle="Combo Pack" data-stock="${stPack}">[PACK] ${pk.nombre}</option>`; } });
+            const sel = document.getElementById('mostrador-prod');
+            const listaBusqueda = document.getElementById('mostrador-prod-list');
+            if(!sel) return;
+            sel.innerHTML = '<option value="">Seleccionar...</option>';
+            if(listaBusqueda) listaBusqueda.innerHTML = '';
+            const agregarOpcionMostrador = (value, idProd, precio, detalle, stock, texto) => {
+                sel.innerHTML += `<option value="${value}" data-idprod="${idProd}" data-precio="${precio}" data-detalle="${detalle}" data-stock="${stock}">${texto}</option>`;
+                if(listaBusqueda) listaBusqueda.innerHTML += `<option value="${texto}"></option>`;
+            };
+            productos.forEach(p => Object.entries(p.variantes || {}).forEach(([vId, v]) => {
+                if((Number(v.stock)||0) > 0) {
+                    let pr = v.precioOferta && window.verificarVigenciaOferta(v.fechaLimiteOferta) ? v.precioOferta : v.precio;
+                    agregarOpcionMostrador(vId, p.id, pr, v.detalle || 'Sin variante', v.stock, `${p.nombre} - ${v.detalle || 'Sin variante'}`);
+                }
+            }));
+            packs.forEach(pk => {
+                let stPack = window.calcularStockPack(pk);
+                if(stPack > 0) agregarOpcionMostrador(`pack_${pk.id}`, `pack_${pk.id}`, pk.precio, 'Combo Pack', stPack, `[PACK] ${pk.nombre}`);
+            });
         };
 
         // VENTAS MOSTRADOR Y FINANZAS
         window.agregarItemMostrador = () => {
-            const sel = document.getElementById('mostrador-prod'); const cant = parseInt(document.getElementById('mostrador-cant').value) || 1; const opt = sel.options[sel.selectedIndex]; if(!opt.value || cant <= 0) return;
+            const sel = document.getElementById('mostrador-prod');
+            const inputBusqueda = document.getElementById('mostrador-prod-search');
+            const cant = parseInt(document.getElementById('mostrador-cant').value) || 1;
+            if(!sel || cant <= 0) return;
+            let opt = null;
+            const textoBuscado = inputBusqueda ? inputBusqueda.value.trim().toLowerCase() : '';
+            if(textoBuscado) {
+                opt = Array.from(sel.options).find(o => o.textContent.trim().toLowerCase() === textoBuscado)
+                   || Array.from(sel.options).find(o => o.textContent.trim().toLowerCase().includes(textoBuscado));
+            } else {
+                opt = sel.options[sel.selectedIndex];
+            }
+            if(!opt || !opt.value) { alert('Seleccioná un producto válido de la búsqueda.'); return; }
             const valId = opt.value; const stock = parseInt(opt.getAttribute('data-stock'));
             if(valId.startsWith('pack_')) {
                 let pkId = valId.replace('pack_', ''); const pk = packs.find(x => x.id === pkId); let existIdx = carritoMostrador.findIndex(x => x.idProd === valId); let qtyInCart = existIdx !== -1 ? carritoMostrador[existIdx].cantidad : 0;
@@ -1380,7 +1445,9 @@
                 if (cant + qtyInCart > stock) { alert("Stock insuficiente."); return; }
                 if(existIdx !== -1) { carritoMostrador[existIdx].cantidad += cant; } else { carritoMostrador.push({ idProd: opt.getAttribute('data-idprod'), idVar: valId, nombre: opt.text.split(' - ')[0], detalle: opt.getAttribute('data-detalle'), precio: parseFloat(opt.getAttribute('data-precio')), cantidad: cant, isPack: false }); }
             }
-            window.renderizarCarritoMostrador(); document.getElementById('mostrador-cant').value = '1';
+            window.renderizarCarritoMostrador();
+            document.getElementById('mostrador-cant').value = '1';
+            if(inputBusqueda) inputBusqueda.value = '';
         };
         window.quitarItemMostrador = (idx) => { carritoMostrador.splice(idx, 1); window.renderizarCarritoMostrador(); };
         window.renderizarCarritoMostrador = () => {
