@@ -821,6 +821,12 @@
         let configTienda = { logo: '', telefono: '', horaApertura: '09:00', horaCierre: '18:00', diasApertura: { 'check-lu':true, 'check-ma':true, 'check-mi':true, 'check-ju':true, 'check-vi':true }, envioDisponible: false, envioPrecio: 0 };
         let metricasChart = null;
 
+        // LISTENERS EN TIEMPO REAL
+        // Firestore usa listeners persistentes con onSnapshot(). Internamente Firebase mantiene una conexión en tiempo real
+        // similar al objetivo de WebSockets, sin que tengas que programar WebSockets manualmente.
+        let unsubTiempoReal = [];
+        let listenersInicializados = false;
+
         window.formatearNum = (num) => new Intl.NumberFormat('es-AR', { maximumFractionDigits: 2 }).format(num);
 
         /* ===== FUNCIÓN GLOBAL PARA FORMATEAR FECHAS ===== */
@@ -1102,6 +1108,7 @@
 
         window.cerrarSesion = async () => {
             try {
+                detenerListenersTiempoReal();
                 negocioIdActual = null;
                 productos = [];
                 packs = [];
@@ -1311,82 +1318,164 @@
         };
 
 
-        // ===== CARGAR BASE DE DATOS (FILTRADA POR NEGOCIO) =====
+        // ===== CARGAR BASE DE DATOS EN TIEMPO REAL (FILTRADA POR NEGOCIO) =====
+        const detenerListenersTiempoReal = () => {
+            unsubTiempoReal.forEach(unsub => {
+                try { unsub(); } catch(e) { console.warn('No se pudo cerrar un listener:', e); }
+            });
+            unsubTiempoReal = [];
+            listenersInicializados = false;
+        };
+
+        const normalizarFechaFirestore = (obj) => {
+            if (obj && obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate();
+            return obj;
+        };
+
+        const docsALista = (snapshot, incluirIdDoc = false) => {
+            return snapshot.docs.map(d => {
+                const obj = normalizarFechaFirestore(d.data());
+                if (incluirIdDoc) obj.idDoc = d.id;
+                else obj.id = d.id;
+                return obj;
+            });
+        };
+
         const cargarDatosBD = async () => {
+            if (!negocioIdActual) return;
+
+            // Si el usuario vuelve a entrar o Firebase dispara Auth otra vez, evitamos listeners duplicados.
+            detenerListenersTiempoReal();
+
             try {
-                // Config y Categorías ahora son documentos únicos POR NEGOCIO
-                const confDoc = await getDoc(doc(db, "configuracion", negocioIdActual)); 
-                if(confDoc.exists()) configTienda = confDoc.data();
-                
-                const catDoc = await getDoc(doc(db, "categorias", negocioIdActual)); 
-                if(catDoc.exists()) categoriasGlobales = catDoc.data().lista || categoriasGlobales;
-                
-                // Las consultas a colecciones ahora llevan el filtro WHERE
+                listenersInicializados = true;
+
+                // CONFIGURACIÓN EN TIEMPO REAL
+                unsubTiempoReal.push(onSnapshot(
+                    doc(db, "configuracion", negocioIdActual),
+                    (confDoc) => {
+                        if (confDoc.exists()) configTienda = confDoc.data();
+                        window.triggerConfiguracion();
+                    },
+                    (error) => console.error('Error listener configuración:', error)
+                ));
+
+                // CATEGORÍAS EN TIEMPO REAL
+                unsubTiempoReal.push(onSnapshot(
+                    doc(db, "categorias", negocioIdActual),
+                    (catDoc) => {
+                        if (catDoc.exists()) categoriasGlobales = catDoc.data().lista || categoriasGlobales;
+                        window.renderizarConfigCategorias();
+                        window.actualizarSelectCategoriasModal();
+                    },
+                    (error) => console.error('Error listener categorías:', error)
+                ));
+
+                // PRODUCTOS EN TIEMPO REAL
                 const qP = query(collection(db, "productos"), where("negocioId", "==", negocioIdActual));
-                const pDoc = await getDocs(qP); 
-                productos = pDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
-                
+                unsubTiempoReal.push(onSnapshot(
+                    qP,
+                    (snapshot) => {
+                        productos = docsALista(snapshot, false);
+                        window.triggerProductos();
+                        window.actualizarNotificaciones();
+                    },
+                    (error) => console.error('Error listener productos:', error)
+                ));
+
+                // PACKS EN TIEMPO REAL
                 const qPk = query(collection(db, "packs"), where("negocioId", "==", negocioIdActual));
-                const pkDoc = await getDocs(qPk); 
-                packs = pkDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; return obj; });
-                
+                unsubTiempoReal.push(onSnapshot(
+                    qPk,
+                    (snapshot) => {
+                        packs = docsALista(snapshot, false);
+                        window.triggerProductos();
+                    },
+                    (error) => console.error('Error listener packs:', error)
+                ));
+
+                // INGRESOS EN TIEMPO REAL
                 const qIng = query(collection(db, "ingresos"), where("negocioId", "==", negocioIdActual));
-                const ingDoc = await getDocs(qIng); 
-                ingresosGlobales = ingDoc.docs.map(d => { let obj = d.data(); if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
-                
+                unsubTiempoReal.push(onSnapshot(
+                    qIng,
+                    (snapshot) => {
+                        ingresosGlobales = docsALista(snapshot, false);
+                        window.triggerIngresos();
+                    },
+                    (error) => console.error('Error listener ingresos:', error)
+                ));
+
+                // GASTOS EN TIEMPO REAL
                 const qGas = query(collection(db, "gastos"), where("negocioId", "==", negocioIdActual));
-                const gasDoc = await getDocs(qGas); 
-                gastosGlobales = gasDoc.docs.map(d => { let obj = d.data(); obj.id = d.id; if(obj.fecha && obj.fecha.toDate) obj.fecha = obj.fecha.toDate(); return obj; });
+                unsubTiempoReal.push(onSnapshot(
+                    qGas,
+                    (snapshot) => {
+                        gastosGlobales = docsALista(snapshot, false);
+                        window.triggerGastos();
+                    },
+                    (error) => console.error('Error listener gastos:', error)
+                ));
 
-                // Escucha en tiempo real de Pedidos, también filtrado
+                // PEDIDOS EN TIEMPO REAL
                 const qPed = query(collection(db, "pedidos"), where("negocioId", "==", negocioIdActual));
-                onSnapshot(qPed, (snapshot) => {
-                    snapshot.docChanges().forEach(async (change) => {
-                        let p = change.doc.data(); p.idDoc = change.doc.id;
-                        if(p.fecha && p.fecha.toDate) p.fecha = p.fecha.toDate();
-                        if (p.estadoPedido === 'confirmado') {
-                            p.estadoPedido = 'pendiente';
-                            updateDoc(doc(db, 'pedidos', p.idDoc), { estadoPedido: 'pendiente' }).catch(console.error);
-                        }
+                unsubTiempoReal.push(onSnapshot(
+                    qPed,
+                    async (snapshot) => {
+                        const cambios = snapshot.docChanges();
 
-                        if (change.type === "added") {
-                            if (!p.stockDescontado) {
+                        for (const change of cambios) {
+                            const p = normalizarFechaFirestore(change.doc.data());
+                            p.idDoc = change.doc.id;
+
+                            if (p.estadoPedido === 'confirmado') {
+                                p.estadoPedido = 'pendiente';
+                                updateDoc(doc(db, 'pedidos', p.idDoc), { estadoPedido: 'pendiente' }).catch(console.error);
+                            }
+
+                            // Mantengo tu lógica de descuento automático cuando entra un pedido nuevo.
+                            // Esto se ejecuta con el listener, sin recargar la página.
+                            if (change.type === "added" && !p.stockDescontado) {
                                 const resultadoStock = await window.descontarStockItems(p.items || [], `Pedido web #${p.idCorto || p.idDoc}`);
-                                if(resultadoStock.ok) {
-                                    await updateDoc(doc(db, "pedidos", p.idDoc), { stockDescontado: true, estadoPedido: normalizarEstadoPedido(p) });
-                                    p.estadoPedido = normalizarEstadoPedido(p);
-                                    p.stockDescontado = true;
+
+                                if (resultadoStock.ok) {
+                                    await updateDoc(doc(db, "pedidos", p.idDoc), {
+                                        stockDescontado: true,
+                                        estadoPedido: normalizarEstadoPedido(p)
+                                    });
                                 } else {
-                                    await updateDoc(doc(db, "pedidos", p.idDoc), { stockDescontado: false, estadoPedido: 'stock_error', alertaStock: resultadoStock.errores.join(' | ') });
-                                    p.stockDescontado = false;
-                                    p.estadoPedido = 'stock_error';
-                                    p.alertaStock = resultadoStock.errores.join(' | ');
+                                    await updateDoc(doc(db, "pedidos", p.idDoc), {
+                                        stockDescontado: false,
+                                        estadoPedido: 'stock_error',
+                                        alertaStock: resultadoStock.errores.join(' | ')
+                                    });
                                     window.mostrarAlertaUI('Pedido #' + (p.idCorto || '') + ' con falta de stock: ' + resultadoStock.errores.join(' / '));
                                 }
-                                window.triggerProductos();
                             }
-                            const exist = pedidosGlobales.findIndex(x => x.idDoc === p.idDoc);
-                            if(exist === -1) pedidosGlobales.push(p);
                         }
-                        if (change.type === "modified") {
-                            const idx = pedidosGlobales.findIndex(x => x.idDoc === p.idDoc);
-                            if(idx !== -1) pedidosGlobales[idx] = p;
-                        }
-                        if (change.type === "removed") {
-                            pedidosGlobales = pedidosGlobales.filter(x => x.idDoc !== p.idDoc);
-                        }
-                    });
-                    window.triggerPedidos();
-                });
 
-                window.triggerConfiguracion(); window.renderizarConfigCategorias(); window.actualizarSelectsClientes(); window.triggerProductos(); window.triggerGastos(); window.triggerIngresos(); window.actualizarNotificaciones();
-                
-            } catch(e) { 
-                console.error("Error loading DB", e); window.mostrarAlertaUI("Error cargando base de datos: " + (e && e.message ? e.message : e)); 
+                        pedidosGlobales = snapshot.docs.map(d => {
+                            const obj = normalizarFechaFirestore(d.data());
+                            obj.idDoc = d.id;
+                            if (obj.estadoPedido === 'confirmado') obj.estadoPedido = 'pendiente';
+                            return obj;
+                        });
+
+                        window.triggerPedidos();
+                        window.triggerProductos();
+                    },
+                    (error) => console.error('Error listener pedidos:', error)
+                ));
+
+                window.actualizarSelectsClientes();
+                window.actualizarNotificaciones();
+
+            } catch(e) {
+                console.error("Error loading DB realtime", e);
+                window.mostrarAlertaUI("Error cargando base de datos en tiempo real: " + (e && e.message ? e.message : e));
             } finally {
                 setTimeout(() => {
                     ocultarPantallaCarga();
-                }, 1000); 
+                }, 700);
             }
         };
 
@@ -1455,7 +1544,6 @@
             pObj.negocioId = negocioIdActual; // <- Inyección de ID
             
             await setDoc(doc(db, "productos", pObj.id), pObj); 
-            if(!id) productos.push(pObj);
             window.triggerProductos(); window.cerrarModal();
         };
 
@@ -1474,7 +1562,7 @@
             await setDoc(doc(db, "productos", p.id), p); 
             if(costoTotalLote > 0) { 
                 let g = { fecha: new Date(), titulo: "Ingreso Mercadería", descripcion: `${p.nombre} - ${p.variantes[vId].detalle} x${window.formatearNum(cant)}`, importe: costoTotalLote, negocioId: negocioIdActual }; // <- Inyección
-                const gRef = await addDoc(collection(db, "gastos"), g); g.id = gRef.id; gastosGlobales.push(g); window.triggerGastos(); 
+                await addDoc(collection(db, "gastos"), g); 
             } 
             window.triggerProductos(); window.cerrarModalStock(); 
         };
@@ -1608,13 +1696,13 @@
             const resultado = await window.descontarStockItems(carritoMostrador, 'Venta de mostrador');
             if(!resultado.ok) { alert('No se pudo descontar stock:\n\n' + resultado.errores.join('\n')); return; }
             let iM = { fecha: new Date(), tipo: 'venta_mostrador', detalle: `Venta Mostrador [${clienteName}] (${countItems} items)`, efectivo: efe, transferencia: trans, itemsCount: countItems, negocioId: negocioIdActual };
-            await addDoc(collection(db, "ingresos"), iM); ingresosGlobales.push(iM);
+            await addDoc(collection(db, "ingresos"), iM);
             carritoMostrador = []; window.renderizarCarritoMostrador(); document.getElementById('mostrador-efectivo').value = ''; document.getElementById('mostrador-transf').value = '';
             window.triggerProductos(); window.triggerIngresos(); alert("Venta registrada y stock descontado.");
         };
 
-        window.registrarIngresoManual = async () => { const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0; if (d && (e>0 || t>0)) { let i = { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t, negocioId: negocioIdActual }; await addDoc(collection(db, "ingresos"), i); ingresosGlobales.push(i); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = ""; window.triggerIngresos(); } };
-        window.registrarGasto = async () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { if(i >= 50000 && !(await pedirConfirmacion(`Vas a registrar un egreso de $${window.formatearNum(i)}. ¿Confirmar?`))) return; let g = { fecha: new Date(), titulo: t, importe: i, negocioId: negocioIdActual }; const docRef = await addDoc(collection(db, "gastos"), g); g.id = docRef.id; gastosGlobales.push(g); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
+        window.registrarIngresoManual = async () => { const d = document.getElementById('ingreso-manual-detalle').value; const e = parseFloat(document.getElementById('ingreso-manual-efectivo').value) || 0; const t = parseFloat(document.getElementById('ingreso-manual-transf').value) || 0; if (d && (e>0 || t>0)) { let i = { fecha: new Date(), tipo: 'manual', detalle: d, efectivo: e, transferencia: t, negocioId: negocioIdActual }; await addDoc(collection(db, "ingresos"), i); document.getElementById('ingreso-manual-detalle').value = ""; document.getElementById('ingreso-manual-efectivo').value = ""; document.getElementById('ingreso-manual-transf').value = ""; window.triggerIngresos(); } };
+        window.registrarGasto = async () => { const t = document.getElementById('gasto-titulo').value; const i = parseFloat(document.getElementById('gasto-importe').value) || 0; if (t && i > 0) { if(i >= 50000 && !(await pedirConfirmacion(`Vas a registrar un egreso de $${window.formatearNum(i)}. ¿Confirmar?`))) return; let g = { fecha: new Date(), titulo: t, importe: i, negocioId: negocioIdActual }; await addDoc(collection(db, "gastos"), g); document.getElementById('gasto-titulo').value = ""; document.getElementById('gasto-importe').value = ""; window.triggerGastos(); } };
         window.borrarGasto = async (id) => { if(!(await pedirConfirmacion("¿Eliminar este egreso?"))) return; await deleteDoc(doc(db, "gastos", id)); gastosGlobales = gastosGlobales.filter(g => g.id !== id); window.triggerGastos(); };
         window.calcularBalanceEnVivo = () => {
             const p = document.getElementById('filtro-periodo').value; const hoy = new Date(); let dias = p==='hoy'?1:p==='semana'?7:p==='mes'?30:99999; let tIng = 0; let tGas = 0;
